@@ -6,93 +6,83 @@ namespace TacticsGame.Engine.Input
 {
     public class KeyHandler
     {
+        #region Properties and data structures
+
         public Keycosystem Keycosystem { get; internal set; }
         public bool Enabled = true;
 
-        private readonly Dictionary<int, uint> _actionIdsByKey = new Dictionary<int, uint>();
-        private readonly Dictionary<uint, Action> _actionsById = new Dictionary<uint, Action>();
-        private ushort _nextAction;
+        private readonly Dictionary<int, uint> _reactionIdsByKey = new Dictionary<int, uint>();
+        private readonly Dictionary<uint, InputReaction> _reactionsById = new Dictionary<uint, InputReaction>();
+        private ushort _nextReaction;
 
-        public void Update(Dictionary<int, KeyState> keyStatesByKey)
+        private class InputReaction
+        {
+            public InputCondition Condition;
+
+            public Func<KeyState, bool> CustomCondition;
+
+            public Action<KeyState> Action;
+        }
+
+        #endregion
+
+        #region Update
+
+        public void Update(long gameTick, Dictionary<int, KeyState> keyStatesByKey)
         {
             if (!this.Enabled)
             {
                 return;
             }
 
-            foreach (var actionIdByKey in this._actionIdsByKey)
+            foreach (var reactionIdByKey in this._reactionIdsByKey)
             {
-                var key = actionIdByKey.Key;
-                var actionId = actionIdByKey.Value;
+                var keyState = keyStatesByKey[reactionIdByKey.Key];
+                var reaction = this._reactionsById[reactionIdByKey.Value];
 
-                var keyState = keyStatesByKey[key];
+                bool shouldInvoke;
 
+                if (reaction.Condition == InputCondition.Custom)
+                {
+                    // Evaluate custom condition
+                    shouldInvoke = reaction.CustomCondition.Invoke(keyState);
+                }
+                else
+                {
+                    // Evaluate preset condition
+                    switch (reaction.Condition)
+                    {
+                        case InputCondition.Always:
+                            shouldInvoke = true;
+                            break;
+                        case InputCondition.WhenPressed:
+                            shouldInvoke = keyState.IsPressed && keyState.IsPressedLastChange == gameTick;
+                            break;
+                        case InputCondition.WhilePressed:
+                            shouldInvoke = keyState.IsPressed;
+                            break;
+                        case InputCondition.WhenReleased:
+                            shouldInvoke = !keyState.IsPressed && keyState.IsPressedLastChange == gameTick;
+                            break;
+                        case InputCondition.WhileReleased:
+                            shouldInvoke = !keyState.IsPressed;
+                            break;
+                        case InputCondition.WhenDigitalChanged:
+                            shouldInvoke = keyState.DigitalLastChange == gameTick;
+                            break;
+                        case InputCondition.WhenAnalogChanged:
+                            shouldInvoke = keyState.AnalogLastChange == gameTick;
+                            break;
+                        default:
+                            throw new InvalidOperationException($"Unhandled input condition: {reaction.Condition} ({(int)reaction.Condition})");
+                    }
+                }
+
+                if (shouldInvoke)
+                {
+                    reaction.Action.Invoke(keyState);
+                }
             }
-        }
-
-        #region Lookup
-
-        // Only for initial registration of a handler. Game code should have no reason to check this.
-        internal IEnumerable<int> GetAllHandledKeys()
-        {
-            return this._actionIdsByKey.Select(x => x.Key);
-        }
-
-        public uint GetActionIdForKey(int key)
-        {
-            return this._actionIdsByKey[key];
-        }
-
-        public bool TryGetActionIdForKey(int key, out uint actionId)
-        {
-            if (!this._actionIdsByKey.TryGetValue(key, out var indexedActionId))
-            {
-                actionId = 0;
-                return false;
-            }
-
-            actionId = indexedActionId;
-            return true;
-        }
-
-        public Action GetActionById(uint actionId)
-        {
-            return this._actionsById[actionId];
-        }
-
-        public bool TryGetActionById(uint actionId, out Action action)
-        {
-            if (!this._actionsById.TryGetValue(actionId, out var indexedAction))
-            {
-                action = null;
-                return false;
-            }
-
-            action = indexedAction;
-            return true;
-        }
-
-        public Action GetActionForKey(int key)
-        {
-            return this._actionsById[this._actionIdsByKey[key]];
-        }
-
-        public bool TryGetActionForKey(int key, out Action action)
-        {
-            if (!this._actionIdsByKey.TryGetValue(key, out var actionId))
-            {
-                action = null;
-                return false;
-            }
-
-            if (!this._actionsById.TryGetValue(actionId, out var indexedAction))
-            {
-                action = null;
-                return false;
-            }
-
-            action = indexedAction;
-            return true;
         }
 
         #endregion
@@ -100,50 +90,135 @@ namespace TacticsGame.Engine.Input
         #region Binding
 
         /// <summary>
-        /// Binds a key to the specified action.
+        /// Tells this <see cref="KeyHandler"/> to execute the specified action when a condition is met for this key.
         /// </summary>
-        /// <param name="key">The key that will trigger the action</param>
-        /// <param name="action">The action to run when the key is triggered</param>
-        /// <param name="allowRebind">Should this action overwrite a key's current bound action, if it has one? Default: true</param>
-        public KeyHandler BindKey(int key, Action action, bool allowRebind = true)
+        /// <param name="key">The key to bind to this action</param>
+        /// <param name="condition">The preset condition of this key under which this action should be executed</param>
+        /// <param name="action">The action to execute when this key condition is met</param>
+        public KeyHandler BindKey(int key, InputCondition condition, Action<KeyState> action)
         {
             if (action == null)
             {
                 throw new ArgumentNullException(nameof(action));
             }
 
-            var actionId = ++this._nextAction;
-            this._actionsById.Add(actionId, action);
+            if (condition == InputCondition.Custom)
+            {
+                throw new ArgumentException($"Cannot set condition '{InputCondition.Custom}'. A custom condition must be provided!");
+            }
 
-            this.BindKey(key, actionId, allowRebind);
+            var reactionId = ++this._nextReaction;
+            var reaction = new InputReaction
+            {
+                Condition = condition,
+                Action = action
+            };
+            this._reactionsById.Add(reactionId, reaction);
+
+            this.BindKeyToReaction(key, reactionId);
             return this;
         }
+
+        /// <summary>
+        /// Tells this <see cref="KeyHandler"/> to execute the specified action when a condition is met for this key.
+        /// </summary>
+        /// <param name="key">The key to bind to this action</param>
+        /// <param name="condition">The custom condition of this key under which this action should be executed</param>
+        /// <param name="action">The action to execute when this key condition is met</param>
+        public KeyHandler BindKey(int key, Func<KeyState, bool> condition, Action<KeyState> action)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            if (condition == null)
+            {
+                throw new ArgumentNullException(nameof(condition));
+            }
+
+            var reactionId = ++this._nextReaction;
+            var reaction = new InputReaction
+            {
+                Condition = InputCondition.Custom,
+                CustomCondition = condition,
+                Action = action
+            };
+            this._reactionsById.Add(reactionId, reaction);
+
+            this.BindKeyToReaction(key, reactionId);
+            return this;
+        }
+
+        /// <summary>
+        /// Binds the reaction from one input to one or more other inputs.
+        /// </summary>
+        /// <param name="fromKey">The key currently bound to the action to copy</param>
+        /// <param name="toKeys">The additional keys to bind to that action</param>
+        public KeyHandler CopyKey(int fromKey, params int[] toKeys)
+        {
+            if (!this._reactionIdsByKey.TryGetValue(fromKey, out var reactionId))
+            {
+                throw new ArgumentException($"There is no reaction to copy from key {fromKey}!");
+            }
+
+            if (toKeys == null || !toKeys.Any())
+            {
+                throw new ArgumentException($"No keys were specified to copy to!");
+            }
+
+            foreach (var key in toKeys)
+            {
+                this.BindKeyToReaction(key, reactionId);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Binds the reaction from one input to another input, and unbinds it from the original input.
+        /// </summary>
+        /// <param name="fromKey">The key currently bound to the action</param>
+        /// <param name="toKey">The new key to bind to that action</param>
+        public KeyHandler RebindKey(int fromKey, int toKey)
+        {
+            this.CopyKey(fromKey, toKey);
+            return this.UnbindKey(fromKey);
+        }
+
+        /// <summary>
+        /// Unbinds a key so that it no longer triggers a reaction.
+        /// </summary>
+        /// <param name="key">The key that should no longer trigger a reaction</param>
+        public KeyHandler UnbindKey(int key)
+        {
+            if (this._reactionIdsByKey.ContainsKey(key))
+            {
+                this._reactionIdsByKey.Remove(key);
+            }
+
+            this.Keycosystem?.NotifyKeyUnbound(this, key);
+            return this;
+        }
+
+        #endregion
+
+        #region Non-public methods
 
         /// <summary>
         /// Binds an action that has already been bound to a key to the specified key as well.
         /// </summary>
         /// <param name="key">The key that will trigger the action</param>
-        /// <param name="actionId">The id of the action to run when the key is triggered</param>
-        /// <param name="allowRebind">Should this action overwrite a key's current bound action, if it has one? Default: true</param>
-        public KeyHandler BindKey(int key, uint actionId, bool allowRebind = true)
+        /// <param name="reactionId">The id of the action to run when the key is triggered</param>
+        private KeyHandler BindKeyToReaction(int key, uint reactionId)
         {
-            if (!this._actionsById.ContainsKey(actionId))
+            if (this._reactionIdsByKey.ContainsKey(key))
             {
-                throw new ArgumentException(nameof(actionId), $"No action has been registered to id {actionId}!");
-            }
-
-            if (this._actionIdsByKey.ContainsKey(key))
-            {
-                if (!allowRebind)
-                {
-                    throw new ArgumentException(nameof(key), $"Key {key} is already bound to an action!");
-                }
-
-                this._actionIdsByKey[key] = actionId;
+                this._reactionIdsByKey[key] = reactionId;
             }
             else
             {
-                this._actionIdsByKey.Add(key, actionId);
+                this._reactionIdsByKey.Add(key, reactionId);
             }
 
             this.Keycosystem?.NotifyKeyBound(this, key);
@@ -151,46 +226,15 @@ namespace TacticsGame.Engine.Input
         }
 
         /// <summary>
-        /// Unbinds a key so that it no longer triggers an action.
+        /// Only for initial registration of a handler. Game code should have no reason to check this.
         /// </summary>
-        /// <param name="key">The key that should no longer trigger an action</param>
-        public KeyHandler UnbindKey(int key)
+        internal IEnumerable<int> GetAllHandledKeys()
         {
-            if (this._actionIdsByKey.ContainsKey(key))
-            {
-                this._actionIdsByKey.Remove(key);
-            }
-
-            this.Keycosystem?.NotifyKeyUnbound(this, key);
-            return this;
-        }
-
-        /// <summary>
-        /// Unbinds an action so that all keys bound to it no longer trigger an action, and the action
-        /// can no longer be assigned to any keys.
-        /// </summary>
-        /// <param name="actionId"></param>
-        /// <returns></returns>
-        public KeyHandler UnbindAction(uint actionId)
-        {
-            if (!this._actionsById.ContainsKey(actionId))
-            {
-                return this;
-            }
-
-            this._actionsById.Remove(actionId);
-
-            // I'm not sure if I need ToList() here, but I'm afraid of removing from an enumerable while I'm iterating over it
-            var keysToUnbind = this._actionIdsByKey.Where(x => x.Value == actionId).Select(x => x.Key).ToList();
-            foreach (var key in keysToUnbind)
-            {
-                this._actionIdsByKey.Remove(key);
-                this.Keycosystem?.NotifyKeyUnbound(this, key);
-            }
-
-            return this;
+            return this._reactionIdsByKey.Select(x => x.Key);
         }
 
         #endregion
     }
+
+    
 }

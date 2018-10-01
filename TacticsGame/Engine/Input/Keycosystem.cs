@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TacticsGame.Engine.Input.Observer;
 
 namespace TacticsGame.Engine.Input
 {
@@ -19,6 +20,8 @@ namespace TacticsGame.Engine.Input
         private readonly Dictionary<int, HashSet<KeyHandler>> _handlersByKey = new Dictionary<int, HashSet<KeyHandler>>();
         private readonly Dictionary<KeyHandler, HashSet<int>> _keysByHandler = new Dictionary<KeyHandler, HashSet<int>>(ReferenceEqualityComparer<KeyHandler>.Instance);
 
+        private readonly List<KeyHandler> _handlersByExecutionOrder = new List<KeyHandler>();
+
         #endregion
 
         #region Constructors
@@ -34,16 +37,20 @@ namespace TacticsGame.Engine.Input
 
         public void Update(long gameTick)
         {
-            // First, update the state of the observe (i.e. "initialize" it for this frame)
+            // First, update the state of the observer (i.e. "initialize" it for this frame)
             this._observer.UpdateState(gameTick);
 
-            // Then, update all keys that we're currently observing
+            // Then, update all inputs that we're currently observing
             foreach (var keyState in this._keyStatesByKey.Select(x => x.Value))
             {
                 this._observer.UpdateKey(keyState);
             }
 
-            // Finally, 
+            // Finally, execute the on-update reactions for each input
+            foreach (var handler in this._handlersByExecutionOrder)
+            {
+                handler.Update(gameTick, _keyStatesByKey);
+            }
         }
 
         #endregion
@@ -69,6 +76,7 @@ namespace TacticsGame.Engine.Input
                 this.IndexHandlerByKey(handler, key);
             }
 
+            this._handlersByExecutionOrder.Add(handler);
             handler.Keycosystem = this;
             return this;
         }
@@ -86,6 +94,7 @@ namespace TacticsGame.Engine.Input
                 this.DeindexHandlerByKey(handler, key);
             }
 
+            this._handlersByExecutionOrder.Remove(handler);
             handler.Keycosystem = null;
             return this;
         }
@@ -95,6 +104,7 @@ namespace TacticsGame.Engine.Input
             this._keyStatesByKey.Clear();
             this._handlersByKey.Clear();
             this._keysByHandler.Clear();
+            this._handlersByExecutionOrder.Clear();
 
             return this;
         }
