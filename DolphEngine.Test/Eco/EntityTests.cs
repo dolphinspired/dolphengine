@@ -61,7 +61,7 @@ namespace DolphEngine.Test.Eco
             var componentDupe = new MockComponent1("dupe", 2);
             var entity = new Entity().AddComponent(component);
 
-            Assert.Throws<ArgumentException>(() => entity.AddComponent(componentDupe));
+            Assert.Throws<InvalidOperationException>(() => entity.AddComponent(componentDupe));
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace DolphEngine.Test.Eco
             var entity = new Entity().AddComponent(component1).AddComponent(component2).RemoveComponent<MockComponent1>();
 
             Assert.False(entity.HasComponent<MockComponent1>());
-            Assert.Throws<Exception>(() => entity.GetComponent<MockComponent1>());
+            Assert.ThrowsAny<Exception>(() => entity.GetComponent<MockComponent1>());
             Assert.False(entity.TryGetComponent<MockComponent1>(out var retrievedComponent1));
             Assert.Null(retrievedComponent1);
 
