@@ -1,0 +1,1 @@
+﻿Everything in this namespace is part of an old idea that needs to be refactored or scrapped. None of this should be used anywhere, but I don't want to delete it until I know whether or not it's worth keeping.
