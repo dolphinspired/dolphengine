@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using System;
 
-namespace TacticsGame.Engine.Input.Observer.Implementations
+namespace TacticsGame.Engine.Input.Implementations
 {
     namespace MgInput
     {

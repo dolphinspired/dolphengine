@@ -17,7 +17,7 @@ namespace TacticsGame.Engine.Input
 
         private class InputReaction
         {
-            public InputCondition Condition;
+            public KeyCondition Condition;
 
             public Func<KeyState, bool> CustomCondition;
 
@@ -42,7 +42,7 @@ namespace TacticsGame.Engine.Input
 
                 bool shouldInvoke;
 
-                if (reaction.Condition == InputCondition.Custom)
+                if (reaction.Condition == KeyCondition.Custom)
                 {
                     // Evaluate custom condition
                     shouldInvoke = reaction.CustomCondition.Invoke(keyState);
@@ -52,25 +52,25 @@ namespace TacticsGame.Engine.Input
                     // Evaluate preset condition
                     switch (reaction.Condition)
                     {
-                        case InputCondition.Always:
+                        case KeyCondition.Always:
                             shouldInvoke = true;
                             break;
-                        case InputCondition.WhenPressed:
+                        case KeyCondition.WhenPressed:
                             shouldInvoke = keyState.IsPressed && keyState.IsPressedLastChange == gameTick;
                             break;
-                        case InputCondition.WhilePressed:
+                        case KeyCondition.WhilePressed:
                             shouldInvoke = keyState.IsPressed;
                             break;
-                        case InputCondition.WhenReleased:
+                        case KeyCondition.WhenReleased:
                             shouldInvoke = !keyState.IsPressed && keyState.IsPressedLastChange == gameTick;
                             break;
-                        case InputCondition.WhileReleased:
+                        case KeyCondition.WhileReleased:
                             shouldInvoke = !keyState.IsPressed;
                             break;
-                        case InputCondition.WhenDigitalChanged:
+                        case KeyCondition.WhenDigitalChanged:
                             shouldInvoke = keyState.DigitalLastChange == gameTick;
                             break;
-                        case InputCondition.WhenAnalogChanged:
+                        case KeyCondition.WhenAnalogChanged:
                             shouldInvoke = keyState.AnalogLastChange == gameTick;
                             break;
                         default:
@@ -95,16 +95,16 @@ namespace TacticsGame.Engine.Input
         /// <param name="key">The key to bind to this action</param>
         /// <param name="condition">The preset condition of this key under which this action should be executed</param>
         /// <param name="action">The action to execute when this key condition is met</param>
-        public KeyHandler BindKey(int key, InputCondition condition, Action<KeyState> action)
+        public KeyHandler BindKey(int key, KeyCondition condition, Action<KeyState> action)
         {
             if (action == null)
             {
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if (condition == InputCondition.Custom)
+            if (condition == KeyCondition.Custom)
             {
-                throw new ArgumentException($"Cannot set condition '{InputCondition.Custom}'. A custom condition must be provided!");
+                throw new ArgumentException($"Cannot set condition '{KeyCondition.Custom}'. A custom condition must be provided!");
             }
 
             var reactionId = ++this._nextReaction;
@@ -140,7 +140,7 @@ namespace TacticsGame.Engine.Input
             var reactionId = ++this._nextReaction;
             var reaction = new InputReaction
             {
-                Condition = InputCondition.Custom,
+                Condition = KeyCondition.Custom,
                 CustomCondition = condition,
                 Action = action
             };

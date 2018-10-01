@@ -6,7 +6,7 @@ namespace TacticsGame.Engine.Input
     /// Specifies a <see cref="KeyState"/> condition under which a reaction should be run.
     /// </summary>
     [Flags]
-    public enum InputCondition
+    public enum KeyCondition
     {
         /// <summary>
         /// A custom evaluation of the <see cref="KeyState"/> determines whether or not the reaction should

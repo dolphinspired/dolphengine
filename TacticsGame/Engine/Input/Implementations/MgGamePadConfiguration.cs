@@ -1,4 +1,4 @@
-﻿namespace TacticsGame.Engine.Input.Observer.Implementations
+﻿namespace TacticsGame.Engine.Input.Implementations
 {
     public struct MgGamePadConfiguration
     {

@@ -1,4 +1,4 @@
-﻿namespace TacticsGame.Engine.Input.Observer
+﻿namespace TacticsGame.Engine.Input
 {
     public interface IKeyStateObserver
     {

@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TacticsGame.Engine.Input.Observer.Implementations.MgInput;
+using TacticsGame.Engine.Input.Implementations.MgInput;
 
-namespace TacticsGame.Engine.Input.Observer.Implementations
+namespace TacticsGame.Engine.Input.Implementations
 {
     public class MonoGameObserver : IKeyStateObserver
     {
