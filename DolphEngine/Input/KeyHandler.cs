@@ -12,16 +12,16 @@ namespace DolphEngine.Input
         public bool Enabled = true;
 
         private readonly Dictionary<int, uint> _reactionIdsByKey = new Dictionary<int, uint>();
-        private readonly Dictionary<uint, InputReaction> _reactionsById = new Dictionary<uint, InputReaction>();
+        private readonly Dictionary<uint, KeyReaction> _reactionsById = new Dictionary<uint, KeyReaction>();
         private ushort _nextReaction;
 
-        private class InputReaction
+        private class KeyReaction
         {
             public KeyCondition Condition;
 
-            public Func<KeyState, bool> CustomCondition;
+            public Func<IReadOnlyKeyState, bool> CustomCondition;
 
-            public Action<KeyState> Action;
+            public Action<IReadOnlyKeyState> Action;
         }
 
         #endregion
@@ -95,7 +95,7 @@ namespace DolphEngine.Input
         /// <param name="key">The key to bind to this action</param>
         /// <param name="condition">The preset condition of this key under which this action should be executed</param>
         /// <param name="action">The action to execute when this key condition is met</param>
-        public KeyHandler BindKey(int key, KeyCondition condition, Action<KeyState> action)
+        public KeyHandler BindKey(int key, KeyCondition condition, Action<IReadOnlyKeyState> action)
         {
             if (action == null)
             {
@@ -108,7 +108,7 @@ namespace DolphEngine.Input
             }
 
             var reactionId = ++this._nextReaction;
-            var reaction = new InputReaction
+            var reaction = new KeyReaction
             {
                 Condition = condition,
                 Action = action
@@ -125,7 +125,7 @@ namespace DolphEngine.Input
         /// <param name="key">The key to bind to this action</param>
         /// <param name="condition">The custom condition of this key under which this action should be executed</param>
         /// <param name="action">The action to execute when this key condition is met</param>
-        public KeyHandler BindKey(int key, Func<KeyState, bool> condition, Action<KeyState> action)
+        public KeyHandler BindKey(int key, Func<IReadOnlyKeyState, bool> condition, Action<IReadOnlyKeyState> action)
         {
             if (action == null)
             {
@@ -138,7 +138,7 @@ namespace DolphEngine.Input
             }
 
             var reactionId = ++this._nextReaction;
-            var reaction = new InputReaction
+            var reaction = new KeyReaction
             {
                 Condition = KeyCondition.Custom,
                 CustomCondition = condition,
@@ -235,6 +235,4 @@ namespace DolphEngine.Input
 
         #endregion
     }
-
-    
 }
