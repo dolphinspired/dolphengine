@@ -1,19 +1,18 @@
-﻿namespace DolphEngine.Input
+﻿using DolphEngine.Input.State;
+
+namespace DolphEngine.Input
 {
     public interface IKeyStateObserver
     {
         /// <summary>
-        /// Performs any preliminary work to load the current state of all observed input devices.
-        /// Runs once per Update iteration, before any <see cref="KeyState"/> objects are updated.
+        /// Run once per frame.
         /// </summary>
-        /// <param name="gameTick">The current game tick to stamp on any KeyStates that have changed</param>
-        void UpdateState(long gameTick);
-
+        void UpdateState();
+        
         /// <summary>
-        /// Updates the provided <see cref="KeyState"/> object, which represents the state of a single input dimension.
-        /// Runs once per <see cref="KeyState"/> per Update iteration.
+        /// Run once per key per frame.
         /// </summary>
-        /// <param name="keyState">The <see cref="KeyState"/> object to update</param>
-        void UpdateKey(KeyState keyState);
+        /// <param name="key">The generic key to look up</param>
+        object GetKeyValue(InputKey key);
     }
 }

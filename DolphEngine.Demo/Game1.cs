@@ -1,6 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DolphEngine.Input.Controls;
+using DolphEngine.Input.State;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace DolphEngine.Demo
 {
@@ -8,6 +9,8 @@ namespace DolphEngine.Demo
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+
+        Color BackgroundColor = Color.CornflowerBlue;
 
         public Game1()
         {
@@ -18,7 +21,16 @@ namespace DolphEngine.Demo
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            Tower.Initialize();
+
+            var controlEsc = new SingleButtonControl(InputKeys.KeyboardEscape);
+            Tower.Keycosystem.AddReaction(controlEsc, c => c.IsPressed, c => this.Exit());
+
+            var control1 = new SingleButtonControl(InputKeys.KeyboardA);
+            Tower.Keycosystem.AddReaction(control1, c => c.IsPressed, c => this.BackgroundColor = Color.Crimson);
+
+            var control2 = new SingleButtonControl(InputKeys.KeyboardZ);
+            Tower.Keycosystem.AddReaction(control2, c => c.IsPressed, c => this.BackgroundColor = Color.DarkOliveGreen);
 
             base.Initialize();
         }
@@ -32,19 +44,14 @@ namespace DolphEngine.Demo
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
+            Tower.Keycosystem.Update(gameTime.ElapsedGameTime.Ticks);
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // TODO: Add your drawing code here
+            GraphicsDevice.Clear(this.BackgroundColor);
 
             base.Draw(gameTime);
         }

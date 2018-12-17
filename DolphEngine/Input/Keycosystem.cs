@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DolphEngine.Input.Controls;
+using DolphEngine.Input.State;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,14 +14,18 @@ namespace DolphEngine.Input
         private readonly IKeyStateObserver _observer;
 
         // Each key has exactly one state that gets updated one time per Update()
-        private readonly Dictionary<int, KeyState> _keyStatesByKey = new Dictionary<int, KeyState>();
+        //private readonly Dictionary<int, KeyState> _keyStatesByKey = new Dictionary<int, KeyState>();
+
+        private readonly InputState _inputState = new InputState();
+        private readonly Dictionary<string, InputKeyInfo> _inputKeys = new Dictionary<string, InputKeyInfo>();
+        private readonly Dictionary<ControlBase, ControlReaction> _controlReactions = new Dictionary<ControlBase, ControlReaction>();
 
         // Each key is indexed by 1-or-more handlers that are triggered by it
         // Each handler is indexed by 0-or-more keys that trigger them
-        private readonly Dictionary<int, HashSet<KeyHandler>> _handlersByKey = new Dictionary<int, HashSet<KeyHandler>>();
-        private readonly Dictionary<KeyHandler, HashSet<int>> _keysByHandler = new Dictionary<KeyHandler, HashSet<int>>(ReferenceEqualityComparer<KeyHandler>.Instance);
+        //private readonly Dictionary<int, HashSet<KeyHandler>> _handlersByKey = new Dictionary<int, HashSet<KeyHandler>>();
+        //private readonly Dictionary<KeyHandler, HashSet<int>> _keysByHandler = new Dictionary<KeyHandler, HashSet<int>>(ReferenceEqualityComparer<KeyHandler>.Instance);
 
-        private readonly List<KeyHandler> _handlersByExecutionOrder = new List<KeyHandler>();
+        //private readonly List<KeyHandler> _handlersByExecutionOrder = new List<KeyHandler>();
 
         #endregion
 
@@ -36,135 +42,54 @@ namespace DolphEngine.Input
 
         public void Update(long gameTick)
         {
+            this._inputState.CurrentTimestamp = gameTick;
+            
             // First, update the state of the observer (i.e. "initialize" it for this frame)
-            this._observer.UpdateState(gameTick);
+            this._observer.UpdateState();
 
             // Then, update all inputs that we're currently observing
-            foreach (var keyState in this._keyStatesByKey.Select(x => x.Value))
+            foreach (var inputKeyKvp in this._inputKeys)
             {
-                this._observer.UpdateKey(keyState);
+                var key = inputKeyKvp.Key;
+                var parsed = inputKeyKvp.Value.Parsed;
+
+                this._inputState.SetValue(key, this._observer.GetKeyValue(parsed));
             }
 
-            // Finally, execute the on-update reactions for each input
-            foreach (var handler in this._handlersByExecutionOrder)
+            // Finally, execute the on-update reactions for each control
+            foreach (var reactionKvp in this._controlReactions)
             {
-                handler.Update(gameTick, _keyStatesByKey);
+                var control = reactionKvp.Key;
+                var reaction = reactionKvp.Value;
+
+                control.Update();
+                reaction.React(control);
             }
         }
 
         #endregion
 
-        #region Add/Remove KeyHandlers
+        #region Add/Remove Reactions
 
-        public Keycosystem AddHandler(KeyHandler handler)
+        public Keycosystem AddReaction<T>(T control, Func<T, bool> condition, Action<T> reaction) where T : ControlBase
         {
-            if (handler == null)
+            control.SetInputState(this._inputState);
+            var cr = new ControlReaction<T>(condition, reaction);
+            this._controlReactions.Add(control, cr);
+
+            // Add this control's keys to the inputs that we track on each update
+            foreach (var key in control.Keys)
             {
-                throw new ArgumentNullException(nameof(handler));
-            }
-
-            if (this._keysByHandler.ContainsKey(handler))
-            {
-                throw new ArgumentException($"This handler has already been added!");
-            }
-            var keysForThisHandler = handler.GetAllHandledKeys().ToHashSet();
-            this._keysByHandler.Add(handler, keysForThisHandler);
-            
-            foreach (var key in keysForThisHandler)
-            {
-                this.IndexHandlerByKey(handler, key);
-            }
-
-            this._handlersByExecutionOrder.Add(handler);
-            handler.Keycosystem = this;
-            return this;
-        }
-
-        public Keycosystem RemoveHandler(KeyHandler handler)
-        {
-            if (!this._keysByHandler.TryGetValue(handler, out var keysForThisHandler))
-            {
-                return this;
-            }
-            this._keysByHandler.Remove(handler);
-
-            foreach (var key in keysForThisHandler)
-            {
-                this.DeindexHandlerByKey(handler, key);
-            }
-
-            this._handlersByExecutionOrder.Remove(handler);
-            handler.Keycosystem = null;
-            return this;
-        }
-
-        public Keycosystem ClearHandlers()
-        {
-            this._keyStatesByKey.Clear();
-            this._handlersByKey.Clear();
-            this._keysByHandler.Clear();
-            this._handlersByExecutionOrder.Clear();
-
-            return this;
-        }
-
-        #region Overloads
-
-        public Keycosystem AddHandlers(IEnumerable<KeyHandler> handlers)
-        {
-            if (handlers == null || !handlers.Any())
-            {
-                throw new ArgumentException("There are no key handlers to add!");
-            }
-
-            foreach (var handler in handlers)
-            {
-                this.AddHandler(handler);
-            }
-
-            return this;
-        }
-
-        public Keycosystem AddHandlers(params KeyHandler[] handlers)
-        {
-            if (handlers == null || !handlers.Any())
-            {
-                throw new ArgumentException("There are no key handlers to add!");
-            }
-
-            foreach (var handler in handlers)
-            {
-                this.AddHandler(handler);
-            }
-
-            return this;
-        }
-
-        public Keycosystem RemoveHandlers(IEnumerable<KeyHandler> handlers)
-        {
-            if (handlers == null || !handlers.Any())
-            {
-                return this;
-            }
-
-            foreach (var handler in handlers)
-            {
-                this.RemoveHandler(handler);
-            }
-
-            return this;
-        }
-
-        public Keycosystem RemoveHandlers(params KeyHandler[] handlers)
-        {
-            if (handlers == null || !handlers.Any())
-            {
-                return this;
-            }
-
-            foreach (var handler in handlers)
-            {
-                this.RemoveHandler(handler);
+                if (this._inputKeys.ContainsKey(key))
+                {
+                    // If it's already being tracked by another control, simply increment the counter
+                    this._inputKeys[key].Count++;
+                }
+                else
+                {
+                    // Otherwise, add a new entry so it starts getting tracked
+                    this._inputKeys.Add(key, new InputKeyInfo(InputKey.Parse(key), 1));
+                }
             }
 
             return this;
@@ -172,61 +97,17 @@ namespace DolphEngine.Input
 
         #endregion
 
-        #endregion
-
-        #region Notifications (internal)
-
-        internal void NotifyKeyBound(KeyHandler handler, int key)
+        private class InputKeyInfo
         {
-            this.IndexHandlerByKey(handler, key);
-
-            // Index this key by this handler, so we can track every key that a given handler observes
-            this._keysByHandler[handler].Add(key);
-        }
-
-        internal void NotifyKeyUnbound(KeyHandler handler, int key)
-        {
-            this.DeindexHandlerByKey(handler, key);
-
-            // Remove this key from the handler index
-            // Empty sets of keys are allowed as long as this handler hasn't been removed from the Keycosystem
-            var keysByThisHandler = this._keysByHandler[handler];
-            keysByThisHandler.Remove(key);
-        }
-
-        #endregion
-
-        #region Private methods
-
-        private void IndexHandlerByKey(KeyHandler handler, int key)
-        {
-            if (this._handlersByKey.TryGetValue(key, out var handlersByThisKey))
+            public InputKeyInfo(InputKey parsed, int count)
             {
-                handlersByThisKey = new HashSet<KeyHandler>(ReferenceEqualityComparer<KeyHandler>.Instance);
-                this._handlersByKey.Add(key, handlersByThisKey);
-
-                // This key now has at least one handler, so it needs to be watched for updates
-                this._keyStatesByKey.Add(key, new KeyState(key));
+                this.Parsed = parsed;
+                this.Count = count;
             }
-            handlersByThisKey.Add(handler);
+
+            public InputKey Parsed;
+
+            public int Count;
         }
-
-        private void DeindexHandlerByKey(KeyHandler handler, int key)
-        {
-            var handlersByThisKey = this._handlersByKey[key];
-            handlersByThisKey.Remove(handler);
-
-            // If there are no handlers for this key anymore...
-            if (!handlersByThisKey.Any())
-            {
-                // De-index this key completely
-                this._handlersByKey.Remove(key);
-
-                // We don't need to watch it for updates anymore
-                this._keyStatesByKey.Remove(key);
-            }
-        }
-
-        #endregion
     }
 }

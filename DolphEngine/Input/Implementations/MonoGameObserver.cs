@@ -1,8 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using DolphEngine.Input.Implementations.MgInput;
+using DolphEngine.Input.State;
 
 namespace DolphEngine.Input.Implementations
 {
@@ -10,99 +9,259 @@ namespace DolphEngine.Input.Implementations
     {
         #region Data structures
 
-        private long _currentGameTick;
+        protected readonly InputState InputState;
 
         private bool _useKeyboard;
-        private HashSet<int> _keyboardInputs;
-        private Dictionary<int, Keys> _keyboardKeysByInput;
         private KeyboardState _keyboardState;
 
         private bool _useMouse;
-        private HashSet<int> _mouseInputs;
         private MouseState _mouseState;
 
         private bool _useGamepads;
-        private MgGamePadConfiguration _gamePadConfig;
-        private HashSet<int> _gamepadInputs;
-        private Dictionary<int, Buttons> _gamepadButtonsByInput;
         private Dictionary<int, GamePadState> _gamepadStatesByPlayer;
+
+        private static readonly IReadOnlyDictionary<string, Func<KeyboardState, object>> KeyboardStateObservers = new Dictionary<string, Func<KeyboardState, object>>
+        {
+            #region Functions
+            { InputKeys.KeyboardNone, s => s.IsKeyDown(Keys.None) },
+            { InputKeys.KeyboardBack, s => s.IsKeyDown(Keys.Back) },
+            { InputKeys.KeyboardTab, s => s.IsKeyDown(Keys.Tab) },
+            { InputKeys.KeyboardEnter, s => s.IsKeyDown(Keys.Enter) },
+            { InputKeys.KeyboardPause, s => s.IsKeyDown(Keys.Pause) },
+            { InputKeys.KeyboardCapsLock, s => s.IsKeyDown(Keys.CapsLock) },
+            { InputKeys.KeyboardKana, s => s.IsKeyDown(Keys.Kana) },
+            { InputKeys.KeyboardKanji, s => s.IsKeyDown(Keys.Kanji) },
+            { InputKeys.KeyboardEscape, s => s.IsKeyDown(Keys.Escape) },
+            { InputKeys.KeyboardImeConvert, s => s.IsKeyDown(Keys.ImeConvert) },
+            { InputKeys.KeyboardImeNoConvert, s => s.IsKeyDown(Keys.ImeNoConvert) },
+            { InputKeys.KeyboardSpace, s => s.IsKeyDown(Keys.Space) },
+            { InputKeys.KeyboardPageUp, s => s.IsKeyDown(Keys.PageUp) },
+            { InputKeys.KeyboardPageDown, s => s.IsKeyDown(Keys.PageDown) },
+            { InputKeys.KeyboardEnd, s => s.IsKeyDown(Keys.End) },
+            { InputKeys.KeyboardHome, s => s.IsKeyDown(Keys.Home) },
+            { InputKeys.KeyboardLeft, s => s.IsKeyDown(Keys.Left) },
+            { InputKeys.KeyboardUp, s => s.IsKeyDown(Keys.Up) },
+            { InputKeys.KeyboardRight, s => s.IsKeyDown(Keys.Right) },
+            { InputKeys.KeyboardDown, s => s.IsKeyDown(Keys.Down) },
+            { InputKeys.KeyboardSelect, s => s.IsKeyDown(Keys.Select) },
+            { InputKeys.KeyboardPrint, s => s.IsKeyDown(Keys.Print) },
+            { InputKeys.KeyboardExecute, s => s.IsKeyDown(Keys.Execute) },
+            { InputKeys.KeyboardPrintScreen, s => s.IsKeyDown(Keys.PrintScreen) },
+            { InputKeys.KeyboardInsert, s => s.IsKeyDown(Keys.Insert) },
+            { InputKeys.KeyboardDelete, s => s.IsKeyDown(Keys.Delete) },
+            { InputKeys.KeyboardHelp, s => s.IsKeyDown(Keys.Help) },
+            { InputKeys.KeyboardD0, s => s.IsKeyDown(Keys.D0) },
+            { InputKeys.KeyboardD1, s => s.IsKeyDown(Keys.D1) },
+            { InputKeys.KeyboardD2, s => s.IsKeyDown(Keys.D2) },
+            { InputKeys.KeyboardD3, s => s.IsKeyDown(Keys.D3) },
+            { InputKeys.KeyboardD4, s => s.IsKeyDown(Keys.D4) },
+            { InputKeys.KeyboardD5, s => s.IsKeyDown(Keys.D5) },
+            { InputKeys.KeyboardD6, s => s.IsKeyDown(Keys.D6) },
+            { InputKeys.KeyboardD7, s => s.IsKeyDown(Keys.D7) },
+            { InputKeys.KeyboardD8, s => s.IsKeyDown(Keys.D8) },
+            { InputKeys.KeyboardD9, s => s.IsKeyDown(Keys.D9) },
+            { InputKeys.KeyboardA, s => s.IsKeyDown(Keys.A) },
+            { InputKeys.KeyboardB, s => s.IsKeyDown(Keys.B) },
+            { InputKeys.KeyboardC, s => s.IsKeyDown(Keys.C) },
+            { InputKeys.KeyboardD, s => s.IsKeyDown(Keys.D) },
+            { InputKeys.KeyboardE, s => s.IsKeyDown(Keys.E) },
+            { InputKeys.KeyboardF, s => s.IsKeyDown(Keys.F) },
+            { InputKeys.KeyboardG, s => s.IsKeyDown(Keys.G) },
+            { InputKeys.KeyboardH, s => s.IsKeyDown(Keys.H) },
+            { InputKeys.KeyboardI, s => s.IsKeyDown(Keys.I) },
+            { InputKeys.KeyboardJ, s => s.IsKeyDown(Keys.J) },
+            { InputKeys.KeyboardK, s => s.IsKeyDown(Keys.K) },
+            { InputKeys.KeyboardL, s => s.IsKeyDown(Keys.L) },
+            { InputKeys.KeyboardM, s => s.IsKeyDown(Keys.M) },
+            { InputKeys.KeyboardN, s => s.IsKeyDown(Keys.N) },
+            { InputKeys.KeyboardO, s => s.IsKeyDown(Keys.O) },
+            { InputKeys.KeyboardP, s => s.IsKeyDown(Keys.P) },
+            { InputKeys.KeyboardQ, s => s.IsKeyDown(Keys.Q) },
+            { InputKeys.KeyboardR, s => s.IsKeyDown(Keys.R) },
+            { InputKeys.KeyboardS, s => s.IsKeyDown(Keys.S) },
+            { InputKeys.KeyboardT, s => s.IsKeyDown(Keys.T) },
+            { InputKeys.KeyboardU, s => s.IsKeyDown(Keys.U) },
+            { InputKeys.KeyboardV, s => s.IsKeyDown(Keys.V) },
+            { InputKeys.KeyboardW, s => s.IsKeyDown(Keys.W) },
+            { InputKeys.KeyboardX, s => s.IsKeyDown(Keys.X) },
+            { InputKeys.KeyboardY, s => s.IsKeyDown(Keys.Y) },
+            { InputKeys.KeyboardZ, s => s.IsKeyDown(Keys.Z) },
+            { InputKeys.KeyboardLeftWindows, s => s.IsKeyDown(Keys.LeftWindows) },
+            { InputKeys.KeyboardRightWindows, s => s.IsKeyDown(Keys.RightWindows) },
+            { InputKeys.KeyboardApps, s => s.IsKeyDown(Keys.Apps) },
+            { InputKeys.KeyboardSleep, s => s.IsKeyDown(Keys.Sleep) },
+            { InputKeys.KeyboardNumPad0, s => s.IsKeyDown(Keys.NumPad0) },
+            { InputKeys.KeyboardNumPad1, s => s.IsKeyDown(Keys.NumPad1) },
+            { InputKeys.KeyboardNumPad2, s => s.IsKeyDown(Keys.NumPad2) },
+            { InputKeys.KeyboardNumPad3, s => s.IsKeyDown(Keys.NumPad3) },
+            { InputKeys.KeyboardNumPad4, s => s.IsKeyDown(Keys.NumPad4) },
+            { InputKeys.KeyboardNumPad5, s => s.IsKeyDown(Keys.NumPad5) },
+            { InputKeys.KeyboardNumPad6, s => s.IsKeyDown(Keys.NumPad6) },
+            { InputKeys.KeyboardNumPad7, s => s.IsKeyDown(Keys.NumPad7) },
+            { InputKeys.KeyboardNumPad8, s => s.IsKeyDown(Keys.NumPad8) },
+            { InputKeys.KeyboardNumPad9, s => s.IsKeyDown(Keys.NumPad9) },
+            { InputKeys.KeyboardMultiply, s => s.IsKeyDown(Keys.Multiply) },
+            { InputKeys.KeyboardAdd, s => s.IsKeyDown(Keys.Add) },
+            { InputKeys.KeyboardSeparator, s => s.IsKeyDown(Keys.Separator) },
+            { InputKeys.KeyboardSubtract, s => s.IsKeyDown(Keys.Subtract) },
+            { InputKeys.KeyboardDecimal, s => s.IsKeyDown(Keys.Decimal) },
+            { InputKeys.KeyboardDivide, s => s.IsKeyDown(Keys.Divide) },
+            { InputKeys.KeyboardF1, s => s.IsKeyDown(Keys.F1) },
+            { InputKeys.KeyboardF2, s => s.IsKeyDown(Keys.F2) },
+            { InputKeys.KeyboardF3, s => s.IsKeyDown(Keys.F3) },
+            { InputKeys.KeyboardF4, s => s.IsKeyDown(Keys.F4) },
+            { InputKeys.KeyboardF5, s => s.IsKeyDown(Keys.F5) },
+            { InputKeys.KeyboardF6, s => s.IsKeyDown(Keys.F6) },
+            { InputKeys.KeyboardF7, s => s.IsKeyDown(Keys.F7) },
+            { InputKeys.KeyboardF8, s => s.IsKeyDown(Keys.F8) },
+            { InputKeys.KeyboardF9, s => s.IsKeyDown(Keys.F9) },
+            { InputKeys.KeyboardF10, s => s.IsKeyDown(Keys.F10) },
+            { InputKeys.KeyboardF11, s => s.IsKeyDown(Keys.F11) },
+            { InputKeys.KeyboardF12, s => s.IsKeyDown(Keys.F12) },
+            { InputKeys.KeyboardF13, s => s.IsKeyDown(Keys.F13) },
+            { InputKeys.KeyboardF14, s => s.IsKeyDown(Keys.F14) },
+            { InputKeys.KeyboardF15, s => s.IsKeyDown(Keys.F15) },
+            { InputKeys.KeyboardF16, s => s.IsKeyDown(Keys.F16) },
+            { InputKeys.KeyboardF17, s => s.IsKeyDown(Keys.F17) },
+            { InputKeys.KeyboardF18, s => s.IsKeyDown(Keys.F18) },
+            { InputKeys.KeyboardF19, s => s.IsKeyDown(Keys.F19) },
+            { InputKeys.KeyboardF20, s => s.IsKeyDown(Keys.F20) },
+            { InputKeys.KeyboardF21, s => s.IsKeyDown(Keys.F21) },
+            { InputKeys.KeyboardF22, s => s.IsKeyDown(Keys.F22) },
+            { InputKeys.KeyboardF23, s => s.IsKeyDown(Keys.F23) },
+            { InputKeys.KeyboardF24, s => s.IsKeyDown(Keys.F24) },
+            { InputKeys.KeyboardNumLock, s => s.IsKeyDown(Keys.NumLock) },
+            { InputKeys.KeyboardScroll, s => s.IsKeyDown(Keys.Scroll) },
+            { InputKeys.KeyboardLeftShift, s => s.IsKeyDown(Keys.LeftShift) },
+            { InputKeys.KeyboardRightShift, s => s.IsKeyDown(Keys.RightShift) },
+            { InputKeys.KeyboardLeftControl, s => s.IsKeyDown(Keys.LeftControl) },
+            { InputKeys.KeyboardRightControl, s => s.IsKeyDown(Keys.RightControl) },
+            { InputKeys.KeyboardLeftAlt, s => s.IsKeyDown(Keys.LeftAlt) },
+            { InputKeys.KeyboardRightAlt, s => s.IsKeyDown(Keys.RightAlt) },
+            { InputKeys.KeyboardBrowserBack, s => s.IsKeyDown(Keys.BrowserBack) },
+            { InputKeys.KeyboardBrowserForward, s => s.IsKeyDown(Keys.BrowserForward) },
+            { InputKeys.KeyboardBrowserRefresh, s => s.IsKeyDown(Keys.BrowserRefresh) },
+            { InputKeys.KeyboardBrowserStop, s => s.IsKeyDown(Keys.BrowserStop) },
+            { InputKeys.KeyboardBrowserSearch, s => s.IsKeyDown(Keys.BrowserSearch) },
+            { InputKeys.KeyboardBrowserFavorites, s => s.IsKeyDown(Keys.BrowserFavorites) },
+            { InputKeys.KeyboardBrowserHome, s => s.IsKeyDown(Keys.BrowserHome) },
+            { InputKeys.KeyboardVolumeMute, s => s.IsKeyDown(Keys.VolumeMute) },
+            { InputKeys.KeyboardVolumeDown, s => s.IsKeyDown(Keys.VolumeDown) },
+            { InputKeys.KeyboardVolumeUp, s => s.IsKeyDown(Keys.VolumeUp) },
+            { InputKeys.KeyboardMediaNextTrack, s => s.IsKeyDown(Keys.MediaNextTrack) },
+            { InputKeys.KeyboardMediaPreviousTrack, s => s.IsKeyDown(Keys.MediaPreviousTrack) },
+            { InputKeys.KeyboardMediaStop, s => s.IsKeyDown(Keys.MediaStop) },
+            { InputKeys.KeyboardMediaPlayPause, s => s.IsKeyDown(Keys.MediaPlayPause) },
+            { InputKeys.KeyboardLaunchMail, s => s.IsKeyDown(Keys.LaunchMail) },
+            { InputKeys.KeyboardSelectMedia, s => s.IsKeyDown(Keys.SelectMedia) },
+            { InputKeys.KeyboardLaunchApplication1, s => s.IsKeyDown(Keys.LaunchApplication1) },
+            { InputKeys.KeyboardLaunchApplication2, s => s.IsKeyDown(Keys.LaunchApplication2) },
+            { InputKeys.KeyboardOemSemicolon, s => s.IsKeyDown(Keys.OemSemicolon) },
+            { InputKeys.KeyboardOemPlus, s => s.IsKeyDown(Keys.OemPlus) },
+            { InputKeys.KeyboardOemComma, s => s.IsKeyDown(Keys.OemComma) },
+            { InputKeys.KeyboardOemMinus, s => s.IsKeyDown(Keys.OemMinus) },
+            { InputKeys.KeyboardOemPeriod, s => s.IsKeyDown(Keys.OemPeriod) },
+            { InputKeys.KeyboardOemQuestion, s => s.IsKeyDown(Keys.OemQuestion) },
+            { InputKeys.KeyboardOemTilde, s => s.IsKeyDown(Keys.OemTilde) },
+            { InputKeys.KeyboardChatPadGreen, s => s.IsKeyDown(Keys.ChatPadGreen) },
+            { InputKeys.KeyboardChatPadOrange, s => s.IsKeyDown(Keys.ChatPadOrange) },
+            { InputKeys.KeyboardOemOpenBrackets, s => s.IsKeyDown(Keys.OemOpenBrackets) },
+            { InputKeys.KeyboardOemPipe, s => s.IsKeyDown(Keys.OemPipe) },
+            { InputKeys.KeyboardOemCloseBrackets, s => s.IsKeyDown(Keys.OemCloseBrackets) },
+            { InputKeys.KeyboardOemQuotes, s => s.IsKeyDown(Keys.OemQuotes) },
+            { InputKeys.KeyboardOem8, s => s.IsKeyDown(Keys.Oem8) },
+            { InputKeys.KeyboardOemBackslash, s => s.IsKeyDown(Keys.OemBackslash) },
+            { InputKeys.KeyboardProcessKey, s => s.IsKeyDown(Keys.ProcessKey) },
+            { InputKeys.KeyboardOemCopy, s => s.IsKeyDown(Keys.OemCopy) },
+            { InputKeys.KeyboardOemAuto, s => s.IsKeyDown(Keys.OemAuto) },
+            { InputKeys.KeyboardOemEnlW, s => s.IsKeyDown(Keys.OemEnlW) },
+            { InputKeys.KeyboardAttn, s => s.IsKeyDown(Keys.Attn) },
+            { InputKeys.KeyboardCrsel, s => s.IsKeyDown(Keys.Crsel) },
+            { InputKeys.KeyboardExsel, s => s.IsKeyDown(Keys.Exsel) },
+            { InputKeys.KeyboardEraseEof, s => s.IsKeyDown(Keys.EraseEof) },
+            { InputKeys.KeyboardPlay, s => s.IsKeyDown(Keys.Play) },
+            { InputKeys.KeyboardZoom, s => s.IsKeyDown(Keys.Zoom) },
+            { InputKeys.KeyboardPa1, s => s.IsKeyDown(Keys.Pa1) },
+            { InputKeys.KeyboardOemClear, s => s.IsKeyDown(Keys.OemClear) },
+            #endregion
+        };
+
+        private static readonly IReadOnlyDictionary<string, Func<MouseState, object>> MouseStateObservers = new Dictionary<string, Func<MouseState, object>>
+        {
+            #region Functions
+            { InputKeys.MouseButton1, s => s.LeftButton == ButtonState.Pressed },
+            { InputKeys.MouseButton2, s => s.RightButton == ButtonState.Pressed },
+            { InputKeys.MouseButton3, s => s.MiddleButton == ButtonState.Pressed },
+            { InputKeys.MouseButton4, s => s.XButton1 == ButtonState.Pressed },
+            { InputKeys.MouseButton5, s => s.XButton2 == ButtonState.Pressed },
+            { InputKeys.MouseCursorX, s => s.Position.X },
+            { InputKeys.MouseCursorY, s => s.Position.Y },
+            { InputKeys.MouseScrollX, s => s.HorizontalScrollWheelValue },
+            { InputKeys.MouseScrollY, s => s.ScrollWheelValue },
+            #endregion
+        };
+
+        private static readonly IReadOnlyDictionary<string, Func<GamePadState, object>> GamePadStateObservers = new Dictionary<string, Func<GamePadState, object>>
+        {
+            #region Functions
+            { InputKeys.GamepadDPadUp, s => s.IsButtonDown(Buttons.DPadUp) },
+            { InputKeys.GamepadDPadDown, s => s.IsButtonDown(Buttons.DPadDown) },
+            { InputKeys.GamepadDPadLeft, s => s.IsButtonDown(Buttons.DPadLeft) },
+            { InputKeys.GamepadDPadRight, s => s.IsButtonDown(Buttons.DPadRight) },
+            { InputKeys.GamepadStart, s => s.IsButtonDown(Buttons.Start) },
+            { InputKeys.GamepadBack, s => s.IsButtonDown(Buttons.Back) },
+            { InputKeys.GamepadLeftStick, s => s.IsButtonDown(Buttons.LeftStick) },
+            { InputKeys.GamepadRightStick, s => s.IsButtonDown(Buttons.RightStick) },
+            { InputKeys.GamepadLeftShoulder, s => s.IsButtonDown(Buttons.LeftShoulder) },
+            { InputKeys.GamepadRightShoulder, s => s.IsButtonDown(Buttons.RightShoulder) },
+            { InputKeys.GamepadBigButton, s => s.IsButtonDown(Buttons.BigButton) },
+            { InputKeys.GamepadA, s => s.IsButtonDown(Buttons.A) },
+            { InputKeys.GamepadB, s => s.IsButtonDown(Buttons.B) },
+            { InputKeys.GamepadX, s => s.IsButtonDown(Buttons.X) },
+            { InputKeys.GamepadY, s => s.IsButtonDown(Buttons.Y) },
+            { InputKeys.GamepadRightTrigger, s => s.Triggers.Right },
+            { InputKeys.GamepadLeftTrigger, s => s.Triggers.Left },
+            { InputKeys.GamepadRightThumbstickX, s => s.ThumbSticks.Right.X },
+            { InputKeys.GamepadRightThumbstickY, s => s.ThumbSticks.Right.Y },
+            { InputKeys.GamepadLeftThumbstickX, s => s.ThumbSticks.Left.X },
+            { InputKeys.GamepadLeftThumbstickY, s => s.ThumbSticks.Right.Y },
+            #endregion
+        };
 
         #endregion
 
         #region Setup
 
-        public void UseKeyboard()
+        public MonoGameObserver UseKeyboard()
         {
-            this._keyboardInputs = GetPublicConstants(typeof(MgInput.Keyboard));
-            this._keyboardKeysByInput = ((Keys[])Enum.GetValues(typeof(Keys))).ToDictionary(k => k.ToGenericInput(), k => k);
             this._useKeyboard = true;
+            return this;
         }
 
-        public void UseMouse()
+        public MonoGameObserver UseMouse()
         {
-            this._mouseInputs = GetPublicConstants(typeof(MgInput.Mouse));
             this._useMouse = true;
+            return this;
         }
 
-        public void UseGamepads(int players, MgGamePadConfiguration config)
+        public MonoGameObserver UseGamepads(int players)
         {
             if (players < 1 || players > GamePad.MaximumGamePadCount)
             {
                 throw new ArgumentException($"MonoGame only supports 1-{GamePad.MaximumGamePadCount} players!");
             }
-
-            var gamepadInputsList = new List<int>();
-            this._gamepadButtonsByInput = new Dictionary<int, Buttons>();
+            
             this._gamepadStatesByPlayer = new Dictionary<int, GamePadState>();
-
-            // Get Player 1's input constant that corresponds with this MonoGame Button
-            // This will be used identify the button during the Update
-            var recognizedButtons = (Buttons[])Enum.GetValues(typeof(Buttons));
-            foreach (var button in recognizedButtons)
-            {
-                this._gamepadButtonsByInput.Add(button.ToGenericInput(1), button);
-            }
-
-            // Start with Player 1's Input constants as a base
-            var recognizedInputs = GetPublicConstants(typeof(MgInput.GamePad.Player1));
 
             // For each player...
             for (var i = 1; i <= players; i++)
             {
                 // Add a default gamepad state
                 this._gamepadStatesByPlayer.Add(i, GamePadState.Default);
-
-                // Add all possible unique Input keys
-                gamepadInputsList.AddRange(recognizedInputs.Select(x => MgInputExtensions.GetPlayerEquivalent(x, i)));
             }
-
-            this._gamepadInputs = gamepadInputsList.ToHashSet();
+            
             this._useGamepads = true;
-        }
-
-        private static HashSet<int> GetPublicConstants(Type type)
-        {
-            var list = new HashSet<int>();
-
-            // from: https://stackoverflow.com/a/45895466
-            foreach (var field in type.GetFields())
-            {
-                if (field.IsLiteral && !field.IsInitOnly && field.IsPublic)
-                {
-                    list.Add((int)field.GetValue(null));
-                }
-            }
-
-            return list;
-        }
-
-        #endregion
-
-        #region Config
-
-        public void SetGamePadConfiguration(MgGamePadConfiguration gamePadConfig)
-        {
-            this._gamePadConfig = gamePadConfig;
+            return this;
         }
 
         #endregion
@@ -110,344 +269,48 @@ namespace DolphEngine.Input.Implementations
         #region IKeyStateObserver implementation
 
         /// <inheritdoc />
-        public void UpdateState(long gameTick)
+        public void UpdateState()
         {
-            this._currentGameTick = gameTick;
-
             if (this._useKeyboard)
             {
-                this._keyboardState = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+                this._keyboardState = Keyboard.GetState();
             }
 
             if (this._useMouse)
             {
-                this._mouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
+                this._mouseState = Mouse.GetState();
             }
 
             if (this._useGamepads)
             {
                 for (var i = 1; i <= this._gamepadStatesByPlayer.Count; i++)
                 {
-                    this._gamepadStatesByPlayer[i] = Microsoft.Xna.Framework.Input.GamePad.GetState(i);
+                    this._gamepadStatesByPlayer[i] = GamePad.GetState(i);
                 }
             }
         }
 
         /// <inheritdoc />
-        public void UpdateKey(KeyState keyState)
+        public object GetKeyValue(InputKey key)
         {
-            var key = keyState.Key;
+            var gkey = key.GenericKey;
 
-            if (this._keyboardInputs.Contains(key))
+            if (KeyboardStateObservers.TryGetValue(gkey, out var kreader))
             {
-                var state = this._keyboardState;
-
-                if (this._keyboardKeysByInput.TryGetValue(key, out var mgKey))
-                {
-                    // If it is a direct MonoGame key, check if it's
-                    UpdateButtonOrKey(keyState, state.IsKeyDown(mgKey));
-                    return;
-                }
-                
-                // Otherwise, it must be one of the special combination inputs, such as "arrow keys"
-                switch (key)
-                {
-                    case MgInput.Keyboard.WASD:
-                        this.UpdateDirectionalPad(keyState,
-                            state.IsKeyDown(Keys.W),
-                            state.IsKeyDown(Keys.D),
-                            state.IsKeyDown(Keys.S),
-                            state.IsKeyDown(Keys.A));
-                        return;
-                    case MgInput.Keyboard.Arrows:
-                        this.UpdateDirectionalPad(keyState,
-                            state.IsKeyDown(Keys.Up),
-                            state.IsKeyDown(Keys.Right),
-                            state.IsKeyDown(Keys.Down),
-                            state.IsKeyDown(Keys.Left));
-                        return;
-                    default:
-                        throw new ArgumentException($"Unrecognized keyboard input: {key}!");
-                }
+                return kreader(this._keyboardState);
             }
-
-            if (this._mouseInputs.Contains(key))
+            else if (MouseStateObservers.TryGetValue(gkey, out var mreader))
             {
-                var state = this._mouseState;
-
-                switch (key)
-                {
-                    case MgInput.Mouse.Button1:
-                        UpdateButtonOrKey(keyState, state.LeftButton == ButtonState.Pressed);
-                        return;
-                    case MgInput.Mouse.Button2:
-                        UpdateButtonOrKey(keyState, state.RightButton == ButtonState.Pressed);
-                        return;
-                    case MgInput.Mouse.Button3:
-                        UpdateButtonOrKey(keyState, state.MiddleButton == ButtonState.Pressed);
-                        return;
-                    case MgInput.Mouse.Button4:
-                        UpdateButtonOrKey(keyState, state.XButton1 == ButtonState.Pressed);
-                        return;
-                    case MgInput.Mouse.Button5:
-                        UpdateButtonOrKey(keyState, state.XButton2 == ButtonState.Pressed);
-                        return;
-                    case MgInput.Mouse.CursorX:
-                        UpdateDigitalPosition(keyState, state.HorizontalScrollWheelValue, 0);
-                        return;
-                    case MgInput.Mouse.CursorY:
-                        UpdateDigitalPosition(keyState, 0, state.ScrollWheelValue);
-                        return;
-                    case MgInput.Mouse.Cursor:
-                        UpdateDigitalPosition(keyState, state.X, state.Y);
-                        return;
-                    case MgInput.Mouse.ScrollX:
-                        UpdateDigitalPosition(keyState, state.HorizontalScrollWheelValue, 0);
-                        return;
-                    case MgInput.Mouse.ScrollY:
-                        UpdateDigitalPosition(keyState, 0, state.ScrollWheelValue);
-                        return;
-                    case MgInput.Mouse.Scroll:
-                        UpdateDigitalPosition(keyState, state.HorizontalScrollWheelValue, state.ScrollWheelValue);
-                        return;
-                    default:
-                        throw new ArgumentException($"Unrecognized mouse input: {key}!");
-                }
+                return mreader(this._mouseState);
             }
-
-            if (this._gamepadInputs.Contains(key))
+            else if (GamePadStateObservers.TryGetValue(gkey, out var greader))
             {
-                var player = MgInputExtensions.GetPlayer(key);
-                var state = this._gamepadStatesByPlayer[player];
-                var config = this._gamePadConfig; // todo: Maybe index this by player, instead of all gamepads the same?
-
-                // Player variable is already isolated by which state we grabbed
-                // So for the sake of asking "which button was pressed?", just normalize input to Player 1's button identities
-                var normalized = MgInputExtensions.GetPlayerEquivalent(key, 1);
-
-                if (this._gamepadButtonsByInput.TryGetValue(normalized, out var mgButton))
-                {
-                    // If there is a corresponding MonoGame button, we can process it directly
-                    switch (mgButton)
-                    {
-                        case Buttons.DPadUp:
-                        case Buttons.DPadDown:
-                        case Buttons.DPadLeft:
-                        case Buttons.DPadRight:
-                        case Buttons.Start:
-                        case Buttons.Back:
-                        case Buttons.LeftStick:
-                        case Buttons.RightStick:
-                        case Buttons.LeftShoulder:
-                        case Buttons.RightShoulder:
-                        case Buttons.BigButton:
-                        case Buttons.A:
-                        case Buttons.B:
-                        case Buttons.X:
-                        case Buttons.Y:
-                            UpdateButtonOrKey(keyState, state.IsButtonDown(mgButton));
-                            return;
-                        case Buttons.RightTrigger:
-                            UpdateAnalog(keyState, 0, state.Triggers.Right, config.TriggerThreshold, config.TriggerSensitivity);
-                            return;
-                        case Buttons.LeftTrigger:
-                            UpdateAnalog(keyState, state.Triggers.Left, 0, config.TriggerThreshold, config.TriggerSensitivity);
-                            return;
-                        case Buttons.RightThumbstickUp:
-                        case Buttons.RightThumbstickDown:
-                            UpdateAnalog(keyState, 0, state.ThumbSticks.Right.Y, config.JoystickDeadzone, config.JoystickSensitivity);
-                            return;
-                        case Buttons.RightThumbstickRight:
-                        case Buttons.RightThumbstickLeft:
-                            UpdateAnalog(keyState, state.ThumbSticks.Right.X, 0, config.JoystickDeadzone, config.JoystickSensitivity);
-                            return;
-                        case Buttons.LeftThumbstickUp:
-                        case Buttons.LeftThumbstickDown:
-                            UpdateAnalog(keyState, 0, state.ThumbSticks.Left.Y, config.JoystickDeadzone, config.JoystickSensitivity);
-                            return;
-                        case Buttons.LeftThumbstickRight:
-                        case Buttons.LeftThumbstickLeft:
-                            UpdateAnalog(keyState, state.ThumbSticks.Left.X, 0, config.JoystickDeadzone, config.JoystickSensitivity);
-                            return;
-                        default:
-                            throw new ArgumentException($"Unrecognized button input: {mgButton} ({(int)mgButton})!");
-                    }
-                }
-
-                // Otherwise, it must be one of our special combination inputs
-                // Remember that these are all normalized to Player1's constants for the sake of identity
-                switch (key)
-                {
-                    case MgInput.GamePad.Player1.DPad:
-                        this.UpdateDirectionalPad(keyState,
-                            state.IsButtonDown(Buttons.DPadUp),
-                            state.IsButtonDown(Buttons.DPadRight),
-                            state.IsButtonDown(Buttons.DPadDown),
-                            state.IsButtonDown(Buttons.DPadLeft));
-                        return;
-                    case MgInput.GamePad.Player1.LeftThumbstick:
-                        UpdateAnalog(keyState, state.ThumbSticks.Left.X, state.ThumbSticks.Left.Y, config.JoystickDeadzone, config.JoystickSensitivity);
-                        return;
-                    case MgInput.GamePad.Player1.RightThumbstick:
-                        UpdateAnalog(keyState, state.ThumbSticks.Right.X, state.ThumbSticks.Right.Y, config.JoystickDeadzone, config.JoystickSensitivity);
-                        return;
-                    case MgInput.GamePad.Player1.ABXY:
-                        // todo: document somewhere that this assumes "Xbox Layout" instead of "Nintendo Layout"
-                        this.UpdateDirectionalPad(keyState,
-                            state.IsButtonDown(Buttons.Y),
-                            state.IsButtonDown(Buttons.B),
-                            state.IsButtonDown(Buttons.A),
-                            state.IsButtonDown(Buttons.X));
-                        return;
-                    case MgInput.GamePad.Player1.Triggers:
-                        UpdateAnalog(keyState, state.Triggers.Left, state.Triggers.Right, config.TriggerThreshold, config.TriggerSensitivity);
-                        return;
-                    default:
-                        throw new ArgumentException($"Unrecognized button input: {key}!");
-                }
+                return greader(this._gamepadStatesByPlayer[key.Player]);
             }
-        }
-
-        #endregion
-
-        #region Update methods
-
-        private void UpdateButtonOrKey(KeyState keyState, bool isPressed)
-        {
-            var isPressedChanged = (isPressed && !keyState.IsPressed) || (!isPressed && keyState.IsPressed);
-
-            if (isPressedChanged)
+            else
             {
-                // The button has gone from up to down, or vice versa
-                keyState.IsPressed = isPressed;
-                keyState.IsPressedLastChange = this._currentGameTick;
-
-                keyState.DigitalX = isPressed ? 1 : 0;
-                keyState.DigitalY = isPressed ? 1 : 0;
-                keyState.DigitalLastChange = this._currentGameTick;
-
-                keyState.AnalogX = isPressed ? 1.000f : 0;
-                keyState.AnalogY = isPressed ? 1.000f : 0;
-                keyState.AnalogLastChange = this._currentGameTick;
+                throw new ArgumentException($"Unrecognized generic input key ({gkey})!");
             }
-        }
-
-        private void UpdateDigital(KeyState keyState, int digitalX, int digitalY)
-        {
-            var isPressed = digitalX != 0 || digitalY != 0;
-            var isPressedChanged = (isPressed && !keyState.IsPressed) || (!isPressed && keyState.IsPressed);
-
-            bool isDigitalChanged = digitalX != keyState.DigitalX || digitalY != keyState.DigitalY;
-
-            if (isPressedChanged)
-            {
-                // The input has changed away from or back toward (0, 0)
-                keyState.IsPressed = isPressed;
-                keyState.IsPressedLastChange = this._currentGameTick;
-            }
-
-            if (isDigitalChanged)
-            {
-                keyState.DigitalX = digitalX;
-                keyState.DigitalY = digitalY;
-                keyState.DigitalLastChange = this._currentGameTick;
-
-                keyState.AnalogX = ToAnalog(digitalX);
-                keyState.AnalogY = ToAnalog(digitalY);
-                keyState.AnalogLastChange = this._currentGameTick;
-            }
-        }
-
-        private void UpdateDigitalPosition(KeyState keyState, int digitalX, int digitalY)
-        {
-            bool isDigitalChanged = digitalX != keyState.DigitalX || digitalY != keyState.DigitalY;
-
-            if (isDigitalChanged)
-            {
-                keyState.DigitalX = digitalX;
-                keyState.DigitalY = digitalY;
-                keyState.DigitalLastChange = this._currentGameTick;
-            }
-        }
-
-        private void UpdateDirectionalPad(KeyState keyState, bool isPressedUp, bool isPressedRight, bool isPressedDown, bool isPressedLeft)
-        {
-            int digitalX = isPressedRight ? 1 : isPressedLeft ? -1 : 0;     // Up takes priority over down if both are pressed
-            int digitalY = isPressedUp ? 1 : isPressedDown ? -1 : 0;        // Right takes priority over left if both are pressed
-            this.UpdateDigital(keyState, digitalX, digitalY);
-        }
-
-        private void UpdateAnalog(KeyState keyState, float analogX, float analogY, float threshold, float sensitivity)
-        {
-            var isPressed = analogX > threshold || analogY > threshold;
-            var isPressedChanged = (isPressed && !keyState.IsPressed) || (!isPressed && keyState.IsPressed);
-
-            if (isPressedChanged)
-            {
-                // Stick/trigger has crossed into or out of the threshold (deadzone)
-                keyState.IsPressed = isPressed;
-                keyState.IsPressedLastChange = this._currentGameTick;
-            }
-
-            if (isPressed)
-            {
-                // Only perform the digital/analog updates if the stick/trigger is above the threshold (i.e. *not* in the deadzone)
-                // Changes below the specified sensitivity will not trigger an update
-
-                var isAnalogXChanged = Math.Abs(keyState.AnalogX - analogX) > sensitivity;
-                var isAnalogYChanged = Math.Abs(keyState.AnalogY - analogY) > sensitivity;
-
-                if (isAnalogXChanged)
-                {
-                    keyState.AnalogX = analogX;
-                    keyState.AnalogLastChange = this._currentGameTick;
-
-                    var digitalX = ToDigital(analogX, threshold);
-                    var isDigitalXChanged = keyState.DigitalX != digitalX;
-
-                    if (isDigitalXChanged)
-                    {
-                        keyState.DigitalX = digitalX;
-                        keyState.DigitalLastChange = this._currentGameTick;
-                    }
-                }
-
-                if (isAnalogYChanged)
-                {
-                    keyState.AnalogY = analogY;
-                    keyState.AnalogLastChange = this._currentGameTick;
-
-                    var digitalY = ToDigital(analogY, threshold);
-                    var isDigitalYChanged = keyState.DigitalY != digitalY;
-
-                    if (isDigitalYChanged)
-                    {
-                        keyState.DigitalY = digitalY;
-                        keyState.DigitalLastChange = this._currentGameTick;
-                    }
-                }
-            }
-        }
-
-        private static float ToAnalog(int digital)
-        {
-            if (digital == 0)
-            {
-                return 0;
-            }
-            
-            return digital > 0 ? 1.000f : -1.000f;
-        }
-
-        private static int ToDigital(float analog, float threshold)
-        {
-            if (analog < threshold)
-            {
-                // If analog is below threshold (or inside deadzone), it's considered "not pressed"
-                return 0;
-            }
-
-            return analog > 0 ? 1 : -1;
         }
 
         #endregion
