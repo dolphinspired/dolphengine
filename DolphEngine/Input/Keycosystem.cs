@@ -18,7 +18,9 @@ namespace DolphEngine.Input
 
         private readonly InputState _inputState = new InputState();
         private readonly Dictionary<string, InputKeyInfo> _inputKeys = new Dictionary<string, InputKeyInfo>();
-        private readonly Dictionary<ControlBase, ControlReaction> _controlReactions = new Dictionary<ControlBase, ControlReaction>();
+
+        private readonly Dictionary<ControlBase, List<ControlReaction>> _controlReactionsByControl =
+            new Dictionary<ControlBase, List<ControlReaction>>(ReferenceEqualityComparer<ControlBase>.Instance);
 
         // Each key is indexed by 1-or-more handlers that are triggered by it
         // Each handler is indexed by 0-or-more keys that trigger them
@@ -57,13 +59,15 @@ namespace DolphEngine.Input
             }
 
             // Finally, execute the on-update reactions for each control
-            foreach (var reactionKvp in this._controlReactions)
+            foreach (var kvp in this._controlReactionsByControl)
             {
-                var control = reactionKvp.Key;
-                var reaction = reactionKvp.Value;
-
+                var control = kvp.Key;
                 control.Update();
-                reaction.React(control);
+
+                foreach (var reaction in kvp.Value)
+                {
+                    reaction.React(control);
+                }
             }
         }
 
@@ -71,11 +75,22 @@ namespace DolphEngine.Input
 
         #region Add/Remove Reactions
 
-        public Keycosystem AddReaction<T>(T control, Func<T, bool> condition, Action<T> reaction) where T : ControlBase
+        public Keycosystem AddControlReaction<T>(T control, Func<T, bool> condition, Action<T> reaction) where T : ControlBase
         {
             control.SetInputState(this._inputState);
             var cr = new ControlReaction<T>(condition, reaction);
-            this._controlReactions.Add(control, cr);
+            
+            // Index the reaction by which control it's bound to
+            if (this._controlReactionsByControl.ContainsKey(control))
+            {
+                // If another reaction has already been added to this control, add this reaction to the list
+                this._controlReactionsByControl[control].Add(cr);
+            }
+            else
+            {
+                // Otherwise, add a new index entry for this control, and create a list with this reaction in it
+                this._controlReactionsByControl.Add(control, new List<ControlReaction> { cr });
+            }
 
             // Add this control's keys to the inputs that we track on each update
             foreach (var key in control.Keys)
@@ -91,6 +106,40 @@ namespace DolphEngine.Input
                     this._inputKeys.Add(key, new InputKeyInfo(InputKey.Parse(key), 1));
                 }
             }
+
+            return this;
+        }
+
+        public Keycosystem RemoveControl(ControlBase control)
+        {
+            foreach (var key in control.Keys)
+            {
+                // Decrement the number of controls tracking this key
+                var info = this._inputKeys[key];
+                info.Count--;
+
+                if (info.Count == 0)
+                {
+                    // If this was the last control to reference an input key, stop tracking that key's updates
+                    this._inputKeys.Remove(key);
+                }
+            }
+
+            this._controlReactionsByControl.Remove(control);
+            return this;
+        }
+
+        public Keycosystem RebindControl<T>(T from, T to) where T : ControlBase
+        {
+            throw new NotImplementedException();
+
+            return this;
+        }
+
+        public Keycosystem ClearControls()
+        {
+            this._controlReactionsByControl.Clear();
+            this._inputKeys.Clear();
 
             return this;
         }

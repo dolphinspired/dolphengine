@@ -10,7 +10,7 @@ namespace DolphEngine.Input.Controls
 
         public void SetInputState(InputState inputState)
         {
-            if (this.InputState != null && this.InputState != inputState)
+            if (this.InputState != null && inputState != null && this.InputState != inputState)
             {
                 throw new InvalidOperationException($"This control is already tracked by another {nameof(InputState)}!");
             }
