@@ -1,6 +1,4 @@
 ﻿using DolphEngine.Input.Controllers;
-using DolphEngine.Input.Controls;
-using DolphEngine.Input.State;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -30,17 +28,21 @@ namespace DolphEngine.Demo
             Tower.Initialize();
 
             var keyboard = new StandardKeyboard();
+            var mouse = new StandardMouse();
             
-            Tower.Keycosystem.AddControlReaction(keyboard, c => c.Escape.IsPressed, c => this.Exit());
-            
-            Tower.Keycosystem.AddControlReaction(keyboard, c => c.A.JustPressed, c => this.BackgroundColor = Color.Crimson);
-            Tower.Keycosystem.AddControlReaction(keyboard, c => c.A.JustReleased, c => this.BackgroundColor = Color.CornflowerBlue);
-            
-            Tower.Keycosystem.AddControlReaction(keyboard, c => c.Z.JustPressed, c => this.BackgroundColor = Color.DarkOliveGreen);
-            Tower.Keycosystem.AddControlReaction(keyboard, c => c.Z.JustReleased, c => this.BackgroundColor = Color.CornflowerBlue);
+            Tower.Keycosystem.AddControlReaction(keyboard, k => k.Escape.IsPressed, k => this.Exit());
 
-            dl = new DebugLogger();
-            dl.CurrentPage = 1;
+            Tower.Keycosystem.AddControlReaction(keyboard, k => k.A.IsPressed, k => this.BackgroundColor = Color.Crimson);
+            Tower.Keycosystem.AddControlReaction(keyboard, k => k.Z.IsPressed, k => this.BackgroundColor = Color.DarkOliveGreen);
+
+            Tower.Keycosystem.AddControlReaction(mouse, m => m.PrimaryClick.IsPressed, m => this.BackgroundColor = Color.BurlyWood);
+            Tower.Keycosystem.AddControlReaction(mouse, m => m.SecondaryClick.IsPressed, m => this.BackgroundColor = Color.Aquamarine);
+            Tower.Keycosystem.AddControlReaction(mouse, m => m.MiddleClick.JustPressed, m => m.LeftHanded = !m.LeftHanded);
+
+            dl = new DebugLogger
+            {
+                CurrentPage = 1
+            };
 
             dl.AddLine(1, () => $"CurrentGameTick: {CurrentTick}");
 
@@ -53,6 +55,12 @@ namespace DolphEngine.Demo
                 () => "",
                 () => "Control Z:",
                 () => $"IsPressed: {keyboard.Z.IsPressed}, LastTickPressed: {keyboard.Z.LastTickPressed}, LastTickReleased: {keyboard.Z.LastTickReleased}");
+
+            dl.AddLine(1,
+                () => "",
+                () => "Mouse:",
+                () => $"PrimaryClick: {mouse.PrimaryClick.IsPressed}, SecondaryClick: {mouse.SecondaryClick.IsPressed}, LeftHanded: {mouse.LeftHanded}",
+                () => $"X: {mouse.Cursor.X}, Y: {mouse.Cursor.Y}");
 
             base.Initialize();
         }
@@ -70,6 +78,8 @@ namespace DolphEngine.Demo
         protected override void Update(GameTime gameTime)
         {
             this.CurrentTick = gameTime.TotalGameTime.Ticks;
+
+            this.BackgroundColor = Color.CornflowerBlue; // Reset to default color before reading inputs
             Tower.Keycosystem.Update(gameTime.TotalGameTime.Ticks);
 
             base.Update(gameTime);

@@ -14,7 +14,7 @@ namespace DolphEngine.Demo
 
         private static void InitializeInput()
         {
-            var observer = new MonoGameObserver().UseKeyboard();
+            var observer = new MonoGameObserver().UseKeyboard().UseMouse();
             Keycosystem = new Keycosystem(observer);
         }
     }
