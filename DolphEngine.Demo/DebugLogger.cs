@@ -8,14 +8,15 @@ namespace DolphEngine.Demo
 {
     public class DebugLogger
     {
+        public bool Hidden;
         public int CurrentPage;
 
         public SpriteFont Font;
         public Color FontColor = Color.White;
-        public int FontSize = 12;
+        public int FontSize = 10;
         public int PaddingTop = 12;
         public int PaddingLeft = 12;
-        public int LineSpacing = 2;
+        public int LineSpacing = 4;
 
         private readonly Dictionary<int, List<Func<string>>> _pages = new Dictionary<int, List<Func<string>>>();
 
@@ -70,6 +71,11 @@ namespace DolphEngine.Demo
 
         public void Render(SpriteBatch sb)
         {
+            if (this.Hidden)
+            {
+                return;
+            }
+
             var pos = new Vector2(this.PaddingLeft, this.PaddingTop);
 
             foreach (var line in this._pages[this.CurrentPage])

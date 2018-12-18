@@ -32,15 +32,19 @@ namespace DolphEngine.Demo
             
             Tower.Keycosystem.AddControlReaction(keyboard, k => k.Escape.IsPressed, k => this.Exit());
 
+            Tower.Keycosystem.AddControlReaction(keyboard, k => k.OemTilde.JustPressed, k => this.dl.Hidden = !this.dl.Hidden);
+            Tower.Keycosystem.AddControlReaction(keyboard, k => k.F1.JustPressed, k => this.dl.PrevPage());
+            Tower.Keycosystem.AddControlReaction(keyboard, k => k.F2.JustPressed, k => this.dl.NextPage());
+
             Tower.Keycosystem.AddControlReaction(keyboard, k => k.A.IsPressed, k => this.BackgroundColor = Color.Crimson);
             Tower.Keycosystem.AddControlReaction(keyboard, k => k.Z.IsPressed, k => this.BackgroundColor = Color.DarkOliveGreen);
-
             Tower.Keycosystem.AddControlReaction(mouse, m => m.PrimaryClick.IsPressed, m => this.BackgroundColor = Color.BurlyWood);
             Tower.Keycosystem.AddControlReaction(mouse, m => m.SecondaryClick.IsPressed, m => this.BackgroundColor = Color.Aquamarine);
             Tower.Keycosystem.AddControlReaction(mouse, m => m.MiddleClick.JustPressed, m => m.LeftHanded = !m.LeftHanded);
 
             dl = new DebugLogger
             {
+                Hidden = true,
                 CurrentPage = 1
             };
 
@@ -89,7 +93,7 @@ namespace DolphEngine.Demo
         {
             GraphicsDevice.Clear(this.BackgroundColor);
 
-            spriteBatch.Begin();
+            spriteBatch.Begin(samplerState: SamplerState.PointWrap); // disable anti-aliasing
             dl.Render(spriteBatch);
             spriteBatch.End();
 
