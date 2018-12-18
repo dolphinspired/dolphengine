@@ -1,4 +1,8 @@
-﻿using DolphEngine.Input.Controllers;
+﻿using DolphEngine.Eco;
+using DolphEngine.Eco.Components;
+using DolphEngine.Input.Controllers;
+using DolphEngine.MonoGame.Eco.Components;
+using DolphEngine.MonoGame.Eco.Handlers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -13,9 +17,9 @@ namespace DolphEngine.Demo
 
         private long CurrentTick;
 
-        private Rectangle Rect = new Rectangle(30, 50, 50, 100);
+        private PositionComponent2d RectPosition = new PositionComponent2d(30, 50);
+        private SizeComponent2d RectSize = new SizeComponent2d(50, 100);
         private Color RectColor = Color.Red;
-        private Texture2D RectTexture;
 
         public Game1()
         {
@@ -29,16 +33,6 @@ namespace DolphEngine.Demo
             Tower.Initialize();
             this.InitializeControls();
 
-            var data = new Color[this.Rect.Width * this.Rect.Height];
-            this.RectTexture = new Texture2D(this.GraphicsDevice, this.Rect.Width, this.Rect.Height);
-
-            for (int i = 0; i < data.Length; ++i)
-            {
-                data[i] = new Color(i / 10, i / 10, i / 10);
-            }
-
-            this.RectTexture.SetData(data);
-
             base.Initialize();
         }
 
@@ -47,6 +41,24 @@ namespace DolphEngine.Demo
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             Tower.Debug.Font = this.Content.Load<SpriteFont>("Debug");
+
+            var data = new Color[this.RectSize.Width * this.RectSize.Height];
+            var texture = new Texture2D(this.GraphicsDevice, this.RectSize.Width, this.RectSize.Height);
+
+            for (int i = 0; i < data.Length; ++i)
+            {
+                data[i] = new Color(i / 10, i / 10, i / 10);
+            }
+
+            texture.SetData(data);
+
+            var player = new Entity("Player")
+                .AddComponent(new SpriteComponent2d { Texture = texture })
+                .AddComponent(this.RectPosition)
+                .AddComponent(this.RectSize);
+
+            Tower.Ecosystem.AddEntity(player);
+            Tower.Ecosystem.AddHandler(new SpriteRenderingHandler(this.spriteBatch));
         }
 
         protected override void Update(GameTime gameTime)
@@ -64,7 +76,7 @@ namespace DolphEngine.Demo
             GraphicsDevice.Clear(this.BackgroundColor);
 
             spriteBatch.Begin(samplerState: SamplerState.PointWrap); // disable anti-aliasing
-            spriteBatch.Draw(this.RectTexture, this.Rect, this.RectColor);
+            Tower.Ecosystem.RunAllHandlers();
             Tower.Debug.Render(spriteBatch);
             spriteBatch.End();
 
@@ -92,10 +104,10 @@ namespace DolphEngine.Demo
                 .AddControlReaction(mouse, m => m.MiddleClick.JustPressed, m => m.LeftHanded = !m.LeftHanded);
 
             Tower.Keycosystem
-                .AddControlReaction(keyboard, k => k.Down.IsPressed, k => this.Rect.Y++)
-                .AddControlReaction(keyboard, k => k.Up.IsPressed, k => this.Rect.Y--)
-                .AddControlReaction(keyboard, k => k.Right.IsPressed, k => this.Rect.X++)
-                .AddControlReaction(keyboard, k => k.Left.IsPressed, k => this.Rect.X--);
+                .AddControlReaction(keyboard, k => k.Down.IsPressed, k => this.RectPosition.Y++)
+                .AddControlReaction(keyboard, k => k.Up.IsPressed, k => this.RectPosition.Y--)
+                .AddControlReaction(keyboard, k => k.Right.IsPressed, k => this.RectPosition.X++)
+                .AddControlReaction(keyboard, k => k.Left.IsPressed, k => this.RectPosition.X--);
 
             Tower.Debug.AddLine(1,
                 () => $"CurrentGameTick: {CurrentTick}",

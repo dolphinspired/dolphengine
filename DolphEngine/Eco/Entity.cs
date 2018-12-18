@@ -102,6 +102,16 @@ namespace DolphEngine.Eco
             return true;
         }
 
+        public T GetComponentOrDefault<T>(T defaultComponent = default(T)) where T : Component
+        {
+            if (this.TryGetComponent<T>(out var component))
+            {
+                return component;
+            }
+
+            return defaultComponent;
+        }
+
         public bool HasComponents()
         {
             return this._componentsByType.Any();
