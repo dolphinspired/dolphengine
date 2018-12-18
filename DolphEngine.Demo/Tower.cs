@@ -1,4 +1,5 @@
-﻿using DolphEngine.Input;
+﻿using DolphEngine.Eco;
+using DolphEngine.Input;
 using DolphEngine.MonoGame.Input;
 
 namespace DolphEngine.Demo
@@ -7,15 +8,22 @@ namespace DolphEngine.Demo
     {
         public static void Initialize()
         {
-            InitializeInput();
-        }
+            Debug = new DebugLogger
+            {
+                Hidden = true,
+                CurrentPage = 1
+            };
 
-        public static Keycosystem Keycosystem;
+            Ecosystem = new Ecosystem();
 
-        private static void InitializeInput()
-        {
             var observer = new MonoGameObserver().UseKeyboard().UseMouse();
             Keycosystem = new Keycosystem(observer);
         }
+
+        public static DebugLogger Debug;
+
+        public static Ecosystem Ecosystem;
+
+        public static Keycosystem Keycosystem;
     }
 }

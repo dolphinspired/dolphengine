@@ -8,6 +8,8 @@ namespace DolphEngine.Demo
 {
     public class DebugLogger
     {
+        public static readonly Func<string> EmptyLine = () => "";
+
         public bool Hidden;
         public int CurrentPage;
 
