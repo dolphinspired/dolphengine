@@ -1,12 +1,13 @@
+﻿using DolphEngine.Eco;
 using Microsoft.Xna.Framework;
 
-namespace DolphEngine.Eco.Components
+namespace DolphEngine.MonoGame.Eco.Components
 {
     public sealed class PositionComponent : Component
     {
         public int X
         {
-            get => this._x;            
+            get => this._x;
             set
             {
                 this._x = value;

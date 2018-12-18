@@ -2,8 +2,9 @@
 using System;
 using System.Collections.Generic;
 using DolphEngine.Input.State;
+using DolphEngine.Input;
 
-namespace DolphEngine.Input.Implementations
+namespace DolphEngine.MonoGame.Input
 {
     public class MonoGameObserver : IKeyStateObserver
     {
@@ -250,7 +251,7 @@ namespace DolphEngine.Input.Implementations
             {
                 throw new ArgumentException($"MonoGame only supports 1-{GamePad.MaximumGamePadCount} players!");
             }
-            
+
             this._gamepadStatesByPlayer = new Dictionary<int, GamePadState>();
 
             // For each player...
@@ -259,7 +260,7 @@ namespace DolphEngine.Input.Implementations
                 // Add a default gamepad state
                 this._gamepadStatesByPlayer.Add(i, GamePadState.Default);
             }
-            
+
             this._useGamepads = true;
             return this;
         }

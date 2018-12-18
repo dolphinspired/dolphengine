@@ -1,7 +1,5 @@
 ﻿using DolphEngine.Input;
-using DolphEngine.Input.Controls;
-using DolphEngine.Input.Implementations;
-using DolphEngine.Input.State;
+using DolphEngine.MonoGame.Input;
 
 namespace DolphEngine.Demo
 {

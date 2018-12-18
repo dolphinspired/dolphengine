@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DolphEngine.Eco.Components;
 
 namespace DolphEngine.Eco
 {
@@ -46,10 +45,6 @@ namespace DolphEngine.Eco
         // If an entity within the ecosystem has a component added or removed, its BitKey will need to be refreshed
         // before we can know which BitLocks (handlers) it should be sent to.
         private readonly HashSet<Entity> _entitiesToRefreshBitKey = new HashSet<Entity>(ReferenceEqualityComparer<Entity>.Instance);
-
-        // todo: experimental, might delete these
-        private readonly Dictionary<PositionComponent, Tuple<int, int>> _positionComponentCoordinates = new Dictionary<PositionComponent, Tuple<int, int>>(ReferenceEqualityComparer<PositionComponent>.Instance);
-        private readonly SortedDictionary<int, SortedDictionary<int, HashSet<PositionComponent>>> _positionComponentsByPosition = new SortedDictionary<int, SortedDictionary<int, HashSet<PositionComponent>>>();
 
         private ushort _nextBitPosition;
 

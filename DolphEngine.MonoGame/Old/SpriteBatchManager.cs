@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework.Graphics;
 
-namespace DolphEngine.Old
+namespace DolphEngine.MonoGame.Old
 {
     public static class SpriteBatchManager
     {
