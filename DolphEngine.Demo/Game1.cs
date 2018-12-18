@@ -1,4 +1,5 @@
-﻿using DolphEngine.Input.Controls;
+﻿using DolphEngine.Input.Controllers;
+using DolphEngine.Input.Controls;
 using DolphEngine.Input.State;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -28,16 +29,15 @@ namespace DolphEngine.Demo
         {
             Tower.Initialize();
 
-            var controlEsc = new SingleButtonControl(InputKeys.KeyboardEscape);
-            Tower.Keycosystem.AddControlReaction(controlEsc, c => c.IsPressed, c => this.Exit());
-
-            var control1 = new SingleButtonControl(InputKeys.KeyboardA);
-            Tower.Keycosystem.AddControlReaction(control1, c => c.JustPressed, c => this.BackgroundColor = Color.Crimson);
-            Tower.Keycosystem.AddControlReaction(control1, c => c.JustReleased, c => this.BackgroundColor = Color.CornflowerBlue);
-
-            var control2 = new SingleButtonControl(InputKeys.KeyboardZ);
-            Tower.Keycosystem.AddControlReaction(control2, c => c.JustPressed, c => this.BackgroundColor = Color.DarkOliveGreen);
-            Tower.Keycosystem.AddControlReaction(control2, c => c.JustReleased, c => this.BackgroundColor = Color.CornflowerBlue);
+            var keyboard = new StandardKeyboard();
+            
+            Tower.Keycosystem.AddControlReaction(keyboard, c => c.Escape.IsPressed, c => this.Exit());
+            
+            Tower.Keycosystem.AddControlReaction(keyboard, c => c.A.JustPressed, c => this.BackgroundColor = Color.Crimson);
+            Tower.Keycosystem.AddControlReaction(keyboard, c => c.A.JustReleased, c => this.BackgroundColor = Color.CornflowerBlue);
+            
+            Tower.Keycosystem.AddControlReaction(keyboard, c => c.Z.JustPressed, c => this.BackgroundColor = Color.DarkOliveGreen);
+            Tower.Keycosystem.AddControlReaction(keyboard, c => c.Z.JustReleased, c => this.BackgroundColor = Color.CornflowerBlue);
 
             dl = new DebugLogger();
             dl.CurrentPage = 1;
@@ -47,12 +47,12 @@ namespace DolphEngine.Demo
             dl.AddLine(1, 
                 () => "",
                 () => "Control A:",
-                () => $"IsPressed: {control1.IsPressed}, LastTickPressed: {control1.LastTickPressed}, LastTickReleased: {control1.LastTickReleased}");
+                () => $"IsPressed: {keyboard.A.IsPressed}, LastTickPressed: {keyboard.A.LastTickPressed}, LastTickReleased: {keyboard.A.LastTickReleased}");
 
             dl.AddLine(1,
                 () => "",
                 () => "Control Z:",
-                () => $"IsPressed: {control2.IsPressed}, LastTickPressed: {control2.LastTickPressed}, LastTickReleased: {control2.LastTickReleased}");
+                () => $"IsPressed: {keyboard.Z.IsPressed}, LastTickPressed: {keyboard.Z.LastTickPressed}, LastTickReleased: {keyboard.Z.LastTickReleased}");
 
             base.Initialize();
         }

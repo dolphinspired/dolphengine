@@ -8,7 +8,7 @@ namespace DolphEngine.Input.Controls
     {
         protected InputState InputState;
 
-        public void SetInputState(InputState inputState)
+        public virtual void SetInputState(InputState inputState)
         {
             if (this.InputState != null && inputState != null && this.InputState != inputState)
             {

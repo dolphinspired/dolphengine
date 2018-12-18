@@ -13,6 +13,15 @@ namespace DolphEngine.Input.Controls
             this.SetKeys(upKey, rightKey, downKey, leftKey);
         }
 
+        public override void SetInputState(InputState inputState)
+        {
+            base.SetInputState(inputState);
+            this.Up.SetInputState(inputState);
+            this.Right.SetInputState(inputState);
+            this.Down.SetInputState(inputState);
+            this.Left.SetInputState(inputState);
+        }
+
         public override void Update()
         {
             this.Up.Update();

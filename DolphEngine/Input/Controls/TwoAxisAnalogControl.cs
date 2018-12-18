@@ -26,6 +26,13 @@ namespace DolphEngine.Input.Controls
             this.Y = new OneAxisAnalogControl(yKey, sensitivity, deadzone);
         }
 
+        public override void SetInputState(InputState inputState)
+        {
+            base.SetInputState(inputState);
+            this.X.SetInputState(inputState);
+            this.Y.SetInputState(inputState);
+        }
+
         public override void Update()
         {
             this.X.Update();
