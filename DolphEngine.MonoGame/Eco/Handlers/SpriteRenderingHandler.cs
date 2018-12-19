@@ -3,15 +3,12 @@ using DolphEngine.Eco.Components;
 using DolphEngine.MonoGame.Eco.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
 
 namespace DolphEngine.MonoGame.Eco.Handlers
 {
-    public class SpriteRenderingHandler : IEcosystemHandler
+    public class SpriteRenderingHandler : EcosystemHandler<SpriteComponent2d, SizeComponent2d>
     {
-        public IEnumerable<Type> SubscribesTo => new List<Type> { typeof(SizeComponent2d), typeof(SpriteComponent2d) };
-
         private readonly SpriteBatch SpriteBatch;
 
         public SpriteRenderingHandler(SpriteBatch sb)
@@ -19,7 +16,7 @@ namespace DolphEngine.MonoGame.Eco.Handlers
             this.SpriteBatch = sb;
         }
 
-        public void Handle(IEnumerable<Entity> entities)
+        public override void Handle(IEnumerable<Entity> entities)
         {
             foreach (var entity in entities)
             {

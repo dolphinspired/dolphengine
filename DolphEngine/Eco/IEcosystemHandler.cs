@@ -28,4 +28,50 @@ namespace DolphEngine.Eco
         /// </param>
         void Handle(IEnumerable<Entity> entities);
     }
+
+    public abstract class EcosystemHandler<TComponent> : IEcosystemHandler
+        where TComponent : Component
+    {
+        /// <inheritdoc/>
+        public IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent) };
+
+        /// <inheritdoc/>
+        public abstract void Handle(IEnumerable<Entity> entities);
+    }
+
+    public abstract class EcosystemHandler<TComponent1, TComponent2> : IEcosystemHandler
+        where TComponent1 : Component
+        where TComponent2 : Component
+    {
+        /// <inheritdoc/>
+        public IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent1), typeof(TComponent2) };
+
+        /// <inheritdoc/>
+        public abstract void Handle(IEnumerable<Entity> entities);
+    }
+
+    public abstract class EcosystemHandler<TComponent1, TComponent2, TComponent3> : IEcosystemHandler
+        where TComponent1 : Component
+        where TComponent2 : Component
+        where TComponent3 : Component
+    {
+        /// <inheritdoc/>
+        public IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent1), typeof(TComponent2), typeof(TComponent3) };
+
+        /// <inheritdoc/>
+        public abstract void Handle(IEnumerable<Entity> entities);
+    }
+
+    public abstract class EcosystemHandler<TComponent1, TComponent2, TComponent3, TComponent4> : IEcosystemHandler
+        where TComponent1 : Component
+        where TComponent2 : Component
+        where TComponent3 : Component
+        where TComponent4 : Component
+    {
+        /// <inheritdoc/>
+        public IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent1), typeof(TComponent2), typeof(TComponent3), typeof(TComponent4) };
+
+        /// <inheritdoc/>
+        public abstract void Handle(IEnumerable<Entity> entities);
+    }
 }
