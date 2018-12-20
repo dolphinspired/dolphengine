@@ -5,6 +5,8 @@ using DolphEngine.MonoGame.Eco.Components;
 using DolphEngine.MonoGame.Eco.Handlers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 
 namespace DolphEngine.Demo
 {
@@ -15,17 +17,20 @@ namespace DolphEngine.Demo
 
         Color BackgroundColor = Color.CornflowerBlue;
 
-        private long CurrentTick;
+        private Entity Player;
+        private const int moveSpeed = 4;
 
-        private PositionComponent2d RectPosition = new PositionComponent2d(30, 50);
-        private SizeComponent2d RectSize = new SizeComponent2d(50, 100);
-        private Color RectColor = Color.Red;
+        private GameTime _currentGameTime;
+        private readonly Func<long> GameTimer;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
+            // Measuring game time in milliseconds until I need something more precise
+            this.GameTimer = () => this._currentGameTime.TotalGameTime.Ticks / TimeSpan.TicksPerMillisecond;
         }
 
         protected override void Initialize()
@@ -39,34 +44,31 @@ namespace DolphEngine.Demo
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
             Tower.Debug.Font = this.Content.Load<SpriteFont>("Debug");
+            var sprite = this.Content.Load<Texture2D>("Assets/link_walk_simple");
 
-            var data = new Color[this.RectSize.Width * this.RectSize.Height];
-            var texture = new Texture2D(this.GraphicsDevice, this.RectSize.Width, this.RectSize.Height);
+            var position = new PositionComponent2d(30, 50);
+            var size = new SizeComponent2d(50, 100);
+            var anim = AnimatedSpriteComponent.BuildFromSpritesheet(sprite, 8, 4);
+            anim.DurationPerFrame = 100;
+            anim.Sequence = new List<int> { 24, 25, 26, 27, 28, 29 };
 
-            for (int i = 0; i < data.Length; ++i)
-            {
-                data[i] = new Color(i / 10, i / 10, i / 10);
-            }
+            this.Player = new Entity("Player")
+                .AddComponent(anim)
+                .AddComponent(position)
+                .AddComponent(size);
 
-            texture.SetData(data);
-
-            var player = new Entity("Player")
-                .AddComponent(new SpriteComponent2d { Texture = texture })
-                .AddComponent(this.RectPosition)
-                .AddComponent(this.RectSize);
-
-            Tower.Ecosystem.AddEntity(player);
+            Tower.Ecosystem.AddEntity(this.Player);
             Tower.Ecosystem.AddHandler(new SpriteRenderingHandler(this.spriteBatch));
+            Tower.Ecosystem.AddHandler(new AnimatedSpriteRenderingHandler(this.spriteBatch, this.GameTimer));
         }
 
         protected override void Update(GameTime gameTime)
         {
-            this.CurrentTick = gameTime.TotalGameTime.Ticks;
+            this._currentGameTime = gameTime;
 
             this.BackgroundColor = Color.CornflowerBlue; // Reset to default color before reading inputs
-            Tower.Keycosystem.Update(gameTime.TotalGameTime.Ticks);
+            Tower.Keycosystem.Update(this.GameTimer());
 
             base.Update(gameTime);
         }
@@ -104,13 +106,13 @@ namespace DolphEngine.Demo
                 .AddControlReaction(mouse, m => m.MiddleClick.JustPressed, m => m.LeftHanded = !m.LeftHanded);
 
             Tower.Keycosystem
-                .AddControlReaction(keyboard, k => k.Down.IsPressed, k => this.RectPosition.Y++)
-                .AddControlReaction(keyboard, k => k.Up.IsPressed, k => this.RectPosition.Y--)
-                .AddControlReaction(keyboard, k => k.Right.IsPressed, k => this.RectPosition.X++)
-                .AddControlReaction(keyboard, k => k.Left.IsPressed, k => this.RectPosition.X--);
+                .AddControlReaction(keyboard, k => k.Down.IsPressed, k => this.Player.GetComponent<PositionComponent2d>().Y += moveSpeed)
+                .AddControlReaction(keyboard, k => k.Up.IsPressed, k => this.Player.GetComponent<PositionComponent2d>().Y -= moveSpeed)
+                .AddControlReaction(keyboard, k => k.Right.IsPressed, k => this.Player.GetComponent<PositionComponent2d>().X += moveSpeed)
+                .AddControlReaction(keyboard, k => k.Left.IsPressed, k => this.Player.GetComponent<PositionComponent2d>().X -= moveSpeed);
 
             Tower.Debug.AddLine(1,
-                () => $"CurrentGameTick: {CurrentTick}",
+                () => $"CurrentGameTick: {this.GameTimer()}",
                 DebugLogger.EmptyLine,
                 () => "Control A:",
                 () => $"IsPressed: {keyboard.A.IsPressed}, LastTickPressed: {keyboard.A.LastTickPressed}, LastTickReleased: {keyboard.A.LastTickReleased}",

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace DolphEngine.MonoGame.Eco.Handlers
 {
-    public class SpriteRenderingHandler : EcosystemHandler<SpriteComponent2d, SizeComponent2d>
+    public class SpriteRenderingHandler : EcosystemHandler<SpriteComponent>
     {
         private readonly SpriteBatch SpriteBatch;
 
@@ -20,12 +20,20 @@ namespace DolphEngine.MonoGame.Eco.Handlers
         {
             foreach (var entity in entities)
             {
-                var positionComponent = entity.GetComponentOrDefault<PositionComponent2d>();
-                var sizeComponent = entity.GetComponent<SizeComponent2d>();
-                var spriteComponent = entity.GetComponent<SpriteComponent2d>();
+                var spriteComponent = entity.GetComponent<SpriteComponent>();
+                var tRect = spriteComponent.Texture.Bounds;
+                
+                // If the entity doesn't have a size, it will be the size of its whole texture
+                var sizeComponent = entity.GetComponentOrDefault(new SizeComponent2d(tRect.Width, tRect.Height));
 
-                var dest = new Rectangle(positionComponent.X, positionComponent.Y, sizeComponent.Width, sizeComponent.Height);
-                this.SpriteBatch.Draw(spriteComponent.Texture, dest, Color.White);
+                // If the entity doesn't have a position, it will be drawn at the origin
+                var positionComponent = entity.GetComponentOrDefault(new PositionComponent2d(0, 0));
+
+                // If a source rect for the texture is not specified, use the whole texture
+                Rectangle src = spriteComponent.SourceRect ?? tRect;
+                Rectangle dest = new Rectangle(positionComponent.X, positionComponent.Y, sizeComponent.Width, sizeComponent.Height);
+
+                this.SpriteBatch.Draw(spriteComponent.Texture, dest, src, spriteComponent.Color ?? Color.White);
             }
         }
     }
