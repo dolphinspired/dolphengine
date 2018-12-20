@@ -1,4 +1,6 @@
-﻿using DolphEngine.Eco;
+﻿using DolphEngine.Demo.Components;
+using DolphEngine.Demo.Handlers;
+using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Input.Controllers;
 using DolphEngine.MonoGame.Eco.Components;
@@ -6,7 +8,6 @@ using DolphEngine.MonoGame.Eco.Handlers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
 
 namespace DolphEngine.Demo
 {
@@ -18,7 +19,7 @@ namespace DolphEngine.Demo
         Color BackgroundColor = Color.CornflowerBlue;
 
         private Entity Player;
-        private const int moveSpeed = 4;
+        private const int MoveSpeed = 4;
 
         private GameTime _currentGameTime;
         private readonly Func<long> GameTimer;
@@ -51,9 +52,9 @@ namespace DolphEngine.Demo
             var size = new SizeComponent2d(50, 100);
             var anim = AnimatedSpriteComponent.BuildFromSpritesheet(sprite, 8, 4);
             anim.DurationPerFrame = 100;
-            anim.Sequence = new List<int> { 24, 25, 26, 27, 28, 29 };
 
             this.Player = new Entity("Player")
+                .AddComponent<PlayerComponent>()
                 .AddComponent(anim)
                 .AddComponent(position)
                 .AddComponent(size);
@@ -61,6 +62,7 @@ namespace DolphEngine.Demo
             Tower.Ecosystem.AddEntity(this.Player);
             Tower.Ecosystem.AddHandler(new SpriteRenderingHandler(this.spriteBatch));
             Tower.Ecosystem.AddHandler(new AnimatedSpriteRenderingHandler(this.spriteBatch, this.GameTimer));
+            Tower.Ecosystem.AddHandler<PlayerHandler>();
         }
 
         protected override void Update(GameTime gameTime)
@@ -104,14 +106,24 @@ namespace DolphEngine.Demo
                 .AddControlReaction(mouse, m => m.PrimaryClick.IsPressed, m => this.BackgroundColor = Color.BurlyWood)
                 .AddControlReaction(mouse, m => m.SecondaryClick.IsPressed, m => this.BackgroundColor = Color.Aquamarine)
                 .AddControlReaction(mouse, m => m.MiddleClick.JustPressed, m => m.LeftHanded = !m.LeftHanded);
-
+            
             Tower.Keycosystem
-                .AddControlReaction(keyboard, k => k.Down.IsPressed, k => this.Player.GetComponent<PositionComponent2d>().Y += moveSpeed)
-                .AddControlReaction(keyboard, k => k.Up.IsPressed, k => this.Player.GetComponent<PositionComponent2d>().Y -= moveSpeed)
-                .AddControlReaction(keyboard, k => k.Right.IsPressed, k => this.Player.GetComponent<PositionComponent2d>().X += moveSpeed)
-                .AddControlReaction(keyboard, k => k.Left.IsPressed, k => this.Player.GetComponent<PositionComponent2d>().X -= moveSpeed);
-
+                .AddControlReaction(keyboard, k => k.ArrowKeys.IsPressed, k => {
+                    var pc = this.Player.GetComponent<PlayerComponent>();
+                    pc.Speed = MoveSpeed;
+                    pc.Direction = k.ArrowKeys.Direction;
+                })
+                .AddControlReaction(keyboard, k => !k.ArrowKeys.IsPressed, k => {
+                    this.Player.GetComponent<PlayerComponent>().Speed = 0;
+                });
+            
             Tower.Debug.AddLine(1,
+                () => "Player info:",
+                DebugLogger.EmptyLine,
+                () => $"Speed: {this.Player.GetComponent<PlayerComponent>().Speed}, Direction: {this.Player.GetComponent<PlayerComponent>().Direction}",
+                () => $"X: {this.Player.GetComponent<PositionComponent2d>().X}, Y: {this.Player.GetComponent<PositionComponent2d>().Y}");
+
+            Tower.Debug.AddLine(2,
                 () => $"CurrentGameTick: {this.GameTimer()}",
                 DebugLogger.EmptyLine,
                 () => "Control A:",
@@ -119,6 +131,10 @@ namespace DolphEngine.Demo
                 DebugLogger.EmptyLine,
                 () => "Control Z:",
                 () => $"IsPressed: {keyboard.Z.IsPressed}, LastTickPressed: {keyboard.Z.LastTickPressed}, LastTickReleased: {keyboard.Z.LastTickReleased}",
+                DebugLogger.EmptyLine,
+                () => "Arrow keys:",
+                () => $"IsPressed: {keyboard.ArrowKeys.IsPressed}, LastTickPressed: {keyboard.ArrowKeys.LastTickPressed}, LastTickReleased: {keyboard.ArrowKeys.LastTickReleased}",
+                () => $"Direction: {keyboard.ArrowKeys.Direction}, LastTickDirectionChanged: {keyboard.ArrowKeys.LastTickDirectionChanged}, DirectionHeld: {keyboard.ArrowKeys.DurationDirectionHeld}",
                 DebugLogger.EmptyLine,
                 () => "Mouse:",
                 () => $"PrimaryClick: {mouse.PrimaryClick.IsPressed}, SecondaryClick: {mouse.SecondaryClick.IsPressed}, LeftHanded: {mouse.LeftHanded}",

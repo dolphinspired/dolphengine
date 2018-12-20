@@ -179,6 +179,9 @@ namespace DolphEngine.Input.Controllers
             {
                 this._keyControls.Add(key, new SingleButtonControl(key));
             }
+
+            this.ArrowKeys = new DirectionalPadControl(InputKeys.KeyboardUp, InputKeys.KeyboardRight, InputKeys.KeyboardDown, InputKeys.KeyboardLeft);
+            this.WASD = new DirectionalPadControl(InputKeys.KeyboardW, InputKeys.KeyboardD, InputKeys.KeyboardS, InputKeys.KeyboardA);
         }
 
         public override void SetInputState(InputState inputState)
@@ -189,6 +192,9 @@ namespace DolphEngine.Input.Controllers
             {
                 control.Value.SetInputState(inputState);
             }
+
+            this.ArrowKeys.SetInputState(inputState);
+            this.WASD.SetInputState(inputState);
         }
 
         public override void Update()
@@ -197,6 +203,9 @@ namespace DolphEngine.Input.Controllers
             {
                 control.Value.Update();
             }
+
+            this.ArrowKeys.Update();
+            this.WASD.Update();
         }
 
         #region Key control getters
@@ -360,6 +369,14 @@ namespace DolphEngine.Input.Controllers
         public SingleButtonControl Zoom => this._keyControls[InputKeys.KeyboardZoom];
         public SingleButtonControl Pa1 => this._keyControls[InputKeys.KeyboardPa1];
         public SingleButtonControl OemClear => this._keyControls[InputKeys.KeyboardOemClear];
+        #endregion
+
+        #region Derived keys
+
+        public DirectionalPadControl ArrowKeys;
+
+        public DirectionalPadControl WASD;
+
         #endregion
     }
 }
