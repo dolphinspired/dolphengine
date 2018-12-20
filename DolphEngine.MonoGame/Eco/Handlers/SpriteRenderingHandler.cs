@@ -3,7 +3,6 @@ using DolphEngine.Eco.Components;
 using DolphEngine.MonoGame.Eco.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 
 namespace DolphEngine.MonoGame.Eco.Handlers
 {
@@ -16,25 +15,22 @@ namespace DolphEngine.MonoGame.Eco.Handlers
             this.SpriteBatch = sb;
         }
 
-        public override void Handle(IEnumerable<Entity> entities)
+        public override void Draw(Entity entity)
         {
-            foreach (var entity in entities)
-            {
-                var spriteComponent = entity.GetComponent<SpriteComponent>();
-                var tRect = spriteComponent.Texture.Bounds;
-                
-                // If the entity doesn't have a size, it will be the size of its whole texture
-                var sizeComponent = entity.GetComponentOrDefault(new SizeComponent2d(tRect.Width, tRect.Height));
+            var spriteComponent = entity.GetComponent<SpriteComponent>();
+            var tRect = spriteComponent.Texture.Bounds;
 
-                // If the entity doesn't have a position, it will be drawn at the origin
-                var positionComponent = entity.GetComponentOrDefault(new PositionComponent2d(0, 0));
+            // If the entity doesn't have a size, it will be the size of its whole texture
+            var sizeComponent = entity.GetComponentOrDefault(new SizeComponent2d(tRect.Width, tRect.Height));
 
-                // If a source rect for the texture is not specified, use the whole texture
-                Rectangle src = spriteComponent.SourceRect ?? tRect;
-                Rectangle dest = new Rectangle(positionComponent.X, positionComponent.Y, sizeComponent.Width, sizeComponent.Height);
+            // If the entity doesn't have a position, it will be drawn at the origin
+            var positionComponent = entity.GetComponentOrDefault(new PositionComponent2d(0, 0));
 
-                this.SpriteBatch.Draw(spriteComponent.Texture, dest, src, spriteComponent.Color ?? Color.White);
-            }
+            // If a source rect for the texture is not specified, use the whole texture
+            Rectangle src = spriteComponent.SourceRect ?? tRect;
+            Rectangle dest = new Rectangle(positionComponent.X, positionComponent.Y, sizeComponent.Width, sizeComponent.Height);
+
+            this.SpriteBatch.Draw(spriteComponent.Texture, dest, src, spriteComponent.Color ?? Color.White);
         }
     }
 }

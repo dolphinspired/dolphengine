@@ -13,9 +13,9 @@ namespace DolphEngine.Test.Eco
         int Called { get; set; }
     }
 
-    public class BulkComponentsHandler : IEcosystemHandler
+    public class BulkComponentsHandler : EcosystemHandler
     {
-        public IEnumerable<Type> SubscribesTo => BulkComponents.Motherlode.Select(x => x.Key);
+        public override IEnumerable<Type> SubscribesTo => BulkComponents.Motherlode.Select(x => x.Key);
 
         public void Handle(IEnumerable<Entity> entities)
         {

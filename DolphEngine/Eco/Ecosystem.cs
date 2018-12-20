@@ -30,7 +30,7 @@ namespace DolphEngine.Eco
         // All handlers that have been registered to the ecosystem, paired with the BitLock which represents
         // the components that the handler subscribes to. A handler's BitLock/Subscriptions never change throughout the
         // lifetime of the application.
-        private readonly Dictionary<IEcosystemHandler, BitLock> _locksByHandler = new Dictionary<IEcosystemHandler, BitLock>(ReferenceEqualityComparer<IEcosystemHandler>.Instance);
+        private readonly Dictionary<EcosystemHandler, BitLock> _locksByHandler = new Dictionary<EcosystemHandler, BitLock>(ReferenceEqualityComparer<EcosystemHandler>.Instance);
 
         // All entities in the ecosystem, indexed by the BitLocks for handlers within the Ecosystem that they support.
         // In other words, all of the entities that have a PositionComponent are grouped together; all the entities that have
@@ -52,7 +52,7 @@ namespace DolphEngine.Eco
 
         #region Handler methods
         
-        public Ecosystem AddHandler(IEcosystemHandler handler)
+        public Ecosystem AddHandler(EcosystemHandler handler)
         {
             if (handler == null)
             {
@@ -100,9 +100,9 @@ namespace DolphEngine.Eco
             return this;
         }
 
-        public Ecosystem AddHandler<T>() where T : IEcosystemHandler, new() => this.AddHandler(new T());
+        public Ecosystem AddHandler<T>() where T : EcosystemHandler, new() => this.AddHandler(new T());
 
-        public Ecosystem AddHandlers(IEnumerable<IEcosystemHandler> handlers)
+        public Ecosystem AddHandlers(IEnumerable<EcosystemHandler> handlers)
         {
             if (handlers == null || !handlers.Any())
             {
@@ -117,7 +117,7 @@ namespace DolphEngine.Eco
             return this;
         }
 
-        public Ecosystem AddHandlers(params IEcosystemHandler[] handlers)
+        public Ecosystem AddHandlers(params EcosystemHandler[] handlers)
         {
             if (handlers == null || !handlers.Any())
             {
@@ -132,7 +132,7 @@ namespace DolphEngine.Eco
             return this;
         }
 
-        public Ecosystem RemoveHandler(IEcosystemHandler handler)
+        public Ecosystem RemoveHandler(EcosystemHandler handler)
         {
             if (!this._locksByHandler.TryGetValue(handler, out var bitLock))
             {
@@ -147,7 +147,7 @@ namespace DolphEngine.Eco
             return this;
         }
 
-        public Ecosystem RemoveHandlers(IEnumerable<IEcosystemHandler> handlers)
+        public Ecosystem RemoveHandlers(IEnumerable<EcosystemHandler> handlers)
         {
             if (handlers == null || !handlers.Any())
             {
@@ -162,7 +162,7 @@ namespace DolphEngine.Eco
             return this;
         }
 
-        public Ecosystem RemoveHandlers(params IEcosystemHandler[] handlers)
+        public Ecosystem RemoveHandlers(params EcosystemHandler[] handlers)
         {
             if (handlers == null || !handlers.Any())
             {
@@ -186,7 +186,7 @@ namespace DolphEngine.Eco
             return this;
         }
 
-        public void RunAllHandlers()
+        public void Update()
         {
             if (this._entitiesToRefreshBitKey.Any())
             {
@@ -202,7 +202,16 @@ namespace DolphEngine.Eco
             foreach (var lockByHandler in this._locksByHandler)
             {
                 var entitiesByThisLock = this._entitiesByLock[lockByHandler.Value];
-                lockByHandler.Key.Handle(entitiesByThisLock);
+                lockByHandler.Key.Update(entitiesByThisLock);
+            }
+        }
+
+        public void Draw()
+        {
+            foreach (var lockByHandler in this._locksByHandler)
+            {
+                var entitiesByThisLock = this._entitiesByLock[lockByHandler.Value];
+                lockByHandler.Key.Draw(entitiesByThisLock);
             }
         }
 

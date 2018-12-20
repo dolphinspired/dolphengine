@@ -19,7 +19,7 @@ namespace DolphEngine.MonoGame.Eco.Handlers
             this.Timer = timer;
         }
 
-        public override void Handle(IEnumerable<Entity> entities)
+        public override void Draw(IEnumerable<Entity> entities)
         {
             var currentGameTick = this.Timer();
 

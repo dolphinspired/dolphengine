@@ -46,14 +46,9 @@ namespace DolphEngine.Test.Eco
         }
     }
     
-    public class MockHandler1 : IEcosystemHandler
+    public class MockHandler1 : EcosystemHandler<MockComponent1>
     {
-        public IEnumerable<Type> SubscribesTo => new[] 
-        {
-            typeof(MockComponent1)
-        };
-
-        public void Handle(IEnumerable<Entity> entities)
+        public override void Update(IEnumerable<Entity> entities)
         {
             this.Called++;
             this.EntitiesHandled = entities;
@@ -69,14 +64,9 @@ namespace DolphEngine.Test.Eco
         public IEnumerable<Entity> EntitiesHandled;
     }
     
-    public class MockHandler2 : IEcosystemHandler
+    public class MockHandler2 : EcosystemHandler<MockComponent2>
     {
-        public IEnumerable<Type> SubscribesTo => new[]
-        {
-            typeof(MockComponent2)
-        };
-
-        public void Handle(IEnumerable<Entity> entities)
+        public override void Update(IEnumerable<Entity> entities)
         {
             this.Called++;
             this.EntitiesHandled = entities;
@@ -92,15 +82,9 @@ namespace DolphEngine.Test.Eco
         public IEnumerable<Entity> EntitiesHandled;
     }
     
-    public class MockHandler3 : IEcosystemHandler
+    public class MockHandler3 : EcosystemHandler<MockComponent1, MockComponent2>
     {
-        public IEnumerable<Type> SubscribesTo => new[]
-        {
-            typeof(MockComponent1),
-            typeof(MockComponent2)
-        };
-
-        public void Handle(IEnumerable<Entity> entities)
+        public override void Update(IEnumerable<Entity> entities)
         {
             this.Called++;
             this.EntitiesHandled = entities;
@@ -116,9 +100,15 @@ namespace DolphEngine.Test.Eco
         public IEnumerable<Entity> EntitiesHandled;
     }
 
-    public class MockUnsubscribedHandler : IEcosystemHandler
+    public class MockUnsubscribedHandler : EcosystemHandler
     {
-        public IEnumerable<Type> SubscribesTo { get; set; }
+        public override IEnumerable<Type> SubscribesTo => this._subscribesTo;
+        private IEnumerable<Type> _subscribesTo;
+
+        public void SetSubscribedTypes(IEnumerable<Type> types)
+        {
+            this._subscribesTo = types;
+        }
 
         public void Handle(IEnumerable<Entity> entities)
         {

@@ -18,7 +18,7 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandler(handler)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
         }
@@ -32,7 +32,7 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandlers(handler1, handler2)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler1.Called);
             Assert.Equal(1, handler2.Called);
@@ -43,7 +43,7 @@ namespace DolphEngine.Test.Eco
         {
             var ecosystem = new Ecosystem().AddHandler<MockHandler1>().AddHandler<MockHandler2>();
 
-            ecosystem.RunAllHandlers();
+            ecosystem.Update();
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace DolphEngine.Test.Eco
             var handler = new MockUnsubscribedHandler();
 
             Assert.Throws<ArgumentException>(() => ecosystem.AddHandler(handler));
-            handler.SubscribesTo = new List<Type>();
+            handler.SetSubscribedTypes(new List<Type>());
             Assert.Throws<ArgumentException>(() => ecosystem.AddHandler(handler));
         }
 
@@ -81,7 +81,7 @@ namespace DolphEngine.Test.Eco
         {
             var ecosystem = new Ecosystem();
             var handler = new MockUnsubscribedHandler();
-            handler.SubscribesTo = new[] { typeof(MockComponent1), typeof(EcosystemTests) };
+            handler.SetSubscribedTypes(new[] { typeof(MockComponent1), typeof(EcosystemTests) });
 
             Assert.Throws<ArgumentException>(() => ecosystem.AddHandler(handler));
         }
@@ -92,7 +92,7 @@ namespace DolphEngine.Test.Eco
             var ecosystem = new Ecosystem();
 
             Assert.Throws<ArgumentException>(() => ecosystem.AddHandlers());
-            Assert.Throws<ArgumentException>(() => ecosystem.AddHandlers(new List<IEcosystemHandler>()));
+            Assert.Throws<ArgumentException>(() => ecosystem.AddHandlers(new List<EcosystemHandler>()));
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddHandler(handler)
                 .RemoveHandler(handler)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(0, handler.Called);
         }
@@ -119,7 +119,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddHandlers(handler1, handler2)
                 .RemoveHandlers(handler1, handler2)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(0, handler1.Called);
             Assert.Equal(0, handler2.Called);
@@ -135,7 +135,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddHandlers(handler1, handler2)
                 .ClearHandlers()
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(0, handler1.Called);
             Assert.Equal(0, handler2.Called);
@@ -149,7 +149,7 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandler(handler)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
         }
@@ -163,7 +163,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddHandler(handler)
                 .RemoveHandler(handler)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(0, handler.Called);
         }
@@ -178,7 +178,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddHandlers(handler1, handler2)
                 .ClearHandlers()
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(0, handler1.Called);
             Assert.Equal(0, handler2.Called);
@@ -198,7 +198,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddEntity(entity)
                 .AddHandler(handler)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Empty(handler.EntitiesHandled);
@@ -214,7 +214,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddEntity(entity)
                 .AddHandler(handler)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Equal(entity, handler.EntitiesHandled.Single());
@@ -231,7 +231,7 @@ namespace DolphEngine.Test.Eco
                 .AddEntity(entity)
                 .RemoveEntity(entity)
                 .AddHandler(handler)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Empty(handler.EntitiesHandled);
@@ -248,7 +248,7 @@ namespace DolphEngine.Test.Eco
                 .AddEntity(entity)
                 .RemoveEntity(entity)
                 .AddHandler(handler)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Empty(handler.EntitiesHandled);
@@ -264,7 +264,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddHandler(handler)
                 .AddEntity(entity)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Empty(handler.EntitiesHandled);
@@ -280,7 +280,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddHandler(handler)
                 .AddEntity(entity)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Equal(entity, handler.EntitiesHandled.Single());
@@ -297,7 +297,7 @@ namespace DolphEngine.Test.Eco
                 .AddHandler(handler)
                 .AddEntity(entity)
                 .RemoveEntity(entity)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Empty(handler.EntitiesHandled);
@@ -314,7 +314,7 @@ namespace DolphEngine.Test.Eco
                 .AddHandler(handler)
                 .AddEntity(entity)
                 .RemoveEntity(entity)
-                .RunAllHandlers();
+                .Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Empty(handler.EntitiesHandled);
@@ -365,7 +365,7 @@ namespace DolphEngine.Test.Eco
                 .AddHandler(handler)
                 .AddEntity(entity);
             entity.AddComponent<MockComponent1>();
-            ecosystem.RunAllHandlers();
+            ecosystem.Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Equal(entity, handler.EntitiesHandled.Single());
@@ -382,7 +382,7 @@ namespace DolphEngine.Test.Eco
                 .AddHandler(handler)
                 .AddEntity(entity);
             entity.AddComponent<MockComponent1>().RemoveComponent<MockComponent1>();
-            ecosystem.RunAllHandlers();
+            ecosystem.Update();
 
             Assert.Equal(1, handler.Called);
             Assert.Empty(handler.EntitiesHandled);

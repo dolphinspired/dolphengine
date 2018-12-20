@@ -17,7 +17,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddEntity(AddBulkComponents(new Entity()))
                 .AddHandler(handler)
-                .RunAllHandlers();
+                .Update();
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddHandler(handler)
                 .AddEntity(AddBulkComponents(new Entity()))                
-                .RunAllHandlers();
+                .Update();
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace DolphEngine.Test.Eco
             }
 
             var elapsedSetup = Observe(() => ecosystem.AddEntities(entities).AddHandler(handler));
-            var elapsedRun = Observe(() => ecosystem.RunAllHandlers());
+            var elapsedRun = Observe(() => ecosystem.Update());
         }
 
         [Theory]
@@ -61,7 +61,7 @@ namespace DolphEngine.Test.Eco
             }
 
             var elapsedSetup = Observe(() => ecosystem.AddHandler(handler).AddEntities(entities));
-            var elapsedRun = Observe(() => ecosystem.RunAllHandlers());
+            var elapsedRun = Observe(() => ecosystem.Update());
         }
 
         [Theory]
@@ -84,7 +84,7 @@ namespace DolphEngine.Test.Eco
                     AddBulkComponents(entity);
                 }
             });            
-            var elapsedRun = Observe(() => ecosystem.RunAllHandlers());
+            var elapsedRun = Observe(() => ecosystem.Update());
         }
 
         private static long Observe(Action action)

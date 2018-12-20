@@ -69,7 +69,7 @@ namespace DolphEngine.Demo
 
             this.BackgroundColor = Color.CornflowerBlue; // Reset to default color before reading inputs
             Tower.Keycosystem.Update(this.GameTimer());
-
+            Tower.Ecosystem.Update();
             base.Update(gameTime);
         }
 
@@ -78,7 +78,7 @@ namespace DolphEngine.Demo
             GraphicsDevice.Clear(this.BackgroundColor);
 
             spriteBatch.Begin(samplerState: SamplerState.PointWrap); // disable anti-aliasing
-            Tower.Ecosystem.RunAllHandlers();
+            Tower.Ecosystem.Draw();
             Tower.Debug.Render(spriteBatch);
             spriteBatch.End();
 
