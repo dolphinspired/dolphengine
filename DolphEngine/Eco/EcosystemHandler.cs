@@ -79,7 +79,7 @@ namespace DolphEngine.Eco
         where TComponent : Component
     {
         /// <inheritdoc/>
-        public sealed override IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent) };
+        public override IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent) };
     }
 
     public abstract class EcosystemHandler<TComponent1, TComponent2> : EcosystemHandler
@@ -87,7 +87,7 @@ namespace DolphEngine.Eco
         where TComponent2 : Component
     {
         /// <inheritdoc/>
-        public sealed override IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent1), typeof(TComponent2) };
+        public override IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent1), typeof(TComponent2) };
     }
 
     public abstract class EcosystemHandler<TComponent1, TComponent2, TComponent3> : EcosystemHandler
@@ -96,7 +96,7 @@ namespace DolphEngine.Eco
         where TComponent3 : Component
     {
         /// <inheritdoc/>
-        public sealed override IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent1), typeof(TComponent2), typeof(TComponent3) };
+        public override IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent1), typeof(TComponent2), typeof(TComponent3) };
     }
 
     public abstract class EcosystemHandler<TComponent1, TComponent2, TComponent3, TComponent4> : EcosystemHandler
@@ -106,6 +106,6 @@ namespace DolphEngine.Eco
         where TComponent4 : Component
     {
         /// <inheritdoc/>
-        public sealed override IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent1), typeof(TComponent2), typeof(TComponent3), typeof(TComponent4) };
+        public override IEnumerable<Type> SubscribesTo => new[] { typeof(TComponent1), typeof(TComponent2), typeof(TComponent3), typeof(TComponent4) };
     }
 }

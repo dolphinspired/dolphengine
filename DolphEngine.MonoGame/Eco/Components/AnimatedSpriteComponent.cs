@@ -10,12 +10,11 @@ namespace DolphEngine.MonoGame.Eco.Components
         {
             var component = new AnimatedSpriteComponent();
 
+            var frameWidth = texture.Bounds.Width / columns;
+            var frameHeight = texture.Bounds.Height / rows;
+
             component.Texture = texture;
-            var bounds = texture.Bounds;
-
-            var frameWidth = bounds.Width / columns;
-            var frameHeight = bounds.Height / rows;
-
+            component.Size = new Size2d(frameWidth, frameHeight);
             component.Frames = new List<Rectangle>(columns * rows);
 
             for (int y = 0; y < rows; y++)

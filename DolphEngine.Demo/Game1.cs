@@ -49,15 +49,13 @@ namespace DolphEngine.Demo
             var sprite = this.Content.Load<Texture2D>("Assets/link_walk_simple");
 
             var position = new PositionComponent2d(30, 50);
-            var size = new SizeComponent2d(50, 100);
             var anim = AnimatedSpriteComponent.BuildFromSpritesheet(sprite, 8, 4);
             anim.DurationPerFrame = 100;
 
             this.Player = new Entity("Player")
                 .AddComponent<PlayerComponent>()
                 .AddComponent(anim)
-                .AddComponent(position)
-                .AddComponent(size);
+                .AddComponent(position);
 
             Tower.Ecosystem.AddEntity(this.Player);
             Tower.Ecosystem.AddHandler(new SpriteRenderingHandler(this.spriteBatch));
@@ -121,7 +119,8 @@ namespace DolphEngine.Demo
                 () => "Player info:",
                 DebugLogger.EmptyLine,
                 () => $"Speed: {this.Player.GetComponent<PlayerComponent>().Speed}, Direction: {this.Player.GetComponent<PlayerComponent>().Direction}",
-                () => $"X: {this.Player.GetComponent<PositionComponent2d>().X}, Y: {this.Player.GetComponent<PositionComponent2d>().Y}");
+                () => $"X: {this.Player.GetComponent<PositionComponent2d>().X}, Y: {this.Player.GetComponent<PositionComponent2d>().Y}",
+                () => $"Width: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Width}, Height: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Height}");
 
             Tower.Debug.AddLine(2,
                 () => $"CurrentGameTick: {this.GameTimer()}",

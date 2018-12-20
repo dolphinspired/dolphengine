@@ -1,21 +1,19 @@
 ﻿using DolphEngine.Eco;
-using DolphEngine.Eco.Components;
 using DolphEngine.MonoGame.Eco.Components;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
 namespace DolphEngine.MonoGame.Eco.Handlers
 {
-    public class AnimatedSpriteRenderingHandler : EcosystemHandler<AnimatedSpriteComponent>
+    public class AnimatedSpriteRenderingHandler : SpriteRenderingHandler
     {
-        private readonly SpriteBatch SpriteBatch;
+        public override IEnumerable<Type> SubscribesTo => new[] { typeof(AnimatedSpriteComponent) };
+        
         private readonly Func<long> Timer;
 
-        public AnimatedSpriteRenderingHandler(SpriteBatch sb, Func<long> timer)
+        public AnimatedSpriteRenderingHandler(SpriteBatch sb, Func<long> timer) : base(sb)
         {
-            this.SpriteBatch = sb;
             this.Timer = timer;
         }
 
@@ -25,41 +23,31 @@ namespace DolphEngine.MonoGame.Eco.Handlers
 
             foreach (var entity in entities)
             {
-                var spriteComponent = entity.GetComponent<AnimatedSpriteComponent>();
-                var tRect = spriteComponent.Texture.Bounds;
-
-                // If the entity doesn't have a size, it will be the size of its whole texture
-                var sizeComponent = entity.GetComponentOrDefault(new SizeComponent2d(tRect.Width, tRect.Height));
-
-                // If the entity doesn't have a position, it will be drawn at the origin
-                var positionComponent = entity.GetComponentOrDefault(new PositionComponent2d(0, 0));
-
-                // If a source rect for the texture is not specified, use the whole texture
-                Rectangle srcWhole = spriteComponent.SourceRect ?? tRect;
+                var animSprite = entity.GetComponent<AnimatedSpriteComponent>();
 
                 // Figure out which step of the animation sequence we're in based on the current time
-                long currentAnimationTick = currentGameTick - spriteComponent.StartingTick;
+                long currentAnimationTick = currentGameTick - animSprite.StartingTick;
                 if (currentAnimationTick < 0)
                 {
                     // If the game time hasn't reached the animation's starting tick yet, do not draw the sprite
                     continue;
                 }
-                long sequenceIndex = currentAnimationTick / spriteComponent.DurationPerFrame;
+                long sequenceIndex = currentAnimationTick / animSprite.DurationPerFrame;
 
                 // Get an adjusted value for when the sequence has been exceeded
                 int sequenceIndexAdjusted;
-                switch (spriteComponent.Behavior)
+                switch (animSprite.Behavior)
                 {
                     case AnimatedSpriteBehavior.Loop:
                         // If you've gone past the last frame, start from frame 0 and count up indefinitely
-                        sequenceIndexAdjusted = (int)(sequenceIndex % spriteComponent.Sequence.Count);
+                        sequenceIndexAdjusted = (int)(sequenceIndex % animSprite.Sequence.Count);
                         break;
                     case AnimatedSpriteBehavior.HoldOnLastFrame:
                         // If you've gone past the last frame, just keep drawing the last frame
-                        sequenceIndexAdjusted = Math.Min((int)(currentGameTick / spriteComponent.DurationPerFrame), spriteComponent.Sequence.Count - 1);
+                        sequenceIndexAdjusted = Math.Min((int)(currentGameTick / animSprite.DurationPerFrame), animSprite.Sequence.Count - 1);
                         break;
                     case AnimatedSpriteBehavior.DisappearAfterLastFrame:
-                        if (sequenceIndex > spriteComponent.Sequence.Count)
+                        if (sequenceIndex > animSprite.Sequence.Count)
                         {
                             // If you've gone past the last frame, do not draw the sprite
                             continue;
@@ -67,16 +55,15 @@ namespace DolphEngine.MonoGame.Eco.Handlers
                         sequenceIndexAdjusted = (int)sequenceIndex;
                         break;
                     default:
-                        throw new InvalidOperationException($"Unrecognized {nameof(AnimatedSpriteBehavior)}: {spriteComponent.Behavior}");
+                        throw new InvalidOperationException($"Unrecognized {nameof(AnimatedSpriteBehavior)}: {animSprite.Behavior}");
                 }
 
                 // Then, lookup which frame is specified at that order in the sequence
-                int frameIndex = spriteComponent.Sequence[sequenceIndexAdjusted];
-                Rectangle src = spriteComponent.Frames[frameIndex];
+                int frameIndex = animSprite.Sequence[sequenceIndexAdjusted];
+                animSprite.SourceRect = animSprite.Frames[frameIndex];
 
-                Rectangle dest = new Rectangle(positionComponent.X, positionComponent.Y, sizeComponent.Width, sizeComponent.Height);
-
-                this.SpriteBatch.Draw(spriteComponent.Texture, dest, src, spriteComponent.Color ?? Color.White);
+                // Call the method that's used to render static sprites with the adjusted source rectangle applied
+                this.DrawSprite(entity, animSprite);
             }
         }
     }

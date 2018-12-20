@@ -8,7 +8,7 @@ namespace DolphEngine.MonoGame.Eco.Handlers
 {
     public class SpriteRenderingHandler : EcosystemHandler<SpriteComponent>
     {
-        private readonly SpriteBatch SpriteBatch;
+        protected readonly SpriteBatch SpriteBatch;
 
         public SpriteRenderingHandler(SpriteBatch sb)
         {
@@ -17,20 +17,69 @@ namespace DolphEngine.MonoGame.Eco.Handlers
 
         public override void Draw(Entity entity)
         {
-            var spriteComponent = entity.GetComponent<SpriteComponent>();
-            var tRect = spriteComponent.Texture.Bounds;
+            var sprite = entity.GetComponent<SpriteComponent>();
+            this.DrawSprite(entity, sprite);
+        }
 
-            // If the entity doesn't have a size, it will be the size of its whole texture
-            var sizeComponent = entity.GetComponentOrDefault(new SizeComponent2d(tRect.Width, tRect.Height));
+        protected virtual void DrawSprite(Entity entity, SpriteComponent sprite)
+        {
+            Rectangle src;
+            if (sprite.SourceRect != null)
+            {
+                // 1ST PRIORITY: If a specific subset of the texture was specified, draw only that portion
+                src = sprite.SourceRect.Value;
+            }
+            else
+            {
+                // LOWEST PRIORITY: Draw the whole texture
+                src = sprite.Texture.Bounds;
+            }
 
-            // If the entity doesn't have a position, it will be drawn at the origin
-            var positionComponent = entity.GetComponentOrDefault(new PositionComponent2d(0, 0));
+            int x;
+            int y;
+            if (sprite.Position != null)
+            {
+                // 1ST PRIORITY: If the sprite was given an explicit drawing position, use that
+                x = sprite.Position.Value.X;
+                y = sprite.Position.Value.Y;
+            }
+            else if (entity.TryGetComponent<PositionComponent2d>(out var position))
+            {
+                // 2ND PRIORITY: If the entity has a location, draw the sprite there
+                x = position.X;
+                y = position.Y;
+            }
+            else
+            {
+                // LOWEST PRIORITY: Draw sprite at 0,0
+                x = 0;
+                y = 0;
+            }
 
-            // If a source rect for the texture is not specified, use the whole texture
-            Rectangle src = spriteComponent.SourceRect ?? tRect;
-            Rectangle dest = new Rectangle(positionComponent.X, positionComponent.Y, sizeComponent.Width, sizeComponent.Height);
+            int width;
+            int height;
+            if (sprite.Size != null)
+            {
+                // 1ST PRIORITY: If the sprite was given an explicit width or height, draw it to that size
+                width = sprite.Size.Value.Width;
+                height = sprite.Size.Value.Height;
+            }
+            else if (entity.TryGetComponent<SizeComponent2d>(out var size))
+            {
+                // 2ND PRIORITY: If the entity has a size, draw the sprite to match
+                width = size.Width;
+                height = size.Height;
+            }
+            else
+            {
+                // LOWEST PRIORITY: Otherwise, draw it to match the size of the whole texture
+                width = sprite.Texture.Bounds.Width;
+                height = sprite.Texture.Bounds.Height;
+            }
 
-            this.SpriteBatch.Draw(spriteComponent.Texture, dest, src, spriteComponent.Color ?? Color.White);
+            Rectangle dest = new Rectangle(x, y, width, height);
+
+            this.SpriteBatch.Draw(sprite.Texture, dest, src, sprite.Color ?? Color.White);
         }
     }
 }

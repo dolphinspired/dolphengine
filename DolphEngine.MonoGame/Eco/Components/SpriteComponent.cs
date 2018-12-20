@@ -10,6 +10,10 @@ namespace DolphEngine.MonoGame.Eco.Components
 
         public Rectangle? SourceRect;
 
+        public Position2d? Position;
+
+        public Size2d? Size;
+
         public Color? Color;
     }
 }
