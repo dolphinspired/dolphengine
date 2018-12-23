@@ -73,8 +73,8 @@ namespace DolphEngine.MonoGame.Eco.Handlers
             else
             {
                 // LOWEST PRIORITY: Otherwise, draw it to match the size of the whole texture
-                width = sprite.Texture.Bounds.Width;
-                height = sprite.Texture.Bounds.Height;
+                width = src.Width;
+                height = src.Height;
             }
 
             Rectangle dest = new Rectangle(x, y, width, height);

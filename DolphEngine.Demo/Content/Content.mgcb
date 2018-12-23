@@ -32,3 +32,15 @@
 /processorParam:TextureFormat=Color
 /build:Assets/link_walk_simple.png
 
+#begin Assets/iso_tiles_32_single.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Assets/iso_tiles_32_single.png
+

@@ -57,6 +57,17 @@ namespace DolphEngine.Demo
                 .AddComponent(anim)
                 .AddComponent(position);
 
+            var tileset = this.Content.Load<Texture2D>("Assets/iso_tiles_32_single");
+            var tile = new SpriteComponent
+            {
+                Texture = tileset,
+                SourceRect = new Rectangle(0, 0, 62, 47)
+            };
+
+            Tower.Ecosystem.AddEntity(new Entity("Tile")
+                .AddComponent(tile)
+                .AddComponent(new PositionComponent2d(200, 200)));
+
             Tower.Ecosystem.AddEntity(this.Player);
             Tower.Ecosystem.AddHandler(new SpriteRenderingHandler(this.spriteBatch));
             Tower.Ecosystem.AddHandler(new AnimatedSpriteRenderingHandler(this.spriteBatch, this.GameTimer));
