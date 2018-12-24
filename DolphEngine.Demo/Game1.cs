@@ -18,8 +18,6 @@ namespace DolphEngine.Demo
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Color BackgroundColor = Color.CornflowerBlue;
-
         private Entity Player;
         private const int MoveSpeed = 4;
 
@@ -70,7 +68,7 @@ namespace DolphEngine.Demo
             Tower.Debug.Font = this.Content.Load<SpriteFont>("Debug");
 
             var position = new PositionComponent2d(30, 50);
-            var tset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/link_walk_simple"), 8, 4);
+            var tset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 12, 8);
             var anim = new AnimatedSpriteComponent { Tileset = tset };
             anim.DurationPerFrame = 100;
 
@@ -91,8 +89,7 @@ namespace DolphEngine.Demo
         protected override void Update(GameTime gameTime)
         {
             this._currentGameTime = gameTime;
-
-            this.BackgroundColor = Color.CornflowerBlue; // Reset to default color before reading inputs
+            
             Tower.Keycosystem.Update(this.GameTimer());
             Tower.Ecosystem.Update();
             base.Update(gameTime);
@@ -100,7 +97,7 @@ namespace DolphEngine.Demo
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(this.BackgroundColor);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin(samplerState: SamplerState.PointWrap); // disable anti-aliasing
             Tower.Ecosystem.Draw();
@@ -122,13 +119,6 @@ namespace DolphEngine.Demo
                 .AddControlReaction(keyboard, k => k.OemTilde.JustPressed, k => Tower.Debug.Hidden = !Tower.Debug.Hidden)
                 .AddControlReaction(keyboard, k => k.F1.JustPressed, k => Tower.Debug.PrevPage())
                 .AddControlReaction(keyboard, k => k.F2.JustPressed, k => Tower.Debug.NextPage());
-
-            Tower.Keycosystem
-                .AddControlReaction(keyboard, k => k.A.IsPressed, k => this.BackgroundColor = Color.Crimson)
-                .AddControlReaction(keyboard, k => k.Z.IsPressed, k => this.BackgroundColor = Color.DarkOliveGreen)
-                .AddControlReaction(mouse, m => m.PrimaryClick.IsPressed, m => this.BackgroundColor = Color.BurlyWood)
-                .AddControlReaction(mouse, m => m.SecondaryClick.IsPressed, m => this.BackgroundColor = Color.Aquamarine)
-                .AddControlReaction(mouse, m => m.MiddleClick.JustPressed, m => m.LeftHanded = !m.LeftHanded);
             
             Tower.Keycosystem
                 .AddControlReaction(keyboard, k => k.ArrowKeys.IsPressed, k => {
