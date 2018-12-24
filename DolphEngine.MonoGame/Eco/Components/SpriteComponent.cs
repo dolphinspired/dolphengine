@@ -6,9 +6,9 @@ namespace DolphEngine.MonoGame.Eco.Components
 {
     public class SpriteComponent : Component
     {
-        public Texture2D Texture;
+        public virtual Texture2D Texture { get; set; }
 
-        public Rectangle? SourceRect;
+        public virtual Rectangle? SourceRect { get; set; }
 
         public Position2d? Position;
 

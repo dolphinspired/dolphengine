@@ -1,6 +1,7 @@
 ﻿using DolphEngine.Eco;
 using DolphEngine.Input;
 using DolphEngine.MonoGame.Input;
+using Microsoft.Xna.Framework.Content;
 
 namespace DolphEngine.Demo
 {
@@ -25,5 +26,7 @@ namespace DolphEngine.Demo
         public static Ecosystem Ecosystem;
 
         public static Keycosystem Keycosystem;
+
+        public static ContentManager Content;
     }
 }

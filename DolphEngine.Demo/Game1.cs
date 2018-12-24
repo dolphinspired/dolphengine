@@ -3,11 +3,13 @@ using DolphEngine.Demo.Handlers;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Input.Controllers;
+using DolphEngine.MonoGame;
 using DolphEngine.MonoGame.Eco.Components;
 using DolphEngine.MonoGame.Eco.Handlers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Threading.Tasks;
 
 namespace DolphEngine.Demo
 {
@@ -24,6 +26,16 @@ namespace DolphEngine.Demo
         private GameTime _currentGameTime;
         private readonly Func<long> GameTimer;
 
+        private readonly int[][] TestMap = new int[][]
+        {
+            new int[] { 0, 0, 0, 2, 0, 1 },
+            new int[] { 0, 0, 0, 2, 0, 1 },
+            new int[] { 3, 2, 2, 2, 0, 1 },
+            new int[] { 3, 2, 0, 0, 0, 1 },
+            new int[] { 0, 2, 0, 3, 3, 1 },
+            new int[] { 0, 2, 0, 3, 3, 1 },
+        };
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -38,18 +50,28 @@ namespace DolphEngine.Demo
         {
             Tower.Initialize();
             this.InitializeControls();
+            Tower.Content = this.Content;
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
+            // todo: experimental. Making this async caused a controller delegate to run early, before this.Player was set. Even though
+            // no keys were pressed?
+
+            //await Task.WhenAll
+            //(
+            //    Tower.Content.LoadAllAsync<SpriteFont>("Debug"),
+            //    Tower.Content.LoadAllAsync<Texture2D>("Assets/link_walk_simple", "Assets/iso_tiles_32_single")
+            //);
+
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Tower.Debug.Font = this.Content.Load<SpriteFont>("Debug");
-            var sprite = this.Content.Load<Texture2D>("Assets/link_walk_simple");
 
             var position = new PositionComponent2d(30, 50);
-            var anim = AnimatedSpriteComponent.BuildFromSpritesheet(sprite, 8, 4);
+            var tset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/link_walk_simple"), 8, 4);
+            var anim = new AnimatedSpriteComponent { Tileset = tset };
             anim.DurationPerFrame = 100;
 
             this.Player = new Entity("Player")
@@ -57,19 +79,11 @@ namespace DolphEngine.Demo
                 .AddComponent(anim)
                 .AddComponent(position);
 
-            var tileset = this.Content.Load<Texture2D>("Assets/iso_tiles_32_single");
-            var tile = new SpriteComponent
-            {
-                Texture = tileset,
-                SourceRect = new Rectangle(0, 0, 62, 47)
-            };
-
-            Tower.Ecosystem.AddEntity(new Entity("Tile")
-                .AddComponent(tile)
-                .AddComponent(new PositionComponent2d(200, 200)));
+            this.LoadMap();
 
             Tower.Ecosystem.AddEntity(this.Player);
             Tower.Ecosystem.AddHandler(new SpriteRenderingHandler(this.spriteBatch));
+            Tower.Ecosystem.AddHandler(new SpritesheetRenderingHandler(this.spriteBatch));
             Tower.Ecosystem.AddHandler(new AnimatedSpriteRenderingHandler(this.spriteBatch, this.GameTimer));
             Tower.Ecosystem.AddHandler<PlayerHandler>();
         }
@@ -151,6 +165,41 @@ namespace DolphEngine.Demo
                 () => $"X: {mouse.Cursor.X}, Y: {mouse.Cursor.Y}");
 
             Tower.Debug.AddLine(2, "This is page 2!");
+        }
+
+        private void LoadMap()
+        {
+            var tileset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/iso_tiles_32_single"), 4, 4);
+            var start = new Position2d(200, 20);
+
+            var i = 0;
+            var row = 0;
+            foreach (var tilerow in this.TestMap)
+            {
+                var row_x = start.X - row * 30;
+                var row_y = start.Y + row * 15;
+
+                var col = 0;
+                foreach (var tilevalue in tilerow)
+                {
+                    var x = row_x + col * 30;
+                    var y = row_y + col * 15;
+
+                    var sprite = new SpritesheetComponent
+                    {
+                        Tileset = tileset,
+                        CurrentFrame = tilevalue
+                    };
+
+                    Tower.Ecosystem.AddEntity(new Entity($"Tile_{i++}")
+                        .AddComponent(sprite)
+                        .AddComponent(new PositionComponent2d(x, y)));
+
+                    col++;
+                }
+
+                row++;
+            }
         }
     }
 }

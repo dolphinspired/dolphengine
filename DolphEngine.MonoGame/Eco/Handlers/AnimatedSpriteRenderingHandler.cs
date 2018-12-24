@@ -59,8 +59,7 @@ namespace DolphEngine.MonoGame.Eco.Handlers
                 }
 
                 // Then, lookup which frame is specified at that order in the sequence
-                int frameIndex = animSprite.Sequence[sequenceIndexAdjusted];
-                animSprite.SourceRect = animSprite.Frames[frameIndex];
+                animSprite.CurrentFrame = animSprite.Sequence[sequenceIndexAdjusted];
 
                 // Call the method that's used to render static sprites with the adjusted source rectangle applied
                 this.DrawSprite(entity, animSprite);
