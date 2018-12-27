@@ -212,21 +212,21 @@ namespace DolphEngine.Demo
 
         private void LoadMap()
         {
-            var tileset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/iso_tiles_32_single"), 4, 4);
+            var tileset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/iso_tiles_32_single_v3"), 4, 4);
             var start = new Position2d(200, 20);
 
             var i = 0;
             var row = 0;
             foreach (var tilerow in this.TestMap)
             {
-                var row_x = start.X - row * 30;
-                var row_y = start.Y + row * 15;
+                var row_x = start.X - row * 32;
+                var row_y = start.Y + row * 16;
 
                 var col = 0;
                 foreach (var tilevalue in tilerow)
                 {
-                    var x = row_x + col * 30;
-                    var y = row_y + col * 15;
+                    var x = row_x + col * 32;
+                    var y = row_y + col * 16;
 
                     var sprite = new SpritesheetComponent
                     {
