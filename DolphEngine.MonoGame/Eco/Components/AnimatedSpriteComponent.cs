@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace DolphEngine.MonoGame.Eco.Components
 {
@@ -11,6 +12,8 @@ namespace DolphEngine.MonoGame.Eco.Components
         public List<int> Sequence;
 
         public AnimatedSpriteBehavior Behavior;
+
+        public Vector2 blah;
     }
 
     public enum AnimatedSpriteBehavior

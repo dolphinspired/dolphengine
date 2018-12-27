@@ -30,8 +30,8 @@ namespace DolphEngine.Input.Controllers
             _buttonControls.Add(InputKeys.MouseButton4, new SingleButtonControl(InputKeys.MouseButton4));
             _buttonControls.Add(InputKeys.MouseButton5, new SingleButtonControl(InputKeys.MouseButton5));
 
-            this.Cursor = new PositionalControl(InputKeys.MouseCursorX, InputKeys.MouseCursorY);
-            this.Scroll = new PositionalControl(InputKeys.MouseScrollX, InputKeys.MouseScrollY);
+            this.Cursor = new TwoAxisPositionalControl(InputKeys.MouseCursorX, InputKeys.MouseCursorY);
+            this.Scroll = new TwoAxisPositionalControl(InputKeys.MouseScrollX, InputKeys.MouseScrollY);
         }
 
         public override void SetInputState(InputState inputState)
@@ -64,7 +64,7 @@ namespace DolphEngine.Input.Controllers
         public SingleButtonControl SideButton1 => _buttonControls[InputKeys.MouseButton4];
         public SingleButtonControl SideButton2 => _buttonControls[InputKeys.MouseButton5];
 
-        public readonly PositionalControl Cursor;
-        public readonly PositionalControl Scroll;
+        public readonly TwoAxisPositionalControl Cursor;
+        public readonly TwoAxisPositionalControl Scroll;
     }
 }

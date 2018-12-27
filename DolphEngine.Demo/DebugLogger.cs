@@ -80,11 +80,15 @@ namespace DolphEngine.Demo
 
             var pos = new Vector2(this.PaddingLeft, this.PaddingTop);
 
+            sb.Begin();
+
             foreach (var line in this._pages[this.CurrentPage])
             {
                 sb.DrawString(this.Font, line(), pos, this.FontColor);
                 pos.Y += this.FontSize + this.LineSpacing;
             }
+
+            sb.End();
         }
     }
 }

@@ -2,46 +2,40 @@
 using DolphEngine.Eco.Components;
 using DolphEngine.MonoGame.Eco.Components;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace DolphEngine.MonoGame.Eco.Handlers
 {
-    public class SpriteRenderingHandler : EcosystemHandler<SpriteComponent>
+    public class SpriteHandler : EcosystemHandler<SpriteComponent, DrawComponent>
     {
-        protected readonly SpriteBatch SpriteBatch;
-
-        public SpriteRenderingHandler(SpriteBatch sb)
-        {
-            this.SpriteBatch = sb;
-        }
-
         public override void Draw(Entity entity)
         {
             var sprite = entity.GetComponent<SpriteComponent>();
-            this.DrawSprite(entity, sprite);
+            var draw = entity.GetComponent<DrawComponent>();
+
+            this.AddDrawDelegate(entity, sprite, draw);
         }
 
-        protected virtual void DrawSprite(Entity entity, SpriteComponent sprite)
+        public void AddDrawDelegate(Entity entity, SpriteComponent spriteComponent, DrawComponent drawComponent)
         {
             Rectangle src;
-            if (sprite.SourceRect != null)
+            if (spriteComponent.SourceRect != null)
             {
                 // 1ST PRIORITY: If a specific subset of the texture was specified, draw only that portion
-                src = sprite.SourceRect.Value;
+                src = spriteComponent.SourceRect.Value;
             }
             else
             {
                 // LOWEST PRIORITY: Draw the whole texture
-                src = sprite.Texture.Bounds;
+                src = spriteComponent.Texture.Bounds;
             }
 
             int x;
             int y;
-            if (sprite.Position != null)
+            if (spriteComponent.Position != null)
             {
                 // 1ST PRIORITY: If the sprite was given an explicit drawing position, use that
-                x = sprite.Position.Value.X;
-                y = sprite.Position.Value.Y;
+                x = spriteComponent.Position.Value.X;
+                y = spriteComponent.Position.Value.Y;
             }
             else if (entity.TryGetComponent<PositionComponent2d>(out var position))
             {
@@ -58,11 +52,11 @@ namespace DolphEngine.MonoGame.Eco.Handlers
 
             int width;
             int height;
-            if (sprite.Size != null)
+            if (spriteComponent.Size != null)
             {
                 // 1ST PRIORITY: If the sprite was given an explicit width or height, draw it to that size
-                width = sprite.Size.Value.Width;
-                height = sprite.Size.Value.Height;
+                width = spriteComponent.Size.Value.Width;
+                height = spriteComponent.Size.Value.Height;
             }
             else if (entity.TryGetComponent<SizeComponent2d>(out var size))
             {
@@ -79,7 +73,8 @@ namespace DolphEngine.MonoGame.Eco.Handlers
 
             Rectangle dest = new Rectangle(x, y, width, height);
 
-            this.SpriteBatch.Draw(sprite.Texture, dest, src, sprite.Color ?? Color.White);
+            // Add an action that tells the appropriate handler how to draw this entity with said handler's own SpriteBatch
+            drawComponent.DrawDelegates.Add(sb => sb.Draw(spriteComponent.Texture, dest, src, spriteComponent.Color ?? Color.White));
         }
     }
 }

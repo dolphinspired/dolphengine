@@ -3,8 +3,10 @@ using DolphEngine.Demo.Handlers;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Input.Controllers;
+using DolphEngine.Input.Controls;
 using DolphEngine.MonoGame;
 using DolphEngine.MonoGame.Eco.Components;
+using DolphEngine.MonoGame.Eco.Entities;
 using DolphEngine.MonoGame.Eco.Handlers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,10 +21,14 @@ namespace DolphEngine.Demo
         SpriteBatch spriteBatch;
 
         private Entity Player;
-        private const int MoveSpeed = 4;
+        private const int MoveSpeed = 2;
 
         private GameTime _currentGameTime;
         private readonly Func<long> GameTimer;
+
+        private CameraEntity Camera;
+        
+        private static Vector2 FpsPosition;
 
         private readonly int[][] TestMap = new int[][]
         {
@@ -42,6 +48,8 @@ namespace DolphEngine.Demo
 
             // Measuring game time in milliseconds until I need something more precise
             this.GameTimer = () => this._currentGameTime.TotalGameTime.Ticks / TimeSpan.TicksPerMillisecond;
+
+            FpsPosition = new Vector2(10, graphics.PreferredBackBufferHeight - 22);
         }
 
         protected override void Initialize()
@@ -74,15 +82,22 @@ namespace DolphEngine.Demo
 
             this.Player = new Entity("Player")
                 .AddComponent<PlayerComponent>()
+                .AddComponent<DrawComponent>()
                 .AddComponent(anim)
                 .AddComponent(position);
+
+            this.Camera = new CameraEntity(this.graphics.PreferredBackBufferWidth, this.graphics.PreferredBackBufferHeight);
+            this.Camera.Pan(240, 120);
 
             this.LoadMap();
 
             Tower.Ecosystem.AddEntity(this.Player);
-            Tower.Ecosystem.AddHandler(new SpriteRenderingHandler(this.spriteBatch));
-            Tower.Ecosystem.AddHandler(new SpritesheetRenderingHandler(this.spriteBatch));
-            Tower.Ecosystem.AddHandler(new AnimatedSpriteRenderingHandler(this.spriteBatch, this.GameTimer));
+            Tower.Ecosystem.AddEntity(this.Camera);
+
+            Tower.Ecosystem.AddHandler(new SpriteHandler());
+            Tower.Ecosystem.AddHandler(new SpritesheetHandler());
+            Tower.Ecosystem.AddHandler(new AnimatedSpriteHandler(this.GameTimer));
+            Tower.Ecosystem.AddHandler(new DrawHandler(this.spriteBatch, this.Camera));
             Tower.Ecosystem.AddHandler<PlayerHandler>();
         }
 
@@ -97,11 +112,11 @@ namespace DolphEngine.Demo
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            spriteBatch.Begin(samplerState: SamplerState.PointWrap); // disable anti-aliasing
             Tower.Ecosystem.Draw();
             Tower.Debug.Render(spriteBatch);
+            
+            spriteBatch.Begin();
+            spriteBatch.DrawString(Tower.Debug.Font, $"FPS: {1 / gameTime.ElapsedGameTime.TotalSeconds:0.0}", FpsPosition, Tower.Debug.FontColor);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -129,13 +144,51 @@ namespace DolphEngine.Demo
                 .AddControlReaction(keyboard, k => !k.ArrowKeys.IsPressed, k => {
                     this.Player.GetComponent<PlayerComponent>().Speed = 0;
                 });
+
+            Tower.Keycosystem
+                .AddControlReaction(keyboard, k => k.WASD.IsPressed, k =>
+                {
+                    if ((k.WASD.Direction & Direction.Up) > 0)
+                    {
+                        this.Camera.Transform.Offset.Y -= 2;
+                    }
+                    if ((k.WASD.Direction & Direction.Right) > 0)
+                    {
+                        this.Camera.Transform.Offset.X += 2;
+                    }
+                    if ((k.WASD.Direction & Direction.Down) > 0)
+                    {
+                        this.Camera.Transform.Offset.Y += 2;
+                    }
+                    if ((k.WASD.Direction & Direction.Left) > 0)
+                    {
+                        this.Camera.Transform.Offset.X -= 2;
+                    }
+                })
+                .AddControlReaction(mouse, m => m.Scroll.Y.JustMoved, m =>
+                {
+                    var zoom = m.Scroll.Y.PositionDelta > 0 ? 0.25f : -0.25f;
+                    this.Camera.AdjustZoom(zoom);
+                })
+                .AddControlReaction(mouse, m => m.MiddleClick.JustPressed, m => this.Camera.ResetZoom())
+                .AddControlReaction(keyboard, k => k.F.JustPressed, k => this.Camera.ResetPan().Focus.Target = this.Player)
+                .AddControlReaction(keyboard, k => k.G.JustPressed, k => this.Camera.Focus.Target = null);
             
             Tower.Debug.AddLine(1,
                 () => "Player info:",
                 DebugLogger.EmptyLine,
                 () => $"Speed: {this.Player.GetComponent<PlayerComponent>().Speed}, Direction: {this.Player.GetComponent<PlayerComponent>().Direction}",
                 () => $"X: {this.Player.GetComponent<PositionComponent2d>().X}, Y: {this.Player.GetComponent<PositionComponent2d>().Y}",
-                () => $"Width: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Width}, Height: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Height}");
+                () => $"Width: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Width}, Height: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Height}",
+                DebugLogger.EmptyLine,
+                () => "Camera info:",
+                DebugLogger.EmptyLine,
+                () => $"Position: ({this.Camera.Position.X}, {this.Camera.Position.Y})" +
+                $"      Size: ({this.Camera.Size.Width}, {this.Camera.Size.Height})",
+                () => $"Offset: ({this.Camera.Transform.Offset.X:0.000}, {this.Camera.Transform.Offset.Y:0.000})" +
+                $"      Scale: ({this.Camera.Transform.Scale.X:0.000}, {this.Camera.Transform.Scale.Y:0.000})" +
+                $"      Rotation: ({this.Camera.Transform.Rotation:0.000})"
+            );
 
             Tower.Debug.AddLine(2,
                 () => $"CurrentGameTick: {this.GameTimer()}",
@@ -152,9 +205,9 @@ namespace DolphEngine.Demo
                 DebugLogger.EmptyLine,
                 () => "Mouse:",
                 () => $"PrimaryClick: {mouse.PrimaryClick.IsPressed}, SecondaryClick: {mouse.SecondaryClick.IsPressed}, LeftHanded: {mouse.LeftHanded}",
-                () => $"X: {mouse.Cursor.X}, Y: {mouse.Cursor.Y}");
-
-            Tower.Debug.AddLine(2, "This is page 2!");
+                () => $"X: {mouse.Cursor.X}, Y: {mouse.Cursor.Y}",
+                () => $"Scroll X: {mouse.Scroll.X}, Scroll Y: {mouse.Scroll.Y}, Scroll Click: {mouse.MiddleClick.IsPressed}"
+            );
         }
 
         private void LoadMap()
@@ -183,6 +236,7 @@ namespace DolphEngine.Demo
 
                     Tower.Ecosystem.AddEntity(new Entity($"Tile_{i++}")
                         .AddComponent(sprite)
+                        .AddComponent<DrawComponent>()
                         .AddComponent(new PositionComponent2d(x, y)));
 
                     col++;

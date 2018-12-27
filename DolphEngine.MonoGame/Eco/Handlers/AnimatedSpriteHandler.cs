@@ -1,25 +1,24 @@
 ﻿using DolphEngine.Eco;
 using DolphEngine.MonoGame.Eco.Components;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
 namespace DolphEngine.MonoGame.Eco.Handlers
 {
-    public class AnimatedSpriteRenderingHandler : SpriteRenderingHandler
+    public class AnimatedSpriteHandler : EcosystemHandler<AnimatedSpriteComponent, DrawComponent>
     {
-        public override IEnumerable<Type> SubscribesTo => new[] { typeof(AnimatedSpriteComponent) };
-        
-        private readonly Func<long> Timer;
+        private readonly SpriteHandler _spriteRenderingHandler;        
+        private readonly Func<long> _timer;
 
-        public AnimatedSpriteRenderingHandler(SpriteBatch sb, Func<long> timer) : base(sb)
+        public AnimatedSpriteHandler(Func<long> timer)
         {
-            this.Timer = timer;
+            this._spriteRenderingHandler = new SpriteHandler();
+            this._timer = timer;
         }
 
         public override void Draw(IEnumerable<Entity> entities)
         {
-            var currentGameTick = this.Timer();
+            var currentGameTick = this._timer();
 
             foreach (var entity in entities)
             {
@@ -61,8 +60,10 @@ namespace DolphEngine.MonoGame.Eco.Handlers
                 // Then, lookup which frame is specified at that order in the sequence
                 animSprite.CurrentFrame = animSprite.Sequence[sequenceIndexAdjusted];
 
+                var draw = entity.GetComponent<DrawComponent>();
+
                 // Call the method that's used to render static sprites with the adjusted source rectangle applied
-                this.DrawSprite(entity, animSprite);
+                this._spriteRenderingHandler.AddDrawDelegate(entity, animSprite, draw);
             }
         }
     }
