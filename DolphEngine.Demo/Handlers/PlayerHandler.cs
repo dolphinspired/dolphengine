@@ -9,14 +9,23 @@ namespace DolphEngine.Demo.Handlers
 {
     public class PlayerHandler : EcosystemHandler<PlayerComponent>
     {
-        private static readonly List<int> IdleNorth =  new List<int> { 12 };
+        //private static readonly List<int> IdleNorth = new List<int> { 12 };
+        //private static readonly List<int> IdleEast = new List<int> { 0 };
+        //private static readonly List<int> IdleSouth = new List<int> { 24 };
+        //private static readonly List<int> IdleWest = new List<int> { 36 };
+        //private static readonly List<int> WalkNorth = new List<int> { 13, 12, 14, 12 };
+        //private static readonly List<int> WalkEast = new List<int> { 1, 0, 2, 0 };
+        //private static readonly List<int> WalkSouth = new List<int> { 25, 24, 26, 24 };
+        //private static readonly List<int> WalkWest = new List<int> { 37, 36, 38, 36 };
+
+        private static readonly List<int> IdleNorth =  new List<int> { 6 };
         private static readonly List<int> IdleEast =   new List<int> { 0 };
-        private static readonly List<int> IdleSouth =  new List<int> { 24 };
-        private static readonly List<int> IdleWest =   new List<int> { 36 };
-        private static readonly List<int> WalkNorth =  new List<int> { 13, 12, 14, 12 };
+        private static readonly List<int> IdleSouth =  new List<int> { 12 };
+        private static readonly List<int> IdleWest =   new List<int> { 18 };
+        private static readonly List<int> WalkNorth =  new List<int> { 7, 6, 8, 6 };
         private static readonly List<int> WalkEast =   new List<int> { 1, 0, 2, 0 };
-        private static readonly List<int> WalkSouth =  new List<int> { 25, 24, 26, 24 };
-        private static readonly List<int> WalkWest =   new List<int> { 37, 36, 38, 36 };
+        private static readonly List<int> WalkSouth =  new List<int> { 13, 12, 14, 12 };
+        private static readonly List<int> WalkWest =   new List<int> { 19, 18, 20, 18 };
 
         public override void Update(Entity entity)
         {

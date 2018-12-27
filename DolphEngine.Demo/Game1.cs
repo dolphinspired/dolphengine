@@ -76,7 +76,7 @@ namespace DolphEngine.Demo
             Tower.Debug.Font = this.Content.Load<SpriteFont>("Debug");
 
             var position = new PositionComponent2d(30, 50);
-            var tset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 12, 8);
+            var tset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
             var anim = new AnimatedSpriteComponent { Tileset = tset };
             anim.DurationPerFrame = 100;
 
