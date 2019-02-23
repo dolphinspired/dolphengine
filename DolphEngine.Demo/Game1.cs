@@ -1,120 +1,77 @@
-﻿using DolphEngine.Demo.Entities;
-using DolphEngine.Demo.Handlers;
-using DolphEngine.Eco;
-using DolphEngine.Eco.Components;
+﻿using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
-using DolphEngine.Input.Controls;
-using DolphEngine.MonoGame;
-using DolphEngine.MonoGame.Eco.Components;
-using DolphEngine.MonoGame.Eco.Entities;
-using DolphEngine.MonoGame.Eco.Handlers;
+using DolphEngine.MonoGame.Input;
+using DolphEngine.Scenery;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace DolphEngine.Demo
 {
     public class Game1 : Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-
-        private PlayerEntity Player;
-        private const int MoveSpeed = 2;
+        GraphicsDeviceManager Graphics;
+        SpriteBatch SpriteBatch;
 
         private GameTime _currentGameTime;
         private readonly Func<long> GameTimer;
-
-        private CameraEntity Camera;
         
         private static Vector2 FpsPosition;
 
-        private readonly int[][] TestMap = new int[][]
-        {
-            new int[] { 0, 0, 0, 2, 0, 1 },
-            new int[] { 0, 0, 0, 2, 0, 1 },
-            new int[] { 3, 2, 2, 2, 0, 1 },
-            new int[] { 3, 2, 0, 0, 0, 1 },
-            new int[] { 0, 2, 0, 3, 3, 1 },
-            new int[] { 0, 2, 0, 3, 3, 1 },
-        };
+        protected readonly Director Director;
+        protected readonly DebugLogger Debug;
+        protected readonly Keycosystem GlobalKeycosystem;
 
         public Game1()
         {
-            graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            this.Graphics = new GraphicsDeviceManager(this);
+            this.Content.RootDirectory = "Content";
+            this.IsMouseVisible = true;
 
             // Measuring game time in milliseconds until I need something more precise
             this.GameTimer = () => this._currentGameTime.TotalGameTime.Ticks / TimeSpan.TicksPerMillisecond;
 
-            FpsPosition = new Vector2(10, graphics.PreferredBackBufferHeight - 22);
+            FpsPosition = new Vector2(10, Graphics.PreferredBackBufferHeight - 22);
+
+            this.Director = new Director();
+            this.Debug = new DebugLogger { Hidden = true, CurrentPage = 1 };
+            this.GlobalKeycosystem = new Keycosystem(new MonoGameObserver().UseKeyboard().UseMouse());
         }
 
         protected override void Initialize()
         {
-            Tower.Initialize();
             this.InitializeControls();
-            Tower.Content = this.Content;
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            // todo: experimental. Making this async caused a controller delegate to run early, before this.Player was set. Even though
-            // no keys were pressed?
+            this.SpriteBatch = new SpriteBatch(GraphicsDevice);
+            this.Debug.Font = this.Content.Load<SpriteFont>("Debug");
 
-            //await Task.WhenAll
-            //(
-            //    Tower.Content.LoadAllAsync<SpriteFont>("Debug"),
-            //    Tower.Content.LoadAllAsync<Texture2D>("Assets/link_walk_simple", "Assets/iso_tiles_32_single")
-            //);
-
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-            Tower.Debug.Font = this.Content.Load<SpriteFont>("Debug");
-            
-            this.Player = new PlayerEntity();
-            this.Player.Position.Set(30, 50);
-            this.Player.Animation.Tileset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
-            this.Player.Animation.Sequence = new List<int> { 6 };
-            this.Player.Animation.DurationPerFrame = 100;
-            this.Player.Animation.Color = new Color(255, 0, 0);
-
-            this.Camera = new CameraEntity(this.graphics.PreferredBackBufferWidth, this.graphics.PreferredBackBufferHeight);
-            this.Camera.Pan(240, 120);
-
-            this.LoadMap();
-
-            Tower.Ecosystem.AddEntity(this.Player);
-            Tower.Ecosystem.AddEntity(this.Camera);
-
-            Tower.Ecosystem.AddHandler(new SpriteHandler());
-            Tower.Ecosystem.AddHandler(new SpritesheetHandler());
-            Tower.Ecosystem.AddHandler(new AnimatedSpriteHandler(this.GameTimer));
-            Tower.Ecosystem.AddHandler(new DrawHandler(this.spriteBatch, this.Camera));
-            Tower.Ecosystem.AddHandler<SpeedHandler2d>();
+            this.Director.AddScene("test-map", new TestMapScene(this.Content, this.SpriteBatch, this.Debug, this.Graphics.PreferredBackBufferWidth, this.Graphics.PreferredBackBufferHeight));
+            this.Director.LoadScene("test-map");
         }
 
         protected override void Update(GameTime gameTime)
         {
             this._currentGameTime = gameTime;
             
-            Tower.Keycosystem.Update(this.GameTimer());
-            Tower.Ecosystem.Update();
+            this.GlobalKeycosystem.Update(this.GameTimer());
+            this.Director.CurrentScene.Update(gameTime.TotalGameTime);
+
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            Tower.Ecosystem.Draw();
-            Tower.Debug.Render(spriteBatch);
+            this.Director.CurrentScene.Draw(gameTime.TotalGameTime);
+            this.Debug.Render(SpriteBatch);
             
-            spriteBatch.Begin();
-            spriteBatch.DrawString(Tower.Debug.Font, $"FPS: {1 / gameTime.ElapsedGameTime.TotalSeconds:0.0}", FpsPosition, Tower.Debug.FontColor);
-            spriteBatch.End();
+            SpriteBatch.Begin();
+            SpriteBatch.DrawString(this.Debug.Font, $"FPS: {1 / gameTime.ElapsedGameTime.TotalSeconds:0.0}", FpsPosition, this.Debug.FontColor);
+            SpriteBatch.End();
 
             base.Draw(gameTime);
         }
@@ -124,90 +81,15 @@ namespace DolphEngine.Demo
             var keyboard = new StandardKeyboard();
             var mouse = new StandardMouse();
 
-            Tower.Keycosystem
+            this.GlobalKeycosystem
                 .AddControlReaction(keyboard, k => k.Escape.IsPressed, k => this.Exit());
 
-            Tower.Keycosystem
-                .AddControlReaction(keyboard, k => k.OemTilde.JustPressed, k => Tower.Debug.Hidden = !Tower.Debug.Hidden)
-                .AddControlReaction(keyboard, k => k.F1.JustPressed, k => Tower.Debug.PrevPage())
-                .AddControlReaction(keyboard, k => k.F2.JustPressed, k => Tower.Debug.NextPage());
-            
-            Tower.Keycosystem
-                .AddControlReaction(keyboard, k => k.ArrowKeys.IsPressed, k => {
-                    var speed = this.Player.GetComponent<SpeedComponent2d>();
-                    if ((k.ArrowKeys.Direction & Direction.Up) > 0)
-                    {
-                        speed.X = 2;
-                        speed.Y = -1;
-                    }
-                    if ((k.ArrowKeys.Direction & Direction.Right) > 0)
-                    {
-                        speed.X = 2;
-                        speed.Y = 1;
-                    }
-                    if ((k.ArrowKeys.Direction & Direction.Down) > 0)
-                    {
-                        speed.X = -2;
-                        speed.Y = 1;
-                    }
-                    if ((k.ArrowKeys.Direction & Direction.Left) > 0)
-                    {
-                        speed.X = -2;
-                        speed.Y = -1;
-                    }
-                })
-                .AddControlReaction(keyboard, k => !k.ArrowKeys.IsPressed, k => {
-                    var speed = this.Player.GetComponent<SpeedComponent2d>();
-                    speed.X = 0;
-                    speed.Y = 0;
-                });
+            this.GlobalKeycosystem
+                .AddControlReaction(keyboard, k => k.OemTilde.JustPressed, k => this.Debug.Hidden = !this.Debug.Hidden)
+                .AddControlReaction(keyboard, k => k.F1.JustPressed, k => this.Debug.PrevPage())
+                .AddControlReaction(keyboard, k => k.F2.JustPressed, k => this.Debug.NextPage());
 
-            Tower.Keycosystem
-                .AddControlReaction(keyboard, k => k.WASD.IsPressed, k =>
-                {
-                    if ((k.WASD.Direction & Direction.Up) > 0)
-                    {
-                        this.Camera.Transform.Offset.Y -= 2;
-                    }
-                    if ((k.WASD.Direction & Direction.Right) > 0)
-                    {
-                        this.Camera.Transform.Offset.X += 2;
-                    }
-                    if ((k.WASD.Direction & Direction.Down) > 0)
-                    {
-                        this.Camera.Transform.Offset.Y += 2;
-                    }
-                    if ((k.WASD.Direction & Direction.Left) > 0)
-                    {
-                        this.Camera.Transform.Offset.X -= 2;
-                    }
-                })
-                .AddControlReaction(mouse, m => m.Scroll.Y.JustMoved, m =>
-                {
-                    var zoom = m.Scroll.Y.PositionDelta > 0 ? 0.25f : -0.25f;
-                    this.Camera.AdjustZoom(zoom);
-                })
-                .AddControlReaction(mouse, m => m.MiddleClick.JustPressed, m => this.Camera.ResetZoom())
-                .AddControlReaction(keyboard, k => k.F.JustPressed, k => this.Camera.ResetPan().Focus.Target = this.Player)
-                .AddControlReaction(keyboard, k => k.G.JustPressed, k => this.Camera.Focus.Target = null);
-            
-            Tower.Debug.AddLine(1,
-                () => "Player info:",
-                DebugLogger.EmptyLine,
-                () => $"Speed: ({this.Player.GetComponent<SpeedComponent2d>().X}, {this.Player.GetComponent<SpeedComponent2d>().Y})",
-                () => $"X: {this.Player.GetComponent<PositionComponent2d>().X}, Y: {this.Player.GetComponent<PositionComponent2d>().Y}",
-                () => $"Width: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Width}, Height: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Height}",
-                DebugLogger.EmptyLine,
-                () => "Camera info:",
-                DebugLogger.EmptyLine,
-                () => $"Position: ({this.Camera.Position.X}, {this.Camera.Position.Y})" +
-                $"      Size: ({this.Camera.Size.Width}, {this.Camera.Size.Height})",
-                () => $"Offset: ({this.Camera.Transform.Offset.X:0.000}, {this.Camera.Transform.Offset.Y:0.000})" +
-                $"      Scale: ({this.Camera.Transform.Scale.X:0.000}, {this.Camera.Transform.Scale.Y:0.000})" +
-                $"      Rotation: ({this.Camera.Transform.Rotation:0.000})"
-            );
-
-            Tower.Debug.AddLine(2,
+            this.Debug.AddPage(
                 () => $"CurrentGameTick: {this.GameTimer()}",
                 DebugLogger.EmptyLine,
                 () => "Control A:",
@@ -225,42 +107,6 @@ namespace DolphEngine.Demo
                 () => $"X: {mouse.Cursor.X}, Y: {mouse.Cursor.Y}",
                 () => $"Scroll X: {mouse.Scroll.X}, Scroll Y: {mouse.Scroll.Y}, Scroll Click: {mouse.MiddleClick.IsPressed}"
             );
-        }
-
-        private void LoadMap()
-        {
-            var tileset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/iso_tiles_32_single_v3"), 4, 4);
-            var start = new Position2d(200, 20);
-
-            var i = 0;
-            var row = 0;
-            foreach (var tilerow in this.TestMap)
-            {
-                var row_x = start.X - row * 32;
-                var row_y = start.Y + row * 16;
-
-                var col = 0;
-                foreach (var tilevalue in tilerow)
-                {
-                    var x = row_x + col * 32;
-                    var y = row_y + col * 16;
-
-                    var sprite = new SpritesheetComponent
-                    {
-                        Tileset = tileset,
-                        CurrentFrame = tilevalue
-                    };
-
-                    Tower.Ecosystem.AddEntity(new Entity($"Tile_{i++}")
-                        .AddComponent(sprite)
-                        .AddComponent<DrawComponent>()
-                        .AddComponent(new PositionComponent2d(x, y)));
-
-                    col++;
-                }
-
-                row++;
-            }
         }
     }
 }

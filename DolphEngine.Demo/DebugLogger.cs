@@ -20,35 +20,49 @@ namespace DolphEngine.Demo
         public int PaddingLeft = 12;
         public int LineSpacing = 4;
 
-        private readonly Dictionary<int, List<Func<string>>> _pages = new Dictionary<int, List<Func<string>>>();
+        private readonly List<List<Func<string>>> _pages = new List<List<Func<string>>>();
 
-        public void NextPage()
+        public int NextPage()
         {
+            if (this._pages.Count == 0)
+            {
+                this.CurrentPage = 0;
+                return 0;
+            }
+
             var next = this.CurrentPage + 1;
 
-            if (!this._pages.ContainsKey(next))
+            if (next >= this._pages.Count)
             {
-                next = this._pages.First().Key;
+                next = 0;
             }
 
             this.CurrentPage = next;
+            return next;
         }
 
-        public void PrevPage()
+        public int PrevPage()
         {
+            if (this._pages.Count == 0)
+            {
+                this.CurrentPage = 0;
+                return 0;
+            }
+
             var prev = this.CurrentPage - 1;
 
-            if (!this._pages.ContainsKey(prev))
+            if (prev < 0)
             {
-                prev = this._pages.Last().Key;
+                prev = this._pages.Count - 1;
             }
 
             this.CurrentPage = prev;
+            return prev;
         }
 
         public void AddLine(int page)
         {
-            this.AddLine(1, () => "");
+            this.AddLine(page, EmptyLine);
         }
 
         public void AddLine(int page, string line)
@@ -58,22 +72,21 @@ namespace DolphEngine.Demo
 
         public void AddLine(int page, params Func<string>[] lines)
         {
-            foreach (var line in lines)
+            if (page < this._pages.Count)
             {
-                if (this._pages.ContainsKey(page))
-                {
-                    this._pages[page].Add(line);
-                }
-                else
-                {
-                    this._pages.Add(page, new List<Func<string>> { line });
-                }
+                this._pages[page].AddRange(lines);
             }
+        }
+
+        public int AddPage(params Func<string>[] lines)
+        {
+            this._pages.Add(lines?.ToList() ?? new List<Func<string>>(0));
+            return this._pages.Count - 1;
         }
 
         public void Render(SpriteBatch sb)
         {
-            if (this.Hidden)
+            if (this.Hidden || this._pages.Count == 0)
             {
                 return;
             }
