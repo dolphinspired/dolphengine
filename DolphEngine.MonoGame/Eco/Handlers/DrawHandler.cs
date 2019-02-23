@@ -30,7 +30,10 @@ namespace DolphEngine.MonoGame.Eco.Handlers
             
             if (cameraSize == null || cameraSize.Width <= 0 || cameraSize.Height <= 0)
             {
-                // If the camera is zero-size, nothing can be drawn
+                // If the camera is zero-size, nothing can be drawn, but we still need to clear out the last frame
+                this.SpriteBatch.Begin();
+                this.SpriteBatch.GraphicsDevice.Clear(this.BackgroundColor);
+                this.SpriteBatch.End();
                 return;
             }
 
