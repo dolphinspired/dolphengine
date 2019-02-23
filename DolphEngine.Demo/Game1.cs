@@ -1,4 +1,4 @@
-﻿using DolphEngine.Demo.Components;
+﻿using DolphEngine.Demo.Entities;
 using DolphEngine.Demo.Handlers;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
@@ -21,7 +21,7 @@ namespace DolphEngine.Demo
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        private Entity Player;
+        private PlayerEntity Player;
         private const int MoveSpeed = 2;
 
         private GameTime _currentGameTime;
@@ -75,17 +75,13 @@ namespace DolphEngine.Demo
 
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Tower.Debug.Font = this.Content.Load<SpriteFont>("Debug");
-
-            var position = new PositionComponent2d(30, 50);
-            var tset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
-            var anim = new AnimatedSpriteComponent { Tileset = tset, Sequence = new List<int> { 6 } };
-            anim.DurationPerFrame = 100;
-
-            this.Player = new Entity("Player")
-                .AddComponent<SpeedComponent2d>()
-                .AddComponent<DrawComponent>()
-                .AddComponent(anim)
-                .AddComponent(position);
+            
+            this.Player = new PlayerEntity();
+            this.Player.Position.Set(30, 50);
+            this.Player.Animation.Tileset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
+            this.Player.Animation.Sequence = new List<int> { 6 };
+            this.Player.Animation.DurationPerFrame = 100;
+            this.Player.Animation.Color = new Color(255, 0, 0);
 
             this.Camera = new CameraEntity(this.graphics.PreferredBackBufferWidth, this.graphics.PreferredBackBufferHeight);
             this.Camera.Pan(240, 120);
