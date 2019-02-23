@@ -7,12 +7,12 @@ namespace DolphEngine.MonoGame.Eco.Handlers
 {
     public class AnimatedSpriteHandler : EcosystemHandler<AnimatedSpriteComponent, DrawComponent>
     {
-        private readonly SpriteHandler _spriteRenderingHandler;        
+        private readonly SpriteHandler _spriteHandler;        
         private readonly Func<long> _timer;
 
         public AnimatedSpriteHandler(Func<long> timer)
         {
-            this._spriteRenderingHandler = new SpriteHandler();
+            this._spriteHandler = new SpriteHandler();
             this._timer = timer;
         }
 
@@ -33,7 +33,7 @@ namespace DolphEngine.MonoGame.Eco.Handlers
                     // Cannot draw a sprite without zero or lower frame duration
                     continue;
                 }
-                if (animSprite.Tileset == null)
+                if (animSprite.Atlas == null)
                 {
                     // Cannot draw a sprite with no texture specified
                     continue;
@@ -79,7 +79,7 @@ namespace DolphEngine.MonoGame.Eco.Handlers
                 var draw = entity.GetComponent<DrawComponent>();
 
                 // Call the method that's used to render static sprites with the adjusted source rectangle applied
-                this._spriteRenderingHandler.AddDrawDelegate(entity, animSprite, draw);
+                this._spriteHandler.AddDrawDelegate(entity, animSprite, draw);
             }
         }
     }

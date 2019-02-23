@@ -77,7 +77,7 @@ namespace DolphEngine.Demo
 
         private void LoadMap()
         {
-            var tileset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/iso_tiles_32_single_v3"), 4, 4);
+            var tileset = TileAtlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/iso_tiles_32_single_v3"), 4, 4);
             var start = new Position2d(200, 20);
 
             var i = 0;
@@ -93,9 +93,9 @@ namespace DolphEngine.Demo
                     var x = row_x + col * 32;
                     var y = row_y + col * 16;
 
-                    var sprite = new SpritesheetComponent
+                    var sprite = new AtlasSpriteComponent
                     {
-                        Tileset = tileset,
+                        Atlas = tileset,
                         CurrentFrame = tilevalue
                     };
 
@@ -115,7 +115,7 @@ namespace DolphEngine.Demo
         {
             this.Player = new PlayerEntity();
             this.Player.Position.Set(30, 50);
-            this.Player.Animation.Tileset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
+            this.Player.Animation.Atlas = TileAtlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
             this.Player.Animation.Sequence = new List<int> { 6 };
             this.Player.Animation.DurationPerFrame = 100;
             this.Player.Animation.Color = new Color(255, 0, 0);
@@ -127,7 +127,7 @@ namespace DolphEngine.Demo
             this.Ecosystem.AddEntity(this.Camera);
 
             this.Ecosystem.AddHandler(new SpriteHandler());
-            this.Ecosystem.AddHandler(new SpritesheetHandler());
+            this.Ecosystem.AddHandler(new AtlasSpriteHandler());
             this.Ecosystem.AddHandler(new AnimatedSpriteHandler(this.GameTimer));
             this.Ecosystem.AddHandler(new DrawHandler(this.SpriteBatch, this.Camera));
             this.Ecosystem.AddHandler<SpeedHandler2d>();

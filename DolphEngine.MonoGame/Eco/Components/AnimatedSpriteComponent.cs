@@ -2,12 +2,12 @@
 
 namespace DolphEngine.MonoGame.Eco.Components
 {
-    public class AnimatedSpriteComponent : SpritesheetComponent
+    public class AnimatedSpriteComponent : AtlasSpriteComponent
     {
         public long StartingTick;
 
         public long DurationPerFrame;
-
+        
         public List<int> Sequence;
 
         public AnimatedSpriteBehavior Behavior;
