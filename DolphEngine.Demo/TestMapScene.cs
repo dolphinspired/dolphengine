@@ -116,53 +116,80 @@ namespace DolphEngine.Demo
             this.Player = new PlayerEntity();
             this.Player.Position.Set(30, 50);
             this.Player.Animation.Atlas = TileAtlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
-            this.Player.Animation.Sequence = new List<int> { 6 };
-            this.Player.Animation.DurationPerFrame = 100;
-            this.Player.Animation.Color = new Color(255, 0, 0);
+            //this.Player.Animation.Color = new Color(255, 0, 0);
 
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
             this.Camera.Pan(240, 120);
 
-            this.Ecosystem.AddEntity(this.Player);
-            this.Ecosystem.AddEntity(this.Camera);
+            this.Ecosystem
+                .AddEntity(this.Player)
+                .AddEntity(this.Camera);
 
-            this.Ecosystem.AddHandler(new SpriteHandler());
-            this.Ecosystem.AddHandler(new AtlasSpriteHandler());
-            this.Ecosystem.AddHandler(new AnimatedSpriteHandler(this.GameTimer));
-            this.Ecosystem.AddHandler(new DrawHandler(this.SpriteBatch, this.Camera));
-            this.Ecosystem.AddHandler<SpeedHandler2d>();
+            this.Ecosystem
+                .AddHandler<SpeedHandler2d>()
+                .AddHandler<DrawStateHandler>()
+                .AddHandler<SpriteHandler>()
+                .AddHandler<AtlasSpriteHandler>()
+                .AddHandler(new AnimatedSpriteHandler(this.GameTimer))
+                .AddHandler(new DrawHandler(this.SpriteBatch, this.Camera));
         }
 
         private void LoadControls()
         {
             this.Keycosystem
                 .AddControlReaction(this._keyboard, k => k.ArrowKeys.IsPressed, k => {
-                    var speed = this.Player.GetComponent<SpeedComponent2d>();
+                    var speed = this.Player.Speed;
+                    var state = this.Player.DrawState;
+                    
                     if ((k.ArrowKeys.Direction & Direction.Up) > 0)
                     {
                         speed.X = 2;
                         speed.Y = -1;
+                        state.State = (int)PlayerDrawStates.WalkNorth;
                     }
                     if ((k.ArrowKeys.Direction & Direction.Right) > 0)
                     {
                         speed.X = 2;
                         speed.Y = 1;
+                        state.State = (int)PlayerDrawStates.WalkEast;
                     }
                     if ((k.ArrowKeys.Direction & Direction.Down) > 0)
                     {
                         speed.X = -2;
                         speed.Y = 1;
+                        state.State = (int)PlayerDrawStates.WalkSouth;
                     }
                     if ((k.ArrowKeys.Direction & Direction.Left) > 0)
                     {
                         speed.X = -2;
                         speed.Y = -1;
+                        state.State = (int)PlayerDrawStates.WalkWest;
                     }
                 })
                 .AddControlReaction(this._keyboard, k => !k.ArrowKeys.IsPressed, k => {
-                    var speed = this.Player.GetComponent<SpeedComponent2d>();
+                    var speed = this.Player.Speed;
                     speed.X = 0;
                     speed.Y = 0;
+                })
+                .AddControlReaction(this._keyboard, k => k.ArrowKeys.JustReleased, k => {
+                    var state = this.Player.DrawState;
+
+                    if (state.State == (int)PlayerDrawStates.WalkNorth)
+                    {
+                        state.State = (int)PlayerDrawStates.IdleNorth;
+                    }
+                    else if (state.State == (int)PlayerDrawStates.WalkEast)
+                    {
+                        state.State = (int)PlayerDrawStates.IdleEast;
+                    }
+                    else if (state.State == (int)PlayerDrawStates.WalkSouth)
+                    {
+                        state.State = (int)PlayerDrawStates.IdleSouth;
+                    }
+                    else if (state.State == (int)PlayerDrawStates.WalkWest)
+                    {
+                        state.State = (int)PlayerDrawStates.IdleWest;
+                    }
                 });
 
             this.Keycosystem
@@ -170,19 +197,19 @@ namespace DolphEngine.Demo
                 {
                     if ((k.WASD.Direction & Direction.Up) > 0)
                     {
-                        this.Camera.Transform.Offset.Y -= 2;
+                        this.Camera.Transform.Offset.Y += 2;
                     }
                     if ((k.WASD.Direction & Direction.Right) > 0)
                     {
-                        this.Camera.Transform.Offset.X += 2;
+                        this.Camera.Transform.Offset.X -= 2;
                     }
                     if ((k.WASD.Direction & Direction.Down) > 0)
                     {
-                        this.Camera.Transform.Offset.Y += 2;
+                        this.Camera.Transform.Offset.Y -= 2;
                     }
                     if ((k.WASD.Direction & Direction.Left) > 0)
                     {
-                        this.Camera.Transform.Offset.X -= 2;
+                        this.Camera.Transform.Offset.X += 2;
                     }
                 })
                 .AddControlReaction(this._mouse, m => m.Scroll.Y.JustMoved, m =>
@@ -197,9 +224,9 @@ namespace DolphEngine.Demo
             this.Debug.AddPage(
                 () => "Player info:",
                 DebugLogger.EmptyLine,
-                () => $"Speed: ({this.Player.GetComponent<SpeedComponent2d>().X}, {this.Player.GetComponent<SpeedComponent2d>().Y})",
-                () => $"X: {this.Player.GetComponent<PositionComponent2d>().X}, Y: {this.Player.GetComponent<PositionComponent2d>().Y}",
-                () => $"Width: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Width}, Height: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Height}",
+                () => $"Speed: ({this.Player.Speed.X}, {this.Player.Speed.Y})",
+                () => $"X: {this.Player.Position.X}, Y: {this.Player.Position.Y}",
+                () => $"Width: {this.Player.Animation.SourceRect?.Width}, Height: {this.Player.Animation.SourceRect?.Height}",
                 DebugLogger.EmptyLine,
                 () => "Camera info:",
                 DebugLogger.EmptyLine,
