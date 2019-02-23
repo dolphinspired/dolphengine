@@ -34,7 +34,7 @@ namespace DolphEngine.Demo
             FpsPosition = new Vector2(10, Graphics.PreferredBackBufferHeight - 22);
 
             this.Director = new Director();
-            this.Debug = new DebugLogger { Hidden = true, CurrentPage = 1 };
+            this.Debug = new DebugLogger { Hidden = true };
             this.GlobalKeycosystem = new Keycosystem(new MonoGameObserver().UseKeyboard().UseMouse());
         }
 

@@ -86,7 +86,7 @@ namespace DolphEngine.Demo
 
         public void Render(SpriteBatch sb)
         {
-            if (this.Hidden || this._pages.Count == 0)
+            if (this.Hidden || this._pages.Count == 0 || this.CurrentPage >= this._pages.Count || this.CurrentPage < 0)
             {
                 return;
             }
