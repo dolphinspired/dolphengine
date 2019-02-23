@@ -23,9 +23,19 @@ namespace DolphEngine.MonoGame.Eco.Handlers
             foreach (var entity in entities)
             {
                 var animSprite = entity.GetComponent<AnimatedSpriteComponent>();
-                if (animSprite.Sequence == null)
+                if (animSprite.Sequence == null || animSprite.Sequence.Count == 0)
                 {
                     // If no animation sequence is specified, don't attempt to draw anything
+                    continue;
+                }
+                if (animSprite.DurationPerFrame <= 0)
+                {
+                    // Cannot draw a sprite without zero or lower frame duration
+                    continue;
+                }
+                if (animSprite.Tileset == null)
+                {
+                    // Cannot draw a sprite with no texture specified
                     continue;
                 }
 
@@ -36,6 +46,7 @@ namespace DolphEngine.MonoGame.Eco.Handlers
                     // If the game time hasn't reached the animation's starting tick yet, do not draw the sprite
                     continue;
                 }
+                
                 long sequenceIndex = currentAnimationTick / animSprite.DurationPerFrame;
 
                 // Get an adjusted value for when the sequence has been exceeded

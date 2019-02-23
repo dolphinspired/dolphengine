@@ -17,6 +17,12 @@ namespace DolphEngine.MonoGame.Eco.Handlers
             var spritesheet = entity.GetComponent<SpritesheetComponent>();
             var draw = entity.GetComponent<DrawComponent>();
 
+            if (spritesheet.Tileset == null)
+            {
+                // Cannot draw from spritesheet if no tileset is specified
+                return;
+            }
+
             this._spriteRenderingHandler.AddDrawDelegate(entity, spritesheet, draw);
         }
     }
