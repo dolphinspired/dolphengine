@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace DolphEngine.MonoGame
 {
-    public class TileAtlas
+    public class Atlas
     {
-        public static TileAtlas FromSpritesheet(Texture2D texture, int columns, int rows)
+        public static Atlas FromSpritesheet(Texture2D texture, int columns, int rows)
         {
-            var tileset = new TileAtlas();
+            var tileset = new Atlas();
 
             var frameWidth = texture.Bounds.Width / columns;
             var frameHeight = texture.Bounds.Height / rows;

@@ -77,7 +77,7 @@ namespace DolphEngine.Demo
 
         private void LoadMap()
         {
-            var tileset = TileAtlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/iso_tiles_32_single_v3"), 4, 4);
+            var tileset = Atlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/iso_tiles_32_single_v3"), 4, 4);
             var start = new Position2d(200, 20);
 
             var i = 0;
@@ -115,7 +115,7 @@ namespace DolphEngine.Demo
         {
             this.Player = new PlayerEntity();
             this.Player.Position.Set(30, 50);
-            this.Player.Animation.Atlas = TileAtlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
+            this.Player.Animation.Atlas = Atlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
             //this.Player.Animation.Color = new Color(255, 0, 0);
 
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);

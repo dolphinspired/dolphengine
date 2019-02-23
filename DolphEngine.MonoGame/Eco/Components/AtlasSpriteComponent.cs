@@ -19,6 +19,6 @@ namespace DolphEngine.MonoGame.Eco.Components
 
         public int CurrentFrame;
 
-        public TileAtlas Atlas;
+        public Atlas Atlas;
     }
 }
