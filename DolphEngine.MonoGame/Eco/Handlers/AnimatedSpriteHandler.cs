@@ -23,6 +23,11 @@ namespace DolphEngine.MonoGame.Eco.Handlers
             foreach (var entity in entities)
             {
                 var animSprite = entity.GetComponent<AnimatedSpriteComponent>();
+                if (animSprite.Sequence == null)
+                {
+                    // If no animation sequence is specified, don't attempt to draw anything
+                    continue;
+                }
 
                 // Figure out which step of the animation sequence we're in based on the current time
                 long currentAnimationTick = currentGameTick - animSprite.StartingTick;

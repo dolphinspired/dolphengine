@@ -11,6 +11,7 @@ using DolphEngine.MonoGame.Eco.Handlers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DolphEngine.Demo
@@ -77,11 +78,11 @@ namespace DolphEngine.Demo
 
             var position = new PositionComponent2d(30, 50);
             var tset = Tileset.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
-            var anim = new AnimatedSpriteComponent { Tileset = tset };
+            var anim = new AnimatedSpriteComponent { Tileset = tset, Sequence = new List<int> { 6 } };
             anim.DurationPerFrame = 100;
 
             this.Player = new Entity("Player")
-                .AddComponent<PlayerComponent>()
+                .AddComponent<SpeedComponent2d>()
                 .AddComponent<DrawComponent>()
                 .AddComponent(anim)
                 .AddComponent(position);
@@ -98,7 +99,7 @@ namespace DolphEngine.Demo
             Tower.Ecosystem.AddHandler(new SpritesheetHandler());
             Tower.Ecosystem.AddHandler(new AnimatedSpriteHandler(this.GameTimer));
             Tower.Ecosystem.AddHandler(new DrawHandler(this.spriteBatch, this.Camera));
-            Tower.Ecosystem.AddHandler<PlayerHandler>();
+            Tower.Ecosystem.AddHandler<SpeedHandler2d>();
         }
 
         protected override void Update(GameTime gameTime)
@@ -137,12 +138,32 @@ namespace DolphEngine.Demo
             
             Tower.Keycosystem
                 .AddControlReaction(keyboard, k => k.ArrowKeys.IsPressed, k => {
-                    var pc = this.Player.GetComponent<PlayerComponent>();
-                    pc.Speed = MoveSpeed;
-                    pc.Direction = k.ArrowKeys.Direction;
+                    var speed = this.Player.GetComponent<SpeedComponent2d>();
+                    if ((k.ArrowKeys.Direction & Direction.Up) > 0)
+                    {
+                        speed.X = 2;
+                        speed.Y = -1;
+                    }
+                    if ((k.ArrowKeys.Direction & Direction.Right) > 0)
+                    {
+                        speed.X = 2;
+                        speed.Y = 1;
+                    }
+                    if ((k.ArrowKeys.Direction & Direction.Down) > 0)
+                    {
+                        speed.X = -2;
+                        speed.Y = 1;
+                    }
+                    if ((k.ArrowKeys.Direction & Direction.Left) > 0)
+                    {
+                        speed.X = -2;
+                        speed.Y = -1;
+                    }
                 })
                 .AddControlReaction(keyboard, k => !k.ArrowKeys.IsPressed, k => {
-                    this.Player.GetComponent<PlayerComponent>().Speed = 0;
+                    var speed = this.Player.GetComponent<SpeedComponent2d>();
+                    speed.X = 0;
+                    speed.Y = 0;
                 });
 
             Tower.Keycosystem
@@ -177,7 +198,7 @@ namespace DolphEngine.Demo
             Tower.Debug.AddLine(1,
                 () => "Player info:",
                 DebugLogger.EmptyLine,
-                () => $"Speed: {this.Player.GetComponent<PlayerComponent>().Speed}, Direction: {this.Player.GetComponent<PlayerComponent>().Direction}",
+                () => $"Speed: ({this.Player.GetComponent<SpeedComponent2d>().X}, {this.Player.GetComponent<SpeedComponent2d>().Y})",
                 () => $"X: {this.Player.GetComponent<PositionComponent2d>().X}, Y: {this.Player.GetComponent<PositionComponent2d>().Y}",
                 () => $"Width: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Width}, Height: {this.Player.GetComponent<AnimatedSpriteComponent>().SourceRect?.Height}",
                 DebugLogger.EmptyLine,
