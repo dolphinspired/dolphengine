@@ -13,7 +13,8 @@ namespace DolphEngine.Demo.Entities
                 .AddComponent<SpeedComponent2d>()
                 .AddComponent<DrawComponent>()
                 .AddComponent<AnimatedSpriteComponent>()
-                .AddComponent<DrawStateComponent>();
+                .AddComponent<DrawStateComponent>()
+                .AddComponent<TextComponent>();
 
             this.Animation.DurationPerFrame = 100;
             this.DrawState.SequenceStates = new Dictionary<int, List<int>>
@@ -36,6 +37,8 @@ namespace DolphEngine.Demo.Entities
         public AnimatedSpriteComponent Animation => this.GetComponent<AnimatedSpriteComponent>();
 
         public DrawStateComponent DrawState => this.GetComponent<DrawStateComponent>();
+
+        public TextComponent Text => this.GetComponent<TextComponent>();
     }
 
     public enum PlayerDrawStates

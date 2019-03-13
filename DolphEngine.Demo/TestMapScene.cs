@@ -117,6 +117,8 @@ namespace DolphEngine.Demo
             this.Player.Position.Set(30, 50);
             this.Player.Animation.Atlas = Atlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
             //this.Player.Animation.Color = new Color(255, 0, 0);
+            this.Player.Text.Text = "Alphonse";
+            this.Player.Text.SpriteFont = this.Content.Load<SpriteFont>("Debug");
 
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
             this.Camera.Pan(240, 120);
@@ -131,7 +133,8 @@ namespace DolphEngine.Demo
                 .AddHandler<SpriteHandler>()
                 .AddHandler<AtlasSpriteHandler>()
                 .AddHandler(new AnimatedSpriteHandler(this.GameTimer))
-                .AddHandler(new DrawHandler(this.SpriteBatch, this.Camera));
+                .AddHandler(new DrawHandler(this.SpriteBatch, this.Camera))
+                .AddHandler<TextHandler>();
         }
 
         private void LoadControls()
