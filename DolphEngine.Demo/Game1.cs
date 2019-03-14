@@ -2,6 +2,7 @@
 using DolphEngine.Input.Controllers;
 using DolphEngine.MonoGame.Input;
 using DolphEngine.Scenery;
+using DolphEngine.Tools;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -15,7 +16,8 @@ namespace DolphEngine.Demo
 
         private GameTime _currentGameTime;
         private readonly Func<long> GameTimer;
-        
+
+        private static FpsCounter FpsCounter;
         private static Vector2 FpsPosition;
 
         protected readonly Director Director;
@@ -29,8 +31,9 @@ namespace DolphEngine.Demo
             this.IsMouseVisible = true;
 
             // Measuring game time in milliseconds until I need something more precise
-            this.GameTimer = () => this._currentGameTime.TotalGameTime.Ticks / TimeSpan.TicksPerMillisecond;
+            this.GameTimer = () => this._currentGameTime.TotalGameTime.Ticks;
 
+            FpsCounter = new FpsCounter(this.GameTimer, 60);
             FpsPosition = new Vector2(10, Graphics.PreferredBackBufferHeight - 22);
 
             this.Director = new Director();
@@ -59,18 +62,18 @@ namespace DolphEngine.Demo
             this._currentGameTime = gameTime;
             
             this.GlobalKeycosystem.Update(this.GameTimer());
-            this.Director.CurrentScene.Update(gameTime.TotalGameTime);
+            this.Director.CurrentScene.Update(gameTime.TotalGameTime.Ticks);
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            this.Director.CurrentScene.Draw(gameTime.TotalGameTime);
+            this.Director.CurrentScene.Draw(gameTime.TotalGameTime.Ticks);
             this.Debug.Render(SpriteBatch);
             
             SpriteBatch.Begin();
-            SpriteBatch.DrawString(this.Debug.Font, $"FPS: {1 / gameTime.ElapsedGameTime.TotalSeconds:0.0}", FpsPosition, this.Debug.FontColor);
+            SpriteBatch.DrawString(this.Debug.Font, $"FPS: {FpsCounter.Update():0.0}", FpsPosition, this.Debug.FontColor);
             SpriteBatch.End();
 
             base.Draw(gameTime);

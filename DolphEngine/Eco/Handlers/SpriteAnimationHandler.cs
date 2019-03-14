@@ -34,14 +34,14 @@ namespace DolphEngine.Eco.Handlers
                 }
 
                 // Figure out which step of the animation sequence we're in based on the current time
-                long currentAnimationTick = currentGameTick - anim.StartingTick;
-                if (currentAnimationTick < 0)
+                long currentAnimationMs = (currentGameTick - anim.StartingTick) / TimeSpan.TicksPerMillisecond;
+                if (currentAnimationMs < 0)
                 {
                     // If the game time hasn't reached the animation's starting tick yet, do not draw the sprite
                     continue;
                 }
 
-                long sequenceIndex = currentAnimationTick / anim.DurationPerFrame;
+                long sequenceIndex = currentAnimationMs / anim.DurationPerFrame;
 
                 // Get an adjusted value for when the sequence has been exceeded
                 int sequenceIndexAdjusted;
