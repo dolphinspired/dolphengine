@@ -1,33 +1,36 @@
-﻿using System.Collections.Generic;
-using DolphEngine.Eco;
+﻿using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
-using DolphEngine.MonoGame.Eco.Components;
+using DolphEngine.Graphics.Directives;
+using DolphEngine.MonoGame.Extensions;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace DolphEngine.MonoGame.Eco.Handlers
 {
-    public class DrawHandler : EcosystemHandler<DrawComponent>
+    public partial class DrawDirectiveHandler : EcosystemHandler<DrawComponent>
     {
         private const float FZero = 0.000f;
         private const float FOne = 1.000f;
 
-        public DrawHandler(SpriteBatch sb, Entity camera)
-        {
-            this.SpriteBatch = sb;
-            this.Camera = camera;
-        }
-
         public SpriteBatch SpriteBatch;
-
+        public ContentManager Content;
         public Entity Camera;
 
         public Color BackgroundColor = Color.CornflowerBlue;
 
+        public DrawDirectiveHandler(SpriteBatch spriteBatch, ContentManager contentManager, Entity camera)
+        {
+            this.SpriteBatch = spriteBatch;
+            this.Content = contentManager;
+            this.Camera = camera;
+        }
+
         public override void Draw(IEnumerable<Entity> entities)
         {
             var cameraSize = this.Camera.GetComponentOrDefault<SizeComponent2d>();
-            
+
             if (cameraSize == null || cameraSize.Width <= 0 || cameraSize.Height <= 0)
             {
                 // If the camera is zero-size, nothing can be drawn, but we still need to clear out the last frame
@@ -69,25 +72,42 @@ namespace DolphEngine.MonoGame.Eco.Handlers
 
             foreach (var entity in entities)
             {
-                var drawDelegates = entity.GetComponent<DrawComponent>().DrawDelegates;
+                var drawDirectives = entity.GetComponent<DrawComponent>().Directives;
 
-                if (drawDelegates == null || drawDelegates.Count == 0)
+                if (drawDirectives.Count == 0)
                 {
                     // There is nothing to draw for this entity
                     continue;
                 }
 
-                foreach (var drawDelegate in drawDelegates)
+                foreach (var directive in drawDirectives)
                 {
                     // Invoke the draw action using the camera-transformed SpriteBatch
-                    drawDelegate(this.SpriteBatch);
+                    this.RouteDirective(directive);
                 }
 
                 // Remove all delegates once they've been drawn so that they won't be drawn on the next frame
-                drawDelegates.Clear();
+                drawDirectives.Clear();
             }
 
             this.SpriteBatch.End();
+        }
+
+        private void RouteDirective(object directive)
+        {
+            var type = directive.GetType();
+            if (type == typeof(SpriteDirective))
+            {
+                var sd = (SpriteDirective)directive;
+                var texture = this.Content.Load<Texture2D>(sd.TextureAssetName);
+                this.SpriteBatch.Draw(texture, sd.Destination.ToRectangle(), sd.Source.ToRectangle(), Color.White, sd.Rotation, Vector2.Zero, SpriteEffects.None, 0);
+            }
+            if (type == typeof(TextDirective))
+            {
+                var td = (TextDirective)directive;
+                var font = this.Content.Load<SpriteFont>(td.FontAssetName);
+                this.SpriteBatch.DrawString(font, td.Text, td.Destination.ToVector2(), Color.White);
+            }
         }
     }
 }

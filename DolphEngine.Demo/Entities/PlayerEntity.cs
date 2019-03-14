@@ -1,6 +1,5 @@
 ﻿using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
-using DolphEngine.MonoGame.Eco.Components;
 using System.Collections.Generic;
 
 namespace DolphEngine.Demo.Entities
@@ -12,7 +11,9 @@ namespace DolphEngine.Demo.Entities
             this.AddComponent<PositionComponent2d>()
                 .AddComponent<SpeedComponent2d>()
                 .AddComponent<DrawComponent>()
-                .AddComponent<AnimatedSpriteComponent>()
+                .AddComponent<SpriteComponent>()
+                .AddComponent<SpriteAtlasComponent>()
+                .AddComponent<SpriteAnimationComponent>()
                 .AddComponent<DrawStateComponent>()
                 .AddComponent<TextComponent>();
 
@@ -34,7 +35,11 @@ namespace DolphEngine.Demo.Entities
 
         public SpeedComponent2d Speed => this.GetComponent<SpeedComponent2d>();
 
-        public AnimatedSpriteComponent Animation => this.GetComponent<AnimatedSpriteComponent>();
+        public SpriteComponent Sprite => this.GetComponent<SpriteComponent>();
+
+        public SpriteAtlasComponent Atlas => this.GetComponent<SpriteAtlasComponent>();
+
+        public SpriteAnimationComponent Animation => this.GetComponent<SpriteAnimationComponent>();
 
         public DrawStateComponent DrawState => this.GetComponent<DrawStateComponent>();
 

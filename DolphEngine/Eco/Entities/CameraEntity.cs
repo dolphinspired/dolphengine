@@ -1,7 +1,6 @@
-﻿using DolphEngine.Eco;
-using DolphEngine.Eco.Components;
+﻿using DolphEngine.Eco.Components;
 
-namespace DolphEngine.MonoGame.Eco.Entities
+namespace DolphEngine.Eco.Entities
 {
     public class CameraEntity : Entity
     {

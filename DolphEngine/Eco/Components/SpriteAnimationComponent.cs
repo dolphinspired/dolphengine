@@ -1,19 +1,19 @@
 ﻿using System.Collections.Generic;
 
-namespace DolphEngine.MonoGame.Eco.Components
+namespace DolphEngine.Eco.Components
 {
-    public class AnimatedSpriteComponent : AtlasSpriteComponent
+    public class SpriteAnimationComponent : Component
     {
         public long StartingTick;
 
         public long DurationPerFrame;
-        
+
         public List<int> Sequence;
 
-        public AnimatedSpriteBehavior Behavior;
+        public SpriteAnimationBehavior Behavior;
     }
 
-    public enum AnimatedSpriteBehavior
+    public enum SpriteAnimationBehavior
     {
         Loop = 0,
 

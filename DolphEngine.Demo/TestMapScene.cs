@@ -2,19 +2,16 @@
 using DolphEngine.Demo.Handlers;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
+using DolphEngine.Eco.Entities;
+using DolphEngine.Eco.Handlers;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
 using DolphEngine.Input.Controls;
-using DolphEngine.MonoGame;
-using DolphEngine.MonoGame.Eco.Components;
-using DolphEngine.MonoGame.Eco.Entities;
 using DolphEngine.MonoGame.Eco.Handlers;
 using DolphEngine.MonoGame.Input;
 using DolphEngine.Scenery;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 
 namespace DolphEngine.Demo
 {
@@ -77,30 +74,29 @@ namespace DolphEngine.Demo
 
         private void LoadMap()
         {
-            var tileset = Atlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/iso_tiles_32_single_v3"), 4, 4);
+            var tileset = "Assets/iso_tiles_32_single_v3";
+            var tileSize = new Size2d(64, 49);
             var start = new Position2d(200, 20);
+
+            int xShift = 32;
+            int yShift = 16;
 
             var i = 0;
             var row = 0;
             foreach (var tilerow in this.TestBoard)
             {
-                var row_x = start.X - row * 32;
-                var row_y = start.Y + row * 16;
+                var row_x = start.X - row * xShift;
+                var row_y = start.Y + row * yShift;
 
                 var col = 0;
                 foreach (var tilevalue in tilerow)
                 {
-                    var x = row_x + col * 32;
-                    var y = row_y + col * 16;
-
-                    var sprite = new AtlasSpriteComponent
-                    {
-                        Atlas = tileset,
-                        CurrentFrame = tilevalue
-                    };
+                    var x = row_x + col * xShift;
+                    var y = row_y + col * yShift;
 
                     this.Ecosystem.AddEntity(new Entity($"Tile_{i++}")
-                        .AddComponent(sprite)
+                        .AddComponent(new SpriteComponent { TextureAssetName = tileset })
+                        .AddComponent(new SpriteAtlasComponent(tileSize, 4, 4) { Index = tilevalue })
                         .AddComponent<DrawComponent>()
                         .AddComponent(new PositionComponent2d(x, y)));
 
@@ -115,10 +111,11 @@ namespace DolphEngine.Demo
         {
             this.Player = new PlayerEntity();
             this.Player.Position.Set(30, 50);
-            this.Player.Animation.Atlas = Atlas.FromSpritesheet(this.Content.Load<Texture2D>("Assets/Alphonse"), 6, 4);
+            this.Player.Sprite.TextureAssetName = "Assets/Alphonse";
+            this.Player.RemoveComponent<SpriteAtlasComponent>().AddComponent(new SpriteAtlasComponent(new Size2d(32, 64), 6, 4));
             //this.Player.Animation.Color = new Color(255, 0, 0);
             this.Player.Text.Text = "Alphonse";
-            this.Player.Text.SpriteFont = this.Content.Load<SpriteFont>("Debug");
+            this.Player.Text.FontAssetName = "Debug";
 
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
             this.Camera.Pan(240, 120);
@@ -131,9 +128,9 @@ namespace DolphEngine.Demo
                 .AddHandler<SpeedHandler2d>()
                 .AddHandler<DrawStateHandler>()
                 .AddHandler<SpriteHandler>()
-                .AddHandler<AtlasSpriteHandler>()
-                .AddHandler(new AnimatedSpriteHandler(this.GameTimer))
-                .AddHandler(new DrawHandler(this.SpriteBatch, this.Camera))
+                .AddHandler<SpriteAtlasHandler>()
+                .AddHandler(new SpriteAnimationHandler(this.GameTimer))
+                .AddHandler(new DrawDirectiveHandler(this.SpriteBatch, this.Content, this.Camera))
                 .AddHandler<TextHandler>();
         }
 
@@ -229,7 +226,7 @@ namespace DolphEngine.Demo
                 DebugLogger.EmptyLine,
                 () => $"Speed: ({this.Player.Speed.X}, {this.Player.Speed.Y})",
                 () => $"X: {this.Player.Position.X}, Y: {this.Player.Position.Y}",
-                () => $"Width: {this.Player.Animation.SourceRect?.Width}, Height: {this.Player.Animation.SourceRect?.Height}",
+                () => $"Width: {this.Player.Sprite.SourceRect?.Width}, Height: {this.Player.Sprite.SourceRect?.Height}",
                 DebugLogger.EmptyLine,
                 () => "Camera info:",
                 DebugLogger.EmptyLine,

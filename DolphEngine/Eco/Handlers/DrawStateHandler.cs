@@ -1,7 +1,6 @@
-﻿using DolphEngine.Eco;
-using DolphEngine.MonoGame.Eco.Components;
+﻿using DolphEngine.Eco.Components;
 
-namespace DolphEngine.MonoGame.Eco.Handlers
+namespace DolphEngine.Eco.Handlers
 {
     public class DrawStateHandler : EcosystemHandler<DrawStateComponent>
     {
@@ -9,16 +8,16 @@ namespace DolphEngine.MonoGame.Eco.Handlers
         {
             var state = entity.GetComponent<DrawStateComponent>();
 
-            if (entity.TryGetComponent<AtlasSpriteComponent>(out var atlas))
+            if (entity.TryGetComponent<SpriteAtlasComponent>(out var atlas))
             {
                 if (state.FrameStates != null && state.FrameStates.TryGetValue(state.State, out var frame))
                 {
                     // Set the current atlas frame to the one mapped to the entity's current state
-                    atlas.CurrentFrame = frame;
+                    atlas.Index = frame;
                 }
             }
 
-            if (entity.TryGetComponent<AnimatedSpriteComponent>(out var anim))
+            if (entity.TryGetComponent<SpriteAnimationComponent>(out var anim))
             {
                 if (state.SequenceStates != null && state.SequenceStates.TryGetValue(state.State, out var sequence))
                 {

@@ -1,7 +1,6 @@
-﻿using DolphEngine.Eco;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace DolphEngine.MonoGame.Eco.Components
+namespace DolphEngine.Eco.Components
 {
     public class DrawStateComponent : Component
     {
