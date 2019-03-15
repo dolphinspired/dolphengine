@@ -9,28 +9,26 @@ namespace DolphEngine.Scenery
         public readonly Ecosystem Ecosystem;
         public readonly Keycosystem Keycosystem;
 
-        private long CurrentGameTicks;
-        protected readonly Func<long> GameTimer;
+        protected readonly GameTimer Timer;
 
-        public Scene(Ecosystem ecosystem, Keycosystem keycosystem)
+        public Scene(GameTimer timer, Ecosystem ecosystem, Keycosystem keycosystem)
         {
+            this.Timer = timer;
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
-            this.GameTimer = () => this.CurrentGameTicks;
         }
 
         public abstract void Load();
 
         public abstract void Unload();
 
-        public virtual void Update(long totalGameTicks)
+        public virtual void Update()
         {
-            this.CurrentGameTicks = totalGameTicks;
-            this.Keycosystem.Update(totalGameTicks);
+            this.Keycosystem.Update();
             this.Ecosystem.Update();
         }
 
-        public virtual void Draw(long totalGameTicks)
+        public virtual void Draw()
         {
             this.Ecosystem.Draw();
         }
@@ -42,8 +40,8 @@ namespace DolphEngine.Scenery
 
         void Unload();
 
-        void Update(long totalGameTicks);
+        void Update();
 
-        void Draw(long totalGameTicks);
+        void Draw();
     }
 }

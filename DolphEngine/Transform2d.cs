@@ -9,6 +9,8 @@
             this.Rotation = rotation;
         }
 
+        public static Transform2d None = new Transform2d(0, 0, 1.000f, 1.000f, 0);
+
         public Position2d? Offset;
 
         public Vector2d? Scale;

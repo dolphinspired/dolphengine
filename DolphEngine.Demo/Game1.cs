@@ -5,7 +5,6 @@ using DolphEngine.Scenery;
 using DolphEngine.Tools;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
 namespace DolphEngine.Demo
 {
@@ -14,8 +13,7 @@ namespace DolphEngine.Demo
         GraphicsDeviceManager Graphics;
         SpriteBatch SpriteBatch;
 
-        private GameTime _currentGameTime;
-        private readonly Func<long> GameTimer;
+        private readonly GameTimer GameTimer;
 
         private static FpsCounter FpsCounter;
         private static Vector2 FpsPosition;
@@ -29,16 +27,15 @@ namespace DolphEngine.Demo
             this.Graphics = new GraphicsDeviceManager(this);
             this.Content.RootDirectory = "Content";
             this.IsMouseVisible = true;
-
-            // Measuring game time in milliseconds until I need something more precise
-            this.GameTimer = () => this._currentGameTime.TotalGameTime.Ticks;
+            
+            this.GameTimer = new GameTimer();
 
             FpsCounter = new FpsCounter(this.GameTimer, 60);
             FpsPosition = new Vector2(10, Graphics.PreferredBackBufferHeight - 22);
 
             this.Director = new Director();
             this.Debug = new DebugLogger { Hidden = true };
-            this.GlobalKeycosystem = new Keycosystem(new MonoGameObserver().UseKeyboard().UseMouse());
+            this.GlobalKeycosystem = new Keycosystem(this.GameTimer, new MonoGameObserver().UseKeyboard().UseMouse());
         }
 
         protected override void Initialize()
@@ -53,23 +50,23 @@ namespace DolphEngine.Demo
             this.SpriteBatch = new SpriteBatch(GraphicsDevice);
             this.Debug.Font = this.Content.Load<SpriteFont>("Debug");
 
-            this.Director.AddScene("test-map", new TestMapScene(this.Content, this.SpriteBatch, this.Debug, this.Graphics.PreferredBackBufferWidth, this.Graphics.PreferredBackBufferHeight));
+            this.Director.AddScene("test-map", new TestMapScene(this.GameTimer, this.Content, this.SpriteBatch, this.Debug, this.Graphics.PreferredBackBufferWidth, this.Graphics.PreferredBackBufferHeight));
             this.Director.LoadScene("test-map");
         }
 
         protected override void Update(GameTime gameTime)
         {
-            this._currentGameTime = gameTime;
+            this.GameTimer.Update(gameTime.ElapsedGameTime);
             
-            this.GlobalKeycosystem.Update(this.GameTimer());
-            this.Director.CurrentScene.Update(gameTime.TotalGameTime.Ticks);
+            this.GlobalKeycosystem.Update();
+            this.Director.CurrentScene.Update();
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            this.Director.CurrentScene.Draw(gameTime.TotalGameTime.Ticks);
+            this.Director.CurrentScene.Draw();
             this.Debug.Render(SpriteBatch);
             
             SpriteBatch.Begin();
@@ -93,7 +90,7 @@ namespace DolphEngine.Demo
                 .AddControlReaction(keyboard, k => k.F2.JustPressed, k => this.Debug.NextPage());
 
             this.Debug.AddPage(
-                () => $"CurrentGameTick: {this.GameTimer()}",
+                () => $"CurrentGameTick: {this.GameTimer.Total.Ticks}",
                 DebugLogger.EmptyLine,
                 () => "Control A:",
                 () => $"IsPressed: {keyboard.A.IsPressed}, LastTickPressed: {keyboard.A.LastTickPressed}, LastTickReleased: {keyboard.A.LastTickReleased}",

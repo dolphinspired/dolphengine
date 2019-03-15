@@ -14,6 +14,8 @@
             this.Height = height;
         }
 
+        public static Rect2d Zero = new Rect2d(0, 0, 0, 0);
+
         public int X;
 
         public int Y;

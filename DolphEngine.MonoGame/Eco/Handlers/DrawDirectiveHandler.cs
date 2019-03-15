@@ -99,7 +99,7 @@ namespace DolphEngine.MonoGame.Eco.Handlers
             if (type == typeof(SpriteDirective))
             {
                 var sd = (SpriteDirective)directive;
-                var texture = this.Content.Load<Texture2D>(sd.TextureAssetName);
+                var texture = this.Content.Load<Texture2D>(sd.Asset);
                 this.SpriteBatch.Draw(texture, sd.Destination.ToRectangle(), sd.Source.ToRectangle(), Color.White, sd.Rotation, Vector2.Zero, SpriteEffects.None, 0);
             }
             if (type == typeof(TextDirective))

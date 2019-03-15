@@ -1,10 +1,16 @@
-﻿namespace DolphEngine.Eco.Components
+﻿using DolphEngine.Graphics.Sprites;
+
+namespace DolphEngine.Eco.Components
 {
     public class SpriteComponent : Component
     {
-        public string TextureAssetName;
+        public SpriteAnimationLibrary Animation;
 
-        public Rect2d? SourceRect;
+        public string AnimationSequence;
+
+        public SpriteSheet SpriteSheet;
+
+        public int SpriteSheetIndex;
 
         public Transform2d? Transform;
     }

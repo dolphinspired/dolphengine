@@ -2,13 +2,14 @@
 using DolphEngine.Input.State;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DolphEngine.Input
 {
     public class Keycosystem
     {
         #region Private properties, indexes
+
+        private readonly GameTimer _timer;
 
         // An implementation of code that will update each key's state during the update loop
         private readonly IKeyStateObserver _observer;
@@ -33,8 +34,9 @@ namespace DolphEngine.Input
 
         #region Constructors
 
-        public Keycosystem(IKeyStateObserver observer)
+        public Keycosystem(GameTimer timer, IKeyStateObserver observer)
         {
+            this._timer = timer;
             this._observer = observer;
         }
 
@@ -42,9 +44,9 @@ namespace DolphEngine.Input
 
         #region Update
 
-        public void Update(long gameTick)
+        public void Update()
         {
-            this._inputState.CurrentTimestamp = gameTick;
+            this._inputState.CurrentTimestamp = this._timer.Total.Ticks;
             
             // First, update the state of the observer (i.e. "initialize" it for this frame)
             this._observer.UpdateState();

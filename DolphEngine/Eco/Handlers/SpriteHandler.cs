@@ -1,5 +1,6 @@
 ﻿using DolphEngine.Eco.Components;
 using DolphEngine.Graphics.Directives;
+using System;
 
 namespace DolphEngine.Eco.Handlers
 {
@@ -10,13 +11,17 @@ namespace DolphEngine.Eco.Handlers
             var sprite = entity.GetComponent<SpriteComponent>();
             var draw = entity.GetComponent<DrawComponent>();
 
-            if (sprite.TextureAssetName == null || sprite.SourceRect == null)
+            if (sprite.SpriteSheet == null)
             {
-                // Can't draw without a specified asset or a specified source region
+                // If there is no spritesheet to reference, nothing can be drawn
                 return;
             }
 
-            Rect2d src = sprite.SourceRect.Value;
+            if (!TryGetAnimationFrame(sprite, out Rect2d src) && !TryGetSpritesheetFrame(sprite, out src))
+            {
+                // Unable to get a source frame, nothing to draw
+                return;
+            }
 
             // DEFAULT: Draw sprite at 0,0
             Rect2d dest = new Rect2d();
@@ -54,11 +59,45 @@ namespace DolphEngine.Eco.Handlers
 
             draw.Directives.Add(new SpriteDirective
             {
-                TextureAssetName = sprite.TextureAssetName,
+                Asset = sprite.SpriteSheet.Name,
                 Source = src,
                 Destination = dest,
                 Rotation = sprite.Transform?.Rotation ?? 0.000f // Rotation transform will be applied by the drawing engine
             });
+        }
+
+        private static bool TryGetSpritesheetFrame(SpriteComponent sprite, out Rect2d src)
+        {
+            try
+            {
+                src = sprite.SpriteSheet.Frames[sprite.SpriteSheetIndex];
+                return true;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // An invalid frame was specified, nothing to draw
+                src = Rect2d.Zero;
+                return false;
+            }
+        }
+
+        private static bool TryGetAnimationFrame(SpriteComponent sprite, out Rect2d src)
+        {
+            if (sprite.Animation == null || sprite.AnimationSequence == null)
+            {
+                // No animation info has been added to the component
+                src = Rect2d.Zero;
+                return false;
+            }
+
+            if (!sprite.Animation.TryGetAnimation(sprite.AnimationSequence, out var anim))
+            {
+                // No animation sequence exists by the name specified on the component
+                src = Rect2d.Zero;
+                return false;
+            }
+
+            return anim.TryGetCurrentFrame(out src);
         }
     }
 }

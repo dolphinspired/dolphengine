@@ -4,6 +4,7 @@ using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
+using DolphEngine.Graphics.Sprites;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
 using DolphEngine.Input.Controls;
@@ -12,6 +13,7 @@ using DolphEngine.MonoGame.Input;
 using DolphEngine.Scenery;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace DolphEngine.Demo
 {
@@ -40,8 +42,8 @@ namespace DolphEngine.Demo
             new int[] { 0, 2, 0, 3, 3, 1 },
         };
 
-        public TestMapScene(ContentManager content, SpriteBatch spriteBatch, DebugLogger debug, int sceneViewWidth, int sceneViewHeight)
-            : base(new Ecosystem(), GetKeycosystem())
+        public TestMapScene(GameTimer timer, ContentManager content, SpriteBatch spriteBatch, DebugLogger debug, int sceneViewWidth, int sceneViewHeight)
+            : base(timer, new Ecosystem(), GetKeycosystem(timer))
         {
             this.Content = content;
             this.SpriteBatch = spriteBatch;
@@ -54,10 +56,10 @@ namespace DolphEngine.Demo
             this._mouse = new StandardMouse();
         }
 
-        private static Keycosystem GetKeycosystem()
+        private static Keycosystem GetKeycosystem(GameTimer timer)
         {
             var observer = new MonoGameObserver().UseKeyboard().UseMouse();
-            return new Keycosystem(observer);
+            return new Keycosystem(timer, observer);
         }
 
         public override void Load()
@@ -74,8 +76,7 @@ namespace DolphEngine.Demo
 
         private void LoadMap()
         {
-            var tileset = "Assets/iso_tiles_32_single_v3";
-            var tileSize = new Size2d(64, 49);
+            var tileSize = Sprites.Tiles.Frames[0].Size;
             var start = new Position2d(200, 20);
 
             int xShift = 32;
@@ -94,11 +95,11 @@ namespace DolphEngine.Demo
                     var x = row_x + col * xShift;
                     var y = row_y + col * yShift;
 
-                    this.Ecosystem.AddEntity(new Entity($"Tile_{i++}")
-                        .AddComponent(new SpriteComponent { TextureAssetName = tileset })
-                        .AddComponent(new SpriteAtlasComponent(tileSize, 4, 4) { Index = tilevalue })
-                        .AddComponent<DrawComponent>()
-                        .AddComponent(new PositionComponent2d(x, y)));
+                    this.Ecosystem
+                        .AddEntity(new Entity($"Tile_{i++}")
+                        .AddComponent(new PositionComponent2d(x, y))
+                        .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, SpriteSheetIndex = tilevalue })
+                        .AddComponent<DrawComponent>());
 
                     col++;
                 }
@@ -111,9 +112,6 @@ namespace DolphEngine.Demo
         {
             this.Player = new PlayerEntity();
             this.Player.Position.Set(30, 50);
-            this.Player.Sprite.TextureAssetName = "Assets/Alphonse";
-            this.Player.RemoveComponent<SpriteAtlasComponent>().AddComponent(new SpriteAtlasComponent(new Size2d(32, 64), 6, 4));
-            //this.Player.Animation.Color = new Color(255, 0, 0);
             this.Player.Text.Text = "Alphonse";
             this.Player.Text.FontAssetName = "Debug";
 
@@ -126,44 +124,47 @@ namespace DolphEngine.Demo
 
             this.Ecosystem
                 .AddHandler<SpeedHandler2d>()
-                .AddHandler<DrawStateHandler>()
                 .AddHandler<SpriteHandler>()
-                .AddHandler<SpriteAtlasHandler>()
-                .AddHandler(new SpriteAnimationHandler(this.GameTimer))
-                .AddHandler(new DrawDirectiveHandler(this.SpriteBatch, this.Content, this.Camera))
-                .AddHandler<TextHandler>();
+                .AddHandler<TextHandler>()
+                .AddHandler(new DrawDirectiveHandler(this.SpriteBatch, this.Content, this.Camera));
         }
 
         private void LoadControls()
         {
             this.Keycosystem
                 .AddControlReaction(this._keyboard, k => k.ArrowKeys.IsPressed, k => {
-                    var speed = this.Player.Speed;
-                    var state = this.Player.DrawState;
+                    var p = this.Player;
+                    var startingAnim = p.Sprite.AnimationSequence;
                     
                     if ((k.ArrowKeys.Direction & Direction.Up) > 0)
                     {
-                        speed.X = 2;
-                        speed.Y = -1;
-                        state.State = (int)PlayerDrawStates.WalkNorth;
+                        p.Speed.X = 2;
+                        p.Speed.Y = -1;
+                        p.Sprite.AnimationSequence = "WalkNorth";
                     }
                     if ((k.ArrowKeys.Direction & Direction.Right) > 0)
                     {
-                        speed.X = 2;
-                        speed.Y = 1;
-                        state.State = (int)PlayerDrawStates.WalkEast;
+                        p.Speed.X = 2;
+                        p.Speed.Y = 1;
+                        p.Sprite.AnimationSequence = "WalkEast";
                     }
                     if ((k.ArrowKeys.Direction & Direction.Down) > 0)
                     {
-                        speed.X = -2;
-                        speed.Y = 1;
-                        state.State = (int)PlayerDrawStates.WalkSouth;
+                        p.Speed.X = -2;
+                        p.Speed.Y = 1;
+                        p.Sprite.AnimationSequence = "WalkSouth";
                     }
                     if ((k.ArrowKeys.Direction & Direction.Left) > 0)
                     {
-                        speed.X = -2;
-                        speed.Y = -1;
-                        state.State = (int)PlayerDrawStates.WalkWest;
+                        p.Speed.X = -2;
+                        p.Speed.Y = -1;
+                        p.Sprite.AnimationSequence = "WalkWest";
+                    }
+
+                    if (startingAnim != p.Sprite.AnimationSequence)
+                    {
+                        var anim = p.Sprite.Animation.GetAnimation(p.Sprite.AnimationSequence);
+                        anim.Play(this.Timer, TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
                     }
                 })
                 .AddControlReaction(this._keyboard, k => !k.ArrowKeys.IsPressed, k => {
@@ -172,23 +173,34 @@ namespace DolphEngine.Demo
                     speed.Y = 0;
                 })
                 .AddControlReaction(this._keyboard, k => k.ArrowKeys.JustReleased, k => {
-                    var state = this.Player.DrawState;
+                    var p = this.Player;
+                    bool play = false;
 
-                    if (state.State == (int)PlayerDrawStates.WalkNorth)
+                    if (p.Sprite.AnimationSequence == "WalkNorth")
                     {
-                        state.State = (int)PlayerDrawStates.IdleNorth;
+                        p.Sprite.AnimationSequence = "IdleNorth";
+                        play = true;
                     }
-                    else if (state.State == (int)PlayerDrawStates.WalkEast)
+                    else if (p.Sprite.AnimationSequence == "WalkEast")
                     {
-                        state.State = (int)PlayerDrawStates.IdleEast;
+                        p.Sprite.AnimationSequence = "IdleEast";
+                        play = true;
                     }
-                    else if (state.State == (int)PlayerDrawStates.WalkSouth)
+                    else if (p.Sprite.AnimationSequence == "WalkSouth")
                     {
-                        state.State = (int)PlayerDrawStates.IdleSouth;
+                        p.Sprite.AnimationSequence = "IdleSouth";
+                        play = true;
                     }
-                    else if (state.State == (int)PlayerDrawStates.WalkWest)
+                    else if (p.Sprite.AnimationSequence == "WalkWest")
                     {
-                        state.State = (int)PlayerDrawStates.IdleWest;
+                        p.Sprite.AnimationSequence = "IdleWest";
+                        play = true;
+                    }
+
+                    if (play)
+                    {
+                        var anim = p.Sprite.Animation.GetAnimation(p.Sprite.AnimationSequence);
+                        anim.Play(this.Timer, TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
                     }
                 });
 
@@ -197,19 +209,19 @@ namespace DolphEngine.Demo
                 {
                     if ((k.WASD.Direction & Direction.Up) > 0)
                     {
-                        this.Camera.Transform.Offset.Y += 2;
+                        this.Camera.Transform.Offset.Y += 8;
                     }
                     if ((k.WASD.Direction & Direction.Right) > 0)
                     {
-                        this.Camera.Transform.Offset.X -= 2;
+                        this.Camera.Transform.Offset.X -= 8;
                     }
                     if ((k.WASD.Direction & Direction.Down) > 0)
                     {
-                        this.Camera.Transform.Offset.Y -= 2;
+                        this.Camera.Transform.Offset.Y -= 8;
                     }
                     if ((k.WASD.Direction & Direction.Left) > 0)
                     {
-                        this.Camera.Transform.Offset.X += 2;
+                        this.Camera.Transform.Offset.X += 8;
                     }
                 })
                 .AddControlReaction(this._mouse, m => m.Scroll.Y.JustMoved, m =>
@@ -226,7 +238,7 @@ namespace DolphEngine.Demo
                 DebugLogger.EmptyLine,
                 () => $"Speed: ({this.Player.Speed.X}, {this.Player.Speed.Y})",
                 () => $"X: {this.Player.Position.X}, Y: {this.Player.Position.Y}",
-                () => $"Width: {this.Player.Sprite.SourceRect?.Width}, Height: {this.Player.Sprite.SourceRect?.Height}",
+                () => $"Width: {this.Player.Sprite.SpriteSheet.Frames[0].Width}, Height: {this.Player.Sprite.SpriteSheet.Frames[0].Height}",
                 DebugLogger.EmptyLine,
                 () => "Camera info:",
                 DebugLogger.EmptyLine,

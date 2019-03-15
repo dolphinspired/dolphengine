@@ -2,7 +2,7 @@
 {
     public struct SpriteDirective
     {
-        public string TextureAssetName;
+        public string Asset;
 
         public Rect2d Source;
 
