@@ -36,8 +36,6 @@ namespace DolphEngine.Graphics.Sprites
         public TimeSpan FrameDuration { get; protected set; }
         public TimeSpan TotalDuration { get; protected set; }
 
-        private GameTimer _timer;
-
         #endregion
 
         #region Static methods
@@ -58,7 +56,7 @@ namespace DolphEngine.Graphics.Sprites
 
         #region Public methods
 
-        public void Play(GameTimer timer, TimeSpan duration, DurationMode mode, AnimationReplayMode replayMode)
+        public void Play(TimeSpan duration, DurationMode mode, AnimationReplayMode replayMode)
         {
             if (duration <= TimeSpan.Zero)
             {
@@ -70,10 +68,8 @@ namespace DolphEngine.Graphics.Sprites
                 throw new InvalidOperationException($"Cannot play an animation with no frames specified.");
             }
 
-            this._timer = timer;
-
             this.IsPlaying = true;
-            this.StartTime = timer.Total;
+            this.StartTime = GameTimer.Global.Total;
             this.ReplayMode = replayMode;
 
             switch(mode)
@@ -99,8 +95,6 @@ namespace DolphEngine.Graphics.Sprites
 
         public void Stop()
         {
-            this._timer = null;
-
             this.IsPlaying = false;
             this.StartTime = TimeSpan.Zero;
             this.TotalDuration = TimeSpan.Zero;
@@ -115,7 +109,7 @@ namespace DolphEngine.Graphics.Sprites
                 return false;
             }
 
-            var currentTime = this._timer.Total;
+            var currentTime = GameTimer.Global.Total;
             var sequenceIndex = (int)((currentTime - this.StartTime) / this.FrameDuration);
 
             int sequenceIndexAdjusted;

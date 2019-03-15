@@ -9,8 +9,6 @@ namespace DolphEngine.Input
     {
         #region Private properties, indexes
 
-        private readonly GameTimer _timer;
-
         // An implementation of code that will update each key's state during the update loop
         private readonly IKeyStateObserver _observer;
 
@@ -34,9 +32,8 @@ namespace DolphEngine.Input
 
         #region Constructors
 
-        public Keycosystem(GameTimer timer, IKeyStateObserver observer)
+        public Keycosystem(IKeyStateObserver observer)
         {
-            this._timer = timer;
             this._observer = observer;
         }
 
@@ -46,7 +43,7 @@ namespace DolphEngine.Input
 
         public void Update()
         {
-            this._inputState.CurrentTimestamp = this._timer.Total.Ticks;
+            this._inputState.CurrentTimestamp = GameTimer.Global.Total.Ticks;
             
             // First, update the state of the observer (i.e. "initialize" it for this frame)
             this._observer.UpdateState();

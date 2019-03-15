@@ -12,14 +12,19 @@ namespace DolphEngine
             this.Total = start;
         }
 
-        public void Update(TimeSpan elapsed)
+        public static readonly GameTimer Global = new GameTimer();
+
+        public void Advance(TimeSpan elapsed)
         {
             this.Elapsed = elapsed;
             this.Total += elapsed;
+            this.Frames++;
         }
 
         public TimeSpan Elapsed { get; private set; }
 
         public TimeSpan Total { get; private set; }
+
+        public int Frames { get; private set; }
     }
 }

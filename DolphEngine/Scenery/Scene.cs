@@ -9,11 +9,8 @@ namespace DolphEngine.Scenery
         public readonly Ecosystem Ecosystem;
         public readonly Keycosystem Keycosystem;
 
-        protected readonly GameTimer Timer;
-
-        public Scene(GameTimer timer, Ecosystem ecosystem, Keycosystem keycosystem)
+        public Scene(Ecosystem ecosystem, Keycosystem keycosystem)
         {
-            this.Timer = timer;
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
         }

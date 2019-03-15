@@ -13,8 +13,6 @@ namespace DolphEngine.Demo
         GraphicsDeviceManager Graphics;
         SpriteBatch SpriteBatch;
 
-        private readonly GameTimer GameTimer;
-
         private static FpsCounter FpsCounter;
         private static Vector2 FpsPosition;
 
@@ -27,15 +25,13 @@ namespace DolphEngine.Demo
             this.Graphics = new GraphicsDeviceManager(this);
             this.Content.RootDirectory = "Content";
             this.IsMouseVisible = true;
-            
-            this.GameTimer = new GameTimer();
 
-            FpsCounter = new FpsCounter(this.GameTimer, 60);
+            FpsCounter = new FpsCounter(60);
             FpsPosition = new Vector2(10, Graphics.PreferredBackBufferHeight - 22);
 
             this.Director = new Director();
             this.Debug = new DebugLogger { Hidden = true };
-            this.GlobalKeycosystem = new Keycosystem(this.GameTimer, new MonoGameObserver().UseKeyboard().UseMouse());
+            this.GlobalKeycosystem = new Keycosystem(new MonoGameObserver().UseKeyboard().UseMouse());
         }
 
         protected override void Initialize()
@@ -50,13 +46,13 @@ namespace DolphEngine.Demo
             this.SpriteBatch = new SpriteBatch(GraphicsDevice);
             this.Debug.Font = this.Content.Load<SpriteFont>("Debug");
 
-            this.Director.AddScene("test-map", new TestMapScene(this.GameTimer, this.Content, this.SpriteBatch, this.Debug, this.Graphics.PreferredBackBufferWidth, this.Graphics.PreferredBackBufferHeight));
+            this.Director.AddScene("test-map", new TestMapScene(this.Content, this.SpriteBatch, this.Debug, this.Graphics.PreferredBackBufferWidth, this.Graphics.PreferredBackBufferHeight));
             this.Director.LoadScene("test-map");
         }
 
         protected override void Update(GameTime gameTime)
         {
-            this.GameTimer.Update(gameTime.ElapsedGameTime);
+            GameTimer.Global.Advance(gameTime.ElapsedGameTime);
             
             this.GlobalKeycosystem.Update();
             this.Director.CurrentScene.Update();
@@ -90,7 +86,7 @@ namespace DolphEngine.Demo
                 .AddControlReaction(keyboard, k => k.F2.JustPressed, k => this.Debug.NextPage());
 
             this.Debug.AddPage(
-                () => $"CurrentGameTick: {this.GameTimer.Total.Ticks}",
+                () => $"GameTime: {GameTimer.Global.Total:g}",
                 DebugLogger.EmptyLine,
                 () => "Control A:",
                 () => $"IsPressed: {keyboard.A.IsPressed}, LastTickPressed: {keyboard.A.LastTickPressed}, LastTickReleased: {keyboard.A.LastTickReleased}",

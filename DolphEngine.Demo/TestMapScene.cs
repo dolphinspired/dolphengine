@@ -42,8 +42,8 @@ namespace DolphEngine.Demo
             new int[] { 0, 2, 0, 3, 3, 1 },
         };
 
-        public TestMapScene(GameTimer timer, ContentManager content, SpriteBatch spriteBatch, DebugLogger debug, int sceneViewWidth, int sceneViewHeight)
-            : base(timer, new Ecosystem(), GetKeycosystem(timer))
+        public TestMapScene(ContentManager content, SpriteBatch spriteBatch, DebugLogger debug, int sceneViewWidth, int sceneViewHeight)
+            : base(new Ecosystem(), GetKeycosystem())
         {
             this.Content = content;
             this.SpriteBatch = spriteBatch;
@@ -56,10 +56,10 @@ namespace DolphEngine.Demo
             this._mouse = new StandardMouse();
         }
 
-        private static Keycosystem GetKeycosystem(GameTimer timer)
+        private static Keycosystem GetKeycosystem()
         {
             var observer = new MonoGameObserver().UseKeyboard().UseMouse();
-            return new Keycosystem(timer, observer);
+            return new Keycosystem(observer);
         }
 
         public override void Load()
@@ -164,7 +164,7 @@ namespace DolphEngine.Demo
                     if (startingAnim != p.Sprite.AnimationSequence)
                     {
                         var anim = p.Sprite.Animation.GetAnimation(p.Sprite.AnimationSequence);
-                        anim.Play(this.Timer, TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
+                        anim.Play(TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
                     }
                 })
                 .AddControlReaction(this._keyboard, k => !k.ArrowKeys.IsPressed, k => {
@@ -200,7 +200,7 @@ namespace DolphEngine.Demo
                     if (play)
                     {
                         var anim = p.Sprite.Animation.GetAnimation(p.Sprite.AnimationSequence);
-                        anim.Play(this.Timer, TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
+                        anim.Play(TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
                     }
                 });
 
