@@ -10,15 +10,7 @@ namespace DolphEngine.Eco
 
         // All entities added to the ecosystem, indexed by id
         private readonly Dictionary<uint, Entity> _entitiesById = new Dictionary<uint, Entity>();
-
-        // All instances of components on all entities across the ecosystem
-        // todo: might not need this, handlers and bitlocks might present a better solution
-        private readonly HashSet<Component> _allComponents = new HashSet<Component>(ReferenceEqualityComparer<Component>.Instance);
-
-        // All components in the ecosystem indexed by their derived type
-        // todo: might not need this, handlers and bitlocks might present a better solution
-        private readonly Dictionary<Type, HashSet<Component>> _componentsByType = new Dictionary<Type, HashSet<Component>>();
-
+        
         // All types of components for which at least one handler has been registered to this ecosystem at some point, paired with the
         // bitPosition by which the type is represented in a BitLock or BitKey
         private readonly Dictionary<Type, ushort> _componentBitPositions = new Dictionary<Type, ushort>();
@@ -237,7 +229,6 @@ namespace DolphEngine.Eco
             // Index the entity by its BitKey
             this.CreateAndIndexBitKey(entity);
 
-            entity.Ecosystem = this;
             return this;
         }        
 
@@ -276,6 +267,11 @@ namespace DolphEngine.Eco
             return this._entitiesById[id];
         }
 
+        public IEnumerable<Entity> GetEntities()
+        {
+            return this._entitiesById.Select(x => x.Value);
+        }
+
         public bool TryGetEntity(uint id, out Entity entity)
         {
             if (!this._entitiesById.TryGetValue(id, out var indexedEntity))
@@ -306,7 +302,6 @@ namespace DolphEngine.Eco
                 this._entitiesByLock[bitLock].Remove(entity);
             }
 
-            entity.Ecosystem = null;
             return this;
         }
 
@@ -339,161 +334,6 @@ namespace DolphEngine.Eco
 
             return this;
         }
-
-        #endregion
-
-        #region Component methods
-
-        public IEnumerable<T> GetComponentsByType<T>() where T : Component
-        {
-            if (!this._componentsByType.TryGetValue(typeof(T), out var componentsByThisType))
-            {
-                return Enumerable.Empty<T>();
-            }
-
-            return componentsByThisType.Select(x => (T)x);
-        }
-
-        public IEnumerable<Entity> GetEntitiesWithComponent<T>() where T : Component
-        {
-            var componentsByThisType = this.GetComponentsByType<T>();
-            if (!componentsByThisType.Any())
-            {
-                return Enumerable.Empty<Entity>();
-            }
-
-            return componentsByThisType.Select(c => c.Entity); // todo: optimize with new index, or filter out dupe entities
-        }
-
-        public bool TryGetComponentForEntity<T>(uint id, out T component) where T : Component
-        {
-            if (!this.TryGetEntity(id, out var indexedEntity))
-            {
-                component = null;
-                return false;
-            }
-
-            if (!indexedEntity.TryGetComponent<T>(out var indexedComponent))
-            {
-                component = null;
-                return false;
-            }
-
-            component = indexedComponent;
-            return true;
-        }
-
-        //public IEnumerable<PositionComponent> GetPositionComponentsInArea(int x, int y, int width, int height)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public IEnumerable<Entity> GetEntitiesInArea(int x, int y, int width, int height)
-        //{
-        //    var positionComponents = this.GetPositionComponentsInArea(x, y, width, height);
-        //    if (!positionComponents.Any())
-        //    {
-        //        return Enumerable.Empty<Entity>();
-        //    }
-
-        //    return positionComponents.Select(c => c.Entity);
-        //}
-
-        #endregion
-
-        #region Notifications (internal)
-        
-        internal void NotifyComponentAttached<T>(Entity entity, T component) where T : Component
-        {
-            // If it's already been indexed, quit now
-            if (this._allComponents.Contains(component))
-            {
-                return;
-            }
-            this._allComponents.Add(component);
-
-            // Index the component by type
-            var type = typeof(T);
-            if (!this._componentsByType.TryGetValue(type, out var componentsByThisType))
-            {
-                componentsByThisType = new HashSet<Component>(ReferenceEqualityComparer<Component>.Instance);
-                this._componentsByType.Add(type, componentsByThisType);
-            }
-            componentsByThisType.Add(component);
-
-            // Mark that this entity needs its BitKey refreshed before the next handler run
-            this._entitiesToRefreshBitKey.Add(entity);
-            
-            //if (component is PositionComponent positionComponent)
-            //{
-            //    var x = positionComponent.X;
-            //    var y = positionComponent.Y;
-
-            //    // Index the component by its current x,y position
-            //    if (!this._positionComponentsByPosition.TryGetValue(x, out var componentsAtThisX))
-            //    {
-            //        componentsAtThisX = new SortedDictionary<int, HashSet<PositionComponent>>();
-            //        this._positionComponentsByPosition.Add(x, componentsAtThisX);
-            //    }
-            //    if (!componentsAtThisX.TryGetValue(y, out var componentsAtThisXY))
-            //    {
-            //        componentsAtThisXY = new HashSet<PositionComponent>(ReferenceEqualityComparer<PositionComponent>.Instance);
-            //        componentsAtThisX.Add(y, componentsAtThisXY);
-            //    }
-            //    componentsAtThisXY.Add(positionComponent);
-
-            //    // Add reverse-reference to see which coordinates this component is currently indexed at
-            //    this._positionComponentCoordinates.Add(positionComponent, new Tuple<int, int>(x, y));
-            //}
-        }
-
-        internal void NotifyComponentDetached<T>(Entity entity, T component) where T : Component
-        {
-            if (!this._allComponents.Contains(component))
-            {
-                return;
-            }
-            this._allComponents.Remove(component);
-
-            // Remove the component from the type index
-            var type = typeof(T);
-            var componentsByThisType = this._componentsByType[type];
-            componentsByThisType.Remove(component);
-            if (!componentsByThisType.Any())
-            {
-                this._componentsByType.Remove(type);
-            }
-
-            // Mark that this entity needs its BitKey refreshed before the next handler run
-            this._entitiesToRefreshBitKey.Add(entity);
-
-            //if (component is PositionComponent positionComponent)
-            //{
-            //    var x = positionComponent.X;
-            //    var y = positionComponent.Y;
-
-            //    // Remove the component from its x,y position index
-            //    var componentsAtThisX = this._positionComponentsByPosition[x];
-            //    var componentsAtThisXY = componentsAtThisX[y];
-            //    componentsAtThisXY.Remove(positionComponent);
-            //    if (!componentsAtThisXY.Any())
-            //    {
-            //        componentsAtThisX.Remove(y);
-            //    }
-            //    if (!componentsAtThisX.Any())
-            //    {
-            //        this._positionComponentsByPosition.Remove(x);
-            //    }
-
-            //    // Remove its reverse-reference as well
-            //    this._positionComponentCoordinates.Remove(positionComponent);
-            //}
-        }
-
-        //internal static void NotifyPositionComponentChanged(PositionComponent positionComponent)
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         #endregion
 

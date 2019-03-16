@@ -33,12 +33,7 @@ namespace DolphEngine.Eco
         /// An descriptivate name for the entity, to help with logging or debugging.
         /// </summary>
         public readonly string Name;
-
-        /// <summary>
-        /// A reference to this entity's <see cref="Ecosystem"/>, if it has been added to one.
-        /// </summary>
-        public Ecosystem Ecosystem { get; internal set; }
-
+        
         #endregion
 
         #region Components
@@ -63,7 +58,6 @@ namespace DolphEngine.Eco
             component.Entity = this;
             this._componentsByType.Add(type, component);
 
-            this.Ecosystem?.NotifyComponentAttached(this, component);
             return this;
         }
 
@@ -79,7 +73,6 @@ namespace DolphEngine.Eco
             component.Entity = null;
             this._componentsByType.Remove(typeof(T));
             
-            this.Ecosystem?.NotifyComponentDetached(this, component as T);
             return this;
         }
 
@@ -240,7 +233,7 @@ namespace DolphEngine.Eco
 
         public override string ToString()
         {
-            return $"[{this.Name}]";
+            return $"{{ id: {this.Id}, name: {this.Name} }}";
         }
 
         #endregion
