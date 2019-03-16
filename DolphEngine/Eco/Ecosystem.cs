@@ -229,6 +229,7 @@ namespace DolphEngine.Eco
             // Index the entity by its BitKey
             this.CreateAndIndexBitKey(entity);
 
+            entity.Ecosystem = this;
             return this;
         }        
 
@@ -302,6 +303,7 @@ namespace DolphEngine.Eco
                 this._entitiesByLock[bitLock].Remove(entity);
             }
 
+            entity.Ecosystem = null;
             return this;
         }
 
@@ -457,6 +459,16 @@ namespace DolphEngine.Eco
             }
 
             return bitKey;
+        }
+
+        #endregion
+
+        #region Notifications (internal)
+
+        internal void NotifyChanged(Entity entity)
+        {
+            // Mark that this entity needs its BitKey refreshed before the next handler run	
+            this._entitiesToRefreshBitKey.Add(entity);
         }
 
         #endregion
