@@ -184,6 +184,8 @@ namespace DolphEngine.Input.Controllers
             this.WASD = new DirectionalPadControl(InputKeys.KeyboardW, InputKeys.KeyboardD, InputKeys.KeyboardS, InputKeys.KeyboardA);
         }
 
+        #region ControlBase implementation
+
         public override void SetInputState(InputState inputState)
         {
             base.SetInputState(inputState);
@@ -207,6 +209,8 @@ namespace DolphEngine.Input.Controllers
             this.ArrowKeys.Update();
             this.WASD.Update();
         }
+
+        #endregion
 
         #region Key control getters
         public SingleButtonControl None => this._keyControls[InputKeys.KeyboardNone];

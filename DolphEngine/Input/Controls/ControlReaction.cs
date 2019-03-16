@@ -4,21 +4,24 @@ namespace DolphEngine.Input.Controls
 {
     public abstract class ControlReaction
     {
-        public abstract bool React(ControlBase control);
+        public ControlBase Control { get; protected set; }
+
+        public abstract bool React();
     }
 
     public class ControlReaction<T> : ControlReaction
         where T : ControlBase
     {
-        public ControlReaction(Func<T, bool> condition, Action<T> reaction)
+        public ControlReaction(T control, Func<T, bool> condition, Action<T> reaction)
         {
+            this.Control = control;
             this.Condition = condition;
             this.Reaction = reaction;
         }
 
-        public override bool React(ControlBase control)
+        public override bool React()
         {
-            var typed = control as T;
+            var typed = this.Control as T;
 
             if (this.Condition(typed))
             {

@@ -34,6 +34,8 @@ namespace DolphEngine.Input.Controllers
             this.Scroll = new TwoAxisPositionalControl(InputKeys.MouseScrollX, InputKeys.MouseScrollY);
         }
 
+        #region ControlBase implementation
+
         public override void SetInputState(InputState inputState)
         {
             base.SetInputState(inputState);
@@ -58,6 +60,10 @@ namespace DolphEngine.Input.Controllers
             this.Scroll.Update();
         }
 
+        #endregion
+
+        #region Key control getters
+
         public SingleButtonControl PrimaryClick => LeftHanded ? _buttonControls[InputKeys.MouseButton2] : _buttonControls[InputKeys.MouseButton1];
         public SingleButtonControl SecondaryClick => LeftHanded ? _buttonControls[InputKeys.MouseButton1] : _buttonControls[InputKeys.MouseButton2];
         public SingleButtonControl MiddleClick => _buttonControls[InputKeys.MouseButton3];
@@ -66,5 +72,7 @@ namespace DolphEngine.Input.Controllers
 
         public readonly TwoAxisPositionalControl Cursor;
         public readonly TwoAxisPositionalControl Scroll;
+
+        #endregion
     }
 }

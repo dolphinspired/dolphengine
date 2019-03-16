@@ -140,8 +140,8 @@ namespace DolphEngine.Demo
 
         private void LoadControls()
         {
-            this.Keycosystem
-                .AddControlReaction(this._keyboard, k => k.ArrowKeys.IsPressed, k => {
+            var context = new KeyContext("TestMapScene")
+                .AddControl(this._keyboard, k => k.ArrowKeys.IsPressed, k => {
                     var p = this.Player;
                     var startingAnim = p.Sprite.AnimationSequence;
                     
@@ -176,12 +176,12 @@ namespace DolphEngine.Demo
                         anim.Play(TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
                     }
                 })
-                .AddControlReaction(this._keyboard, k => !k.ArrowKeys.IsPressed, k => {
+                .AddControl(this._keyboard, k => !k.ArrowKeys.IsPressed, k => {
                     var speed = this.Player.Speed;
                     speed.X = 0;
                     speed.Y = 0;
                 })
-                .AddControlReaction(this._keyboard, k => k.ArrowKeys.JustReleased, k => {
+                .AddControl(this._keyboard, k => k.ArrowKeys.JustReleased, k => {
                     var p = this.Player;
                     bool play = false;
 
@@ -211,10 +211,8 @@ namespace DolphEngine.Demo
                         var anim = p.Sprite.Animation.GetAnimation(p.Sprite.AnimationSequence);
                         anim.Play(TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
                     }
-                });
-
-            this.Keycosystem
-                .AddControlReaction(this._keyboard, k => k.WASD.IsPressed, k =>
+                })
+                .AddControl(this._keyboard, k => k.WASD.IsPressed, k =>
                 {
                     if ((k.WASD.Direction & Direction.Up) > 0)
                     {
@@ -233,14 +231,26 @@ namespace DolphEngine.Demo
                         this.Camera.Transform.Offset.X += 8;
                     }
                 })
-                .AddControlReaction(this._mouse, m => m.Scroll.Y.JustMoved, m =>
+                .AddControl(this._mouse, m => m.Scroll.Y.JustMoved, m =>
                 {
                     var zoom = m.Scroll.Y.PositionDelta > 0 ? 0.25f : -0.25f;
                     this.Camera.AdjustZoom(zoom);
                 })
-                .AddControlReaction(this._mouse, m => m.MiddleClick.JustPressed, m => this.Camera.ResetZoom())
-                .AddControlReaction(this._keyboard, k => k.F.JustPressed, k => this.Camera.ResetPan().Focus.Target = this.Player)
-                .AddControlReaction(this._keyboard, k => k.G.JustPressed, k => this.Camera.Focus.Target = null);
+                .AddControl(this._mouse, m => m.MiddleClick.JustPressed, m => this.Camera.ResetZoom())
+                .AddControl(this._keyboard, k => k.F.JustPressed, k => this.Camera.ResetPan().Focus.Target = this.Player)
+                .AddControl(this._keyboard, k => k.G.JustPressed, k => this.Camera.Focus.Target = null);
+
+            var pauseContext = new KeyContext("Paused");
+
+            pauseContext
+                .AddControl(this._keyboard, k => k.P.JustPressed, p =>
+                {
+                    context.Enabled = !context.Enabled;
+                });
+            
+            this.Keycosystem
+                .AddContext(context)
+                .AddContext(pauseContext);
 
             this.Debug.AddPage(
                 () => "Player info:",
@@ -265,8 +275,8 @@ namespace DolphEngine.Demo
         public void UnloadControls()
         {
             this.Keycosystem
-                .RemoveControl(this._keyboard)
-                .RemoveControl(this._mouse);
+                .RemoveContext("TestMapScene")
+                .RemoveContext("Paused");
         }
     }
 }

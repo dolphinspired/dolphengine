@@ -18,15 +18,12 @@ namespace DolphEngine.Input
         private readonly InputState _inputState = new InputState();
         private readonly Dictionary<string, InputKeyInfo> _inputKeys = new Dictionary<string, InputKeyInfo>();
 
-        private readonly Dictionary<ControlBase, List<ControlReaction>> _controlReactionsByControl =
-            new Dictionary<ControlBase, List<ControlReaction>>(ReferenceEqualityComparer<ControlBase>.Instance);
+        // Keeps track of the contexts in which each unique control is used
+        // Only controls that are being used in a context will be updated
+        private readonly Dictionary<ControlBase, HashSet<string>> _contextsByControl = new Dictionary<ControlBase, HashSet<string>>(ReferenceEqualityComparer<ControlBase>.Instance);
+        private readonly Dictionary<string, HashSet<ControlBase>> _controlsByContext = new Dictionary<string, HashSet<ControlBase>>();
 
-        // Each key is indexed by 1-or-more handlers that are triggered by it
-        // Each handler is indexed by 0-or-more keys that trigger them
-        //private readonly Dictionary<int, HashSet<KeyHandler>> _handlersByKey = new Dictionary<int, HashSet<KeyHandler>>();
-        //private readonly Dictionary<KeyHandler, HashSet<int>> _keysByHandler = new Dictionary<KeyHandler, HashSet<int>>(ReferenceEqualityComparer<KeyHandler>.Instance);
-
-        //private readonly List<KeyHandler> _handlersByExecutionOrder = new List<KeyHandler>();
+        private readonly Dictionary<string, KeyContext> _contextsByName = new Dictionary<string, KeyContext>();
 
         #endregion
 
@@ -57,93 +54,111 @@ namespace DolphEngine.Input
                 this._inputState.SetValue(key, this._observer.GetKeyValue(parsed));
             }
 
-            // Finally, execute the on-update reactions for each control
-            foreach (var kvp in this._controlReactionsByControl)
+            // Update each unique control in the Keycosystem just once
+            foreach (var control in this._contextsByControl.Keys)
             {
-                var control = kvp.Key;
                 control.Update();
+            }
 
-                foreach (var reaction in kvp.Value)
+            // Then run all reactions for each enabled context in the order that they were added
+            foreach (var contextName in this._controlsByContext.Keys)
+            {
+                var context = this._contextsByName[contextName];
+
+                if (!context.Enabled)
                 {
-                    reaction.React(control);
+                    continue;
+                }
+
+                foreach (var reaction in context.ControlReactions)
+                {
+                    reaction.React();
                 }
             }
         }
 
         #endregion
 
-        #region Add/Remove Reactions
+        #region Public methods - Context management (core)
 
-        public Keycosystem AddControlReaction<T>(T control, Func<T, bool> condition, Action<T> reaction) where T : ControlBase
+        public Keycosystem AddContext<T>(T context) where T : KeyContext
         {
-            control.SetInputState(this._inputState);
-            var cr = new ControlReaction<T>(condition, reaction);
+            if (this._contextsByName.ContainsKey(context.Name))
+            {
+                throw new ArgumentException($"A key context with name {context.Name} has already been added!");
+            }
+
+            context.SetInputState(this._inputState);
+            this.IndexControls(context);
             
-            // Index the reaction by which control it's bound to
-            if (this._controlReactionsByControl.ContainsKey(control))
-            {
-                // If another reaction has already been added to this control, add this reaction to the list
-                this._controlReactionsByControl[control].Add(cr);
-            }
-            else
-            {
-                // Otherwise, add a new index entry for this control, and create a list with this reaction in it
-                this._controlReactionsByControl.Add(control, new List<ControlReaction> { cr });
-            }
-
-            // Add this control's keys to the inputs that we track on each update
-            foreach (var key in control.Keys)
-            {
-                if (this._inputKeys.ContainsKey(key))
-                {
-                    // If it's already being tracked by another control, simply increment the counter
-                    this._inputKeys[key].Count++;
-                }
-                else
-                {
-                    // Otherwise, add a new entry so it starts getting tracked
-                    this._inputKeys.Add(key, new InputKeyInfo(InputKey.Parse(key), 1));
-                }
-            }
-
+            this._contextsByName.Add(context.Name, context);
+            context.Keycosystem = this;
             return this;
         }
 
-        public Keycosystem RemoveControl(ControlBase control)
+        public bool TryGetContext(string contextName, out KeyContext context)
         {
-            foreach (var key in control.Keys)
-            {
-                // Decrement the number of controls tracking this key
-                var info = this._inputKeys[key];
-                info.Count--;
+            return this._contextsByName.TryGetValue(contextName, out context);
+        }
 
-                if (info.Count == 0)
-                {
-                    // If this was the last control to reference an input key, stop tracking that key's updates
-                    this._inputKeys.Remove(key);
-                }
+        public KeyContext GetContext(string contextName)
+        {
+            return this._contextsByName[contextName];
+        }
+
+        public Keycosystem RemoveContext(string contextName)
+        {
+            if (!this._contextsByName.TryGetValue(contextName, out var context))
+            {
+                return this;
             }
 
-            this._controlReactionsByControl.Remove(control);
+            context.SetInputState(null);
+            this.DeindexControls(context);
+
+            this._contextsByName.Remove(contextName);
+            context.Keycosystem = null;
             return this;
         }
 
-        public Keycosystem RebindControl<T>(T from, T to) where T : ControlBase
+        public Keycosystem ClearContexts()
         {
-            throw new NotImplementedException();
+            foreach (var context in this._contextsByName.Values)
+            {
+                context.Keycosystem = null;
+            }
 
-            return this;
-        }
-
-        public Keycosystem ClearControls()
-        {
-            this._controlReactionsByControl.Clear();
+            this._contextsByControl.Clear();
+            this._controlsByContext.Clear();
+            this._contextsByName.Clear();
             this._inputKeys.Clear();
 
             return this;
         }
 
         #endregion
+
+        #region Public methods - Context management (derived)
+
+        public Keycosystem RemoveContext<T>(T context) where T : KeyContext
+        {
+            return this.RemoveContext(context.Name);
+        }
+
+        public Keycosystem SwapContext<T>(T context) where T : KeyContext
+        {
+            if (this._contextsByName.TryGetValue(context.Name, out var oldContext))
+            {
+                this.RemoveContext(oldContext);
+            }
+
+            this.AddContext(context);
+            return this;
+        }
+
+        #endregion
+
+        #region Non-public stuff
 
         private class InputKeyInfo
         {
@@ -157,5 +172,104 @@ namespace DolphEngine.Input
 
             public int Count;
         }
+
+        internal void IndexControls(KeyContext context)
+        {
+            if (!this._controlsByContext.TryGetValue(context.Name, out var controls))
+            {
+                controls = new HashSet<ControlBase>(ReferenceEqualityComparer<ControlBase>.Instance);
+                this._controlsByContext.Add(context.Name, controls);
+            }
+
+            controls.Clear();
+            foreach (var cr in context.ControlReactions)
+            {
+                controls.Add(cr.Control);
+            }
+
+            foreach (var cr in context.ControlReactions)
+            {
+                this.IndexByControl(context, cr.Control);
+
+                foreach (var key in cr.Control.Keys)
+                {
+                    this.IndexByKey(context, key);
+                }
+            }
+        }
+
+        internal void DeindexControls(KeyContext context)
+        {
+            if (this._controlsByContext.ContainsKey(context.Name))
+            {
+                this._controlsByContext.Remove(context.Name);
+            }
+
+            foreach (var cr in context.ControlReactions)
+            {
+                this.DeindexByControl(context, cr.Control);
+
+                foreach (var key in cr.Control.Keys)
+                {
+                    this.DeindexByKey(context, key);
+                }
+            }
+        }
+
+        private void IndexByKey(KeyContext context, string key)
+        {
+            if (this._inputKeys.ContainsKey(key))
+            {
+                // If it's already being tracked by another control or context, simply increment the counter
+                this._inputKeys[key].Count++;
+            }
+            else
+            {
+                // Otherwise, add a new entry so it starts getting tracked
+                this._inputKeys.Add(key, new InputKeyInfo(InputKey.Parse(key), 1));
+            }
+        }
+
+        private void DeindexByKey(KeyContext context, string key)
+        {
+            if (this._inputKeys.TryGetValue(key, out var info))
+            {
+                // Decrement the number of controls tracking this key
+                info.Count--;
+
+                if (info.Count == 0)
+                {
+                    // If this was the last control to reference an input key, stop tracking that key's updates
+                    this._inputKeys.Remove(key);
+                }
+            }
+        }
+
+        private void IndexByControl(KeyContext context, ControlBase control)
+        {
+            if (this._contextsByControl.TryGetValue(control, out var contexts))
+            {
+                contexts.Add(context.Name);
+            }
+            else
+            {
+                this._contextsByControl.Add(control, new HashSet<string> { context.Name });
+            }
+        }
+
+        private void DeindexByControl(KeyContext context, ControlBase control)
+        {
+            if (this._contextsByControl.TryGetValue(control, out var contextNames))
+            {
+                contextNames.Remove(context.Name);
+
+                if (contextNames.Count == 0)
+                {
+                    this._contextsByControl.Remove(control);
+                }
+            }
+        }
+
+        #endregion
     }
 }
