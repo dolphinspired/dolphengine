@@ -14,6 +14,7 @@ using DolphEngine.Scenery;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Linq;
 
 namespace DolphEngine.Demo
 {
@@ -118,15 +119,23 @@ namespace DolphEngine.Demo
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
             this.Camera.Pan(240, 120);
 
+            var arrow = new Entity("Arrow")
+                .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, SpriteSheetIndex = 0, Transform = new Transform2d(-30, 30, 2, 2, 0) })
+                .AddComponent<DrawComponent>()
+                .AddComponent(new LinkedPositionComponent2d(this.Player))
+                .AddComponent<PositionComponent2d>();
+
             this.Ecosystem
                 .AddEntity(this.Player)
-                .AddEntity(this.Camera);
+                .AddEntity(this.Camera)
+                .AddEntity(arrow);
 
             this.Ecosystem
                 .AddHandler<SpeedHandler2d>()
                 .AddHandler<SpriteHandler>()
                 .AddHandler<TextHandler>()
-                .AddHandler(new DrawDirectiveHandler(this.SpriteBatch, this.Content, this.Camera));
+                .AddHandler(new DrawDirectiveHandler(this.SpriteBatch, this.Content, this.Camera))
+                .AddHandler<LinkedPositionHandler>();
         }
 
         private void LoadControls()
@@ -248,6 +257,9 @@ namespace DolphEngine.Demo
                 $"      Scale: ({this.Camera.Transform.Scale.X:0.000}, {this.Camera.Transform.Scale.Y:0.000})" +
                 $"      Rotation: ({this.Camera.Transform.Rotation:0.000})"
             );
+
+            this.Debug.AddPage(
+                () => $"Entities: {string.Join(',', this.Ecosystem.GetEntities().Where(x => !x.Name.StartsWith("Tile")))}");
         }
 
         public void UnloadControls()
