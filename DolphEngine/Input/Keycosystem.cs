@@ -38,9 +38,9 @@ namespace DolphEngine.Input
 
         #region Update
 
-        public void Update()
+        public void Update(TimeSpan time)
         {
-            this._inputState.CurrentTimestamp = GameTimer.Global.Total.Ticks;
+            this._inputState.CurrentTimestamp = time.Ticks;
             
             // First, update the state of the observer (i.e. "initialize" it for this frame)
             this._observer.UpdateState();

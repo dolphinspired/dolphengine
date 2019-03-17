@@ -15,12 +15,12 @@ namespace DolphEngine.Demo
                 .AddControl(Keyboard, k => k.Escape.IsPressed, k => game.Exit());
         }
 
-        public static KeyContext DebugNavigation(DebugLogger debug)
+        public static KeyContext DebugNavigation()
         {
             return new KeyContext("DebugLogger")
-                .AddControl(Keyboard, k => k.OemTilde.JustPressed, k => debug.Hidden = !debug.Hidden)
-                .AddControl(Keyboard, k => k.F1.JustPressed, k => debug.PrevPage())
-                .AddControl(Keyboard, k => k.F2.JustPressed, k => debug.NextPage());
+                .AddControl(Keyboard, k => k.OemTilde.JustPressed, k => Tower.DebugLogger.Hidden = !Tower.DebugLogger.Hidden)
+                .AddControl(Keyboard, k => k.F1.JustPressed, k => Tower.DebugLogger.PrevPage())
+                .AddControl(Keyboard, k => k.F2.JustPressed, k => Tower.DebugLogger.NextPage());
         }
     }
 }

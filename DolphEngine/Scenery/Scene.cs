@@ -19,9 +19,9 @@ namespace DolphEngine.Scenery
 
         public abstract void Unload();
 
-        public virtual void Update()
+        public virtual void Update(TimeSpan time)
         {
-            this.Keycosystem.Update();
+            this.Keycosystem.Update(time);
             this.Ecosystem.Update();
         }
 
@@ -37,7 +37,7 @@ namespace DolphEngine.Scenery
 
         void Unload();
 
-        void Update();
+        void Update(TimeSpan time);
 
         void Draw();
     }

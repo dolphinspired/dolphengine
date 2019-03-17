@@ -69,7 +69,7 @@ namespace DolphEngine.Graphics.Sprites
             }
 
             this.IsPlaying = true;
-            this.StartTime = GameTimer.Global.Total;
+            this.StartTime = GameTimer.Global.Total; // todo: kill this
             this.ReplayMode = replayMode;
 
             switch(mode)
@@ -109,7 +109,7 @@ namespace DolphEngine.Graphics.Sprites
                 return false;
             }
 
-            var currentTime = GameTimer.Global.Total;
+            var currentTime = GameTimer.Global.Total; // todo: kill this
             var sequenceIndex = (int)((currentTime - this.StartTime) / this.FrameDuration);
 
             int sequenceIndexAdjusted;

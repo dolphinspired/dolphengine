@@ -6,8 +6,6 @@ using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
 using DolphEngine.Graphics.Sprites;
 using DolphEngine.Input;
-using DolphEngine.Input.Controllers;
-using DolphEngine.Input.Controls;
 using DolphEngine.MonoGame.Eco.Handlers;
 using DolphEngine.MonoGame.Input;
 using DolphEngine.Scenery;
@@ -22,13 +20,9 @@ namespace DolphEngine.Demo
     {
         protected readonly ContentManager Content;
         protected readonly SpriteBatch SpriteBatch;
-        protected readonly DebugLogger Debug;
 
         protected PlayerEntity Player;
         protected CameraEntity Camera;
-
-        private readonly StandardKeyboard _keyboard;
-        private readonly StandardMouse _mouse;
 
         private readonly int _sceneViewWidth;
         private readonly int _sceneViewHeight;
@@ -43,18 +37,14 @@ namespace DolphEngine.Demo
             new int[] { 0, 2, 0, 3, 3, 1 },
         };
 
-        public TestMapScene(ContentManager content, SpriteBatch spriteBatch, DebugLogger debug, int sceneViewWidth, int sceneViewHeight)
+        public TestMapScene(ContentManager content, SpriteBatch spriteBatch, int sceneViewWidth, int sceneViewHeight)
             : base(new Ecosystem(), GetKeycosystem())
         {
             this.Content = content;
             this.SpriteBatch = spriteBatch;
-            this.Debug = debug;
 
             this._sceneViewWidth = sceneViewWidth;
             this._sceneViewHeight = sceneViewHeight;
-
-            this._keyboard = new StandardKeyboard();
-            this._mouse = new StandardMouse();
         }
 
         private static Keycosystem GetKeycosystem()
@@ -141,7 +131,7 @@ namespace DolphEngine.Demo
         private void LoadControls()
         {
             var context = new KeyContext("TestMapScene")
-                .AddControl(this._keyboard, k => k.ArrowKeys.IsPressed, k => {
+                .AddControl(Tower.Keyboard, k => k.ArrowKeys.IsPressed, k => {
                     var p = this.Player;
                     var startingAnim = p.Sprite.AnimationSequence;
                     
@@ -176,12 +166,12 @@ namespace DolphEngine.Demo
                         anim.Play(TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
                     }
                 })
-                .AddControl(this._keyboard, k => !k.ArrowKeys.IsPressed, k => {
+                .AddControl(Tower.Keyboard, k => !k.ArrowKeys.IsPressed, k => {
                     var speed = this.Player.Speed;
                     speed.X = 0;
                     speed.Y = 0;
                 })
-                .AddControl(this._keyboard, k => k.ArrowKeys.JustReleased, k => {
+                .AddControl(Tower.Keyboard, k => k.ArrowKeys.JustReleased, k => {
                     var p = this.Player;
                     bool play = false;
 
@@ -212,7 +202,7 @@ namespace DolphEngine.Demo
                         anim.Play(TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
                     }
                 })
-                .AddControl(this._keyboard, k => k.WASD.IsPressed, k =>
+                .AddControl(Tower.Keyboard, k => k.WASD.IsPressed, k =>
                 {
                     if ((k.WASD.Direction & Direction2d.Up) > 0)
                     {
@@ -231,19 +221,19 @@ namespace DolphEngine.Demo
                         this.Camera.Transform.Offset.X += 8;
                     }
                 })
-                .AddControl(this._mouse, m => m.Scroll.Y.JustMoved, m =>
+                .AddControl(Tower.Mouse, m => m.Scroll.Y.JustMoved, m =>
                 {
                     var zoom = m.Scroll.Y.PositionDelta > 0 ? 0.25f : -0.25f;
                     this.Camera.AdjustZoom(zoom);
                 })
-                .AddControl(this._mouse, m => m.MiddleClick.JustPressed, m => this.Camera.ResetZoom())
-                .AddControl(this._keyboard, k => k.F.JustPressed, k => this.Camera.ResetPan().Focus.Target = this.Player)
-                .AddControl(this._keyboard, k => k.G.JustPressed, k => this.Camera.Focus.Target = null);
+                .AddControl(Tower.Mouse, m => m.MiddleClick.JustPressed, m => this.Camera.ResetZoom())
+                .AddControl(Tower.Keyboard, k => k.F.JustPressed, k => this.Camera.ResetPan().Focus.Target = this.Player)
+                .AddControl(Tower.Keyboard, k => k.G.JustPressed, k => this.Camera.Focus.Target = null);
 
             var pauseContext = new KeyContext("Paused");
 
             pauseContext
-                .AddControl(this._keyboard, k => k.P.JustPressed, p =>
+                .AddControl(Tower.Keyboard, k => k.P.JustPressed, p =>
                 {
                     context.Enabled = !context.Enabled;
                 });
@@ -252,7 +242,7 @@ namespace DolphEngine.Demo
                 .AddContext(context)
                 .AddContext(pauseContext);
 
-            this.Debug.AddPage(
+            Tower.DebugLogger.AddPage(
                 () => "Player info:",
                 DebugLogger.EmptyLine,
                 () => $"Speed: ({this.Player.Speed.X}, {this.Player.Speed.Y})",
@@ -268,7 +258,7 @@ namespace DolphEngine.Demo
                 $"      Rotation: ({this.Camera.Transform.Rotation:0.000})"
             );
 
-            this.Debug.AddPage(
+            Tower.DebugLogger.AddPage(
                 () => $"Entities: {string.Join(',', this.Ecosystem.GetEntities().Where(x => !x.Name.StartsWith("Tile")))}");
         }
 

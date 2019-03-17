@@ -12,6 +12,7 @@ namespace DolphEngine
             this.Total = start;
         }
 
+        // todo: kill this
         public static readonly GameTimer Global = new GameTimer();
 
         public void Advance(TimeSpan elapsed)
