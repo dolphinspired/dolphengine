@@ -1,13 +1,14 @@
-﻿using DolphEngine.Eco;
+﻿using DolphEngine.Demo.Components;
+using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 
 namespace DolphEngine.Demo.Handlers
 {
-    public class SpeedHandler2d : EcosystemHandler<SpeedComponent2d>
+    public class SpeedHandler : EcosystemHandler<SpeedComponent>
     {
         public override void Update(Entity entity)
         {
-            var speed = entity.GetComponent<SpeedComponent2d>();
+            var speed = entity.GetComponent<SpeedComponent>();
 
             if (entity.TryGetComponent<PositionComponent2d>(out var position))
             {

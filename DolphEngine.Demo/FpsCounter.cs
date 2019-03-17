@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace DolphEngine.Tools
+namespace DolphEngine.Demo
 {
     public class FpsCounter
     {
@@ -16,7 +16,7 @@ namespace DolphEngine.Tools
         public double Update()
         {
             this.CurrentSample = ++this.CurrentSample % Samples.Length;
-            this.Samples[this.CurrentSample] = GameTimer.Global.Elapsed.Ticks;
+            this.Samples[this.CurrentSample] = Tower.Timer.Elapsed.Ticks;
 
             var frameAverage = Samples.Average();
             return (1 / frameAverage) * TimeSpan.TicksPerSecond;

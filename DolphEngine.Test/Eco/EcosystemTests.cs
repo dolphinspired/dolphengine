@@ -332,12 +332,12 @@ namespace DolphEngine.Test.Eco
 
             ecosystem.AddEntity(entity);
 
-            var entitiesWithComponent = ecosystem.GetEntitiesWithComponent<MockComponent1>();            
+            var entitiesWithComponent = ecosystem.GetEntities().Where(x => x.HasComponent<MockComponent1>());            
             Assert.Empty(entitiesWithComponent);
 
             entity.AddComponent<MockComponent1>();
 
-            entitiesWithComponent = ecosystem.GetEntitiesWithComponent<MockComponent1>();
+            entitiesWithComponent = ecosystem.GetEntities().Where(x => x.HasComponent<MockComponent1>());
             Assert.Equal(entity, entitiesWithComponent.Single());
         }
 
@@ -350,7 +350,7 @@ namespace DolphEngine.Test.Eco
             ecosystem.AddEntity(entity);
             entity.AddComponent<MockComponent1>().RemoveComponent<MockComponent1>();
 
-            var entitiesWithComponent = ecosystem.GetEntitiesWithComponent<MockComponent1>();
+            var entitiesWithComponent = ecosystem.GetEntities().Where(x => x.HasComponent<MockComponent1>());
             Assert.Empty(entitiesWithComponent);
         }
 

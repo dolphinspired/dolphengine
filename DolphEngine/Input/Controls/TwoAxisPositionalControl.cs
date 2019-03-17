@@ -24,7 +24,7 @@ namespace DolphEngine.Input.Controls
             this.X.Update();
             this.Y.Update();
 
-            this.Direction = Direction.None;
+            this.Direction = Direction2d.None;
 
             if (this.X.JustMoved || this.Y.JustMoved)
             {
@@ -32,20 +32,20 @@ namespace DolphEngine.Input.Controls
 
                 if (this.X.PositionDelta > 0)
                 {
-                    this.Direction |= Direction.Right;
+                    this.Direction |= Direction2d.Right;
                 }
                 else if (this.X.PositionDelta < 0)
                 {
-                    this.Direction |= Direction.Left;
+                    this.Direction |= Direction2d.Left;
                 }
 
                 if (this.Y.PositionDelta > 0)
                 {
-                    this.Direction |= Direction.Down;
+                    this.Direction |= Direction2d.Down;
                 }
                 else if (this.Y.PositionDelta < 0)
                 {
-                    this.Direction |= Direction.Up;
+                    this.Direction |= Direction2d.Up;
                 }
             }
         }
@@ -53,7 +53,7 @@ namespace DolphEngine.Input.Controls
         public readonly OneAxisPositionalControl X;
         public readonly OneAxisPositionalControl Y;
 
-        public Direction Direction { get; private set; }
+        public Direction2d Direction { get; private set; }
         public long LastTickMoved { get; private set; } 
 
         public bool JustMoved => DurationHeld == 0;

@@ -59,14 +59,14 @@ namespace DolphEngine.Input.Controls
                 var angle = (float)Math.Atan2(Y.Magnitude, X.Magnitude);
                 this.Angle = angle;
                 this.Magnitude = (float)Math.Sqrt(Math.Pow(X.Magnitude, 2) + Math.Pow(Y.Magnitude, 2));
-                this.Direction = Direction.None; // todo: calculate direction
+                this.Direction = Direction2d.None; // todo: calculate direction
                 // todo: track changes (last tick moved)
             }
             else
             {
                 this.Angle = Idle;
                 this.Magnitude = Idle;
-                this.Direction = Direction.None;
+                this.Direction = Direction2d.None;
             }
         }
         
@@ -75,7 +75,7 @@ namespace DolphEngine.Input.Controls
 
         private float LastAngle;
         public float Angle { get; private set; }
-        public Direction Direction { get; private set; }
+        public Direction2d Direction { get; private set; }
 
         public float AngleDelta => this.Angle - this.LastAngle;
         public float AngleDeltaAbsolute => Math.Abs(this.AngleDelta);

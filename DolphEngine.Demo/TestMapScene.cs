@@ -131,7 +131,7 @@ namespace DolphEngine.Demo
                 .AddEntity(arrow);
 
             this.Ecosystem
-                .AddHandler<SpeedHandler2d>()
+                .AddHandler<SpeedHandler>()
                 .AddHandler<SpriteHandler>()
                 .AddHandler<TextHandler>()
                 .AddHandler(new DrawDirectiveHandler(this.SpriteBatch, this.Content, this.Camera))
@@ -145,25 +145,25 @@ namespace DolphEngine.Demo
                     var p = this.Player;
                     var startingAnim = p.Sprite.AnimationSequence;
                     
-                    if ((k.ArrowKeys.Direction & Direction.Up) > 0)
+                    if ((k.ArrowKeys.Direction & Direction2d.Up) > 0)
                     {
                         p.Speed.X = 2;
                         p.Speed.Y = -1;
                         p.Sprite.AnimationSequence = "WalkNorth";
                     }
-                    if ((k.ArrowKeys.Direction & Direction.Right) > 0)
+                    if ((k.ArrowKeys.Direction & Direction2d.Right) > 0)
                     {
                         p.Speed.X = 2;
                         p.Speed.Y = 1;
                         p.Sprite.AnimationSequence = "WalkEast";
                     }
-                    if ((k.ArrowKeys.Direction & Direction.Down) > 0)
+                    if ((k.ArrowKeys.Direction & Direction2d.Down) > 0)
                     {
                         p.Speed.X = -2;
                         p.Speed.Y = 1;
                         p.Sprite.AnimationSequence = "WalkSouth";
                     }
-                    if ((k.ArrowKeys.Direction & Direction.Left) > 0)
+                    if ((k.ArrowKeys.Direction & Direction2d.Left) > 0)
                     {
                         p.Speed.X = -2;
                         p.Speed.Y = -1;
@@ -214,19 +214,19 @@ namespace DolphEngine.Demo
                 })
                 .AddControl(this._keyboard, k => k.WASD.IsPressed, k =>
                 {
-                    if ((k.WASD.Direction & Direction.Up) > 0)
+                    if ((k.WASD.Direction & Direction2d.Up) > 0)
                     {
                         this.Camera.Transform.Offset.Y += 8;
                     }
-                    if ((k.WASD.Direction & Direction.Right) > 0)
+                    if ((k.WASD.Direction & Direction2d.Right) > 0)
                     {
                         this.Camera.Transform.Offset.X -= 8;
                     }
-                    if ((k.WASD.Direction & Direction.Down) > 0)
+                    if ((k.WASD.Direction & Direction2d.Down) > 0)
                     {
                         this.Camera.Transform.Offset.Y -= 8;
                     }
-                    if ((k.WASD.Direction & Direction.Left) > 0)
+                    if ((k.WASD.Direction & Direction2d.Left) > 0)
                     {
                         this.Camera.Transform.Offset.X += 8;
                     }

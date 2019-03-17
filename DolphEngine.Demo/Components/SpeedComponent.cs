@@ -1,10 +1,12 @@
-﻿namespace DolphEngine.Eco.Components
-{
-    public class SpeedComponent2d : Component
-    {
-        public SpeedComponent2d() : this(0, 0) { }
+﻿using DolphEngine.Eco;
 
-        public SpeedComponent2d(int x, int y)
+namespace DolphEngine.Demo.Components
+{
+    public class SpeedComponent : Component
+    {
+        public SpeedComponent() : this(0, 0) { }
+
+        public SpeedComponent(int x, int y)
         {
             this.Set(x, y);
         }

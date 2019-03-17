@@ -46,25 +46,25 @@ namespace DolphEngine.Input.Controls
             }
 
             // What direction do the pressed arrow keys form?
-            var direction = Direction.None;
+            var direction = Direction2d.None;
 
             if (isPressed)
             {
                 if (this.Up.IsPressed)
                 {
-                    direction |= Direction.Up;
+                    direction |= Direction2d.Up;
                 }
                 if (this.Right.IsPressed)
                 {
-                    direction |= Direction.Right;
+                    direction |= Direction2d.Right;
                 }
                 if (this.Down.IsPressed)
                 {
-                    direction |= Direction.Down;
+                    direction |= Direction2d.Down;
                 }
                 if (this.Left.IsPressed)
                 {
-                    direction |= Direction.Left;
+                    direction |= Direction2d.Left;
                 }
             }
 
@@ -80,7 +80,7 @@ namespace DolphEngine.Input.Controls
         public readonly SingleButtonControl Down;
         public readonly SingleButtonControl Left;
 
-        public Direction Direction { get; private set; }
+        public Direction2d Direction { get; private set; }
         public long LastTickDirectionChanged { get; private set; }
 
         public bool DirectionJustChanged => LastTickDirectionChanged == 0;

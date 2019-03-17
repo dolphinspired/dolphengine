@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace DolphEngine
 {
-    internal sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
+    public sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
     {
         private static Dictionary<Type, object> _comparersByType;
 
