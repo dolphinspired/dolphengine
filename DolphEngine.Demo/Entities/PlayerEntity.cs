@@ -11,18 +11,16 @@ namespace DolphEngine.Demo.Entities
             this.AddComponent<DrawComponent>()
                 .AddComponent<PositionComponent2d>()
                 .AddComponent<SpeedComponent>()
-                .AddComponent<SpriteComponent>()
+                .AddComponent<FacingComponent>()
+                .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Alphonse, Animation = Animations.Player })
                 .AddComponent<TextComponent>();
-
-            this.Sprite.SpriteSheet = Sprites.Alphonse;
-            this.Sprite.Animation = Animations.Player;
         }
 
         public PositionComponent2d Position => this.GetComponent<PositionComponent2d>();
 
         public SpeedComponent Speed => this.GetComponent<SpeedComponent>();
 
-        public SpriteComponent Sprite => this.GetComponent<SpriteComponent>();
+        public FacingComponent Facing => this.GetComponent<FacingComponent>();
 
         public TextComponent Text => this.GetComponent<TextComponent>();
     }

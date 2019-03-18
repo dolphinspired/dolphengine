@@ -4,14 +4,12 @@ using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
-using DolphEngine.Graphics.Sprites;
 using DolphEngine.Input;
 using DolphEngine.MonoGame.Eco.Handlers;
 using DolphEngine.MonoGame.Input;
 using DolphEngine.Scenery;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Linq;
 
 namespace DolphEngine.Demo
@@ -109,23 +107,22 @@ namespace DolphEngine.Demo
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
             this.Camera.Pan(240, 120);
 
-            var arrow = new Entity("Arrow")
-                .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, SpriteSheetIndex = 0, Transform = new Transform2d(-30, 30, 2, 2, 0) })
-                .AddComponent<DrawComponent>()
-                .AddComponent(new LinkedPositionComponent2d(this.Player))
-                .AddComponent<PositionComponent2d>();
+            var arrow1 = new GlyphEntity(0);
+            arrow1.AddComponent(new LinkedPositionComponent2d(this.Player));
+            arrow1.Sprite.Transform = new Transform2d(-50, 30, 2, 2, 0);
 
-            this.Ecosystem
-                .AddEntity(this.Player)
-                .AddEntity(this.Camera)
-                .AddEntity(arrow);
+            this.Ecosystem.AddEntities(
+                this.Player,
+                this.Camera,
+                arrow1);
 
             this.Ecosystem
                 .AddHandler<SpeedHandler>()
-                .AddHandler<SpriteHandler>()
+                .AddHandler<LinkedPositionHandler>()
+                .AddHandler<SpriteStateHandler>()
                 .AddHandler<TextHandler>()
-                .AddHandler(new DrawDirectiveHandler(this.SpriteBatch, this.Content, this.Camera))
-                .AddHandler<LinkedPositionHandler>();
+                .AddHandler<SpriteHandler>()
+                .AddHandler(new DrawDirectiveHandler(this.SpriteBatch, this.Content, this.Camera));
         }
 
         private void LoadControls()
@@ -138,51 +135,31 @@ namespace DolphEngine.Demo
                     {
                         p.Speed.X = 2;
                         p.Speed.Y = -1;
-                        p.Sprite.AnimationSequence = "WalkNorth";
+                        p.Facing.Direction = Direction2d.Up;
                     }
                     if ((k.ArrowKeys.Direction & Direction2d.Right) > 0)
                     {
                         p.Speed.X = 2;
                         p.Speed.Y = 1;
-                        p.Sprite.AnimationSequence = "WalkEast";
+                        p.Facing.Direction = Direction2d.Right;
                     }
                     if ((k.ArrowKeys.Direction & Direction2d.Down) > 0)
                     {
                         p.Speed.X = -2;
                         p.Speed.Y = 1;
-                        p.Sprite.AnimationSequence = "WalkSouth";
+                        p.Facing.Direction = Direction2d.Down;
                     }
                     if ((k.ArrowKeys.Direction & Direction2d.Left) > 0)
                     {
                         p.Speed.X = -2;
                         p.Speed.Y = -1;
-                        p.Sprite.AnimationSequence = "WalkWest";
+                        p.Facing.Direction = Direction2d.Left;
                     }
                 })
                 .AddControl(Tower.Keyboard, k => !k.ArrowKeys.IsPressed, k => {
                     var speed = this.Player.Speed;
                     speed.X = 0;
                     speed.Y = 0;
-                })
-                .AddControl(Tower.Keyboard, k => k.ArrowKeys.JustReleased, k => {
-                    var p = this.Player;
-
-                    if (p.Sprite.AnimationSequence == "WalkNorth")
-                    {
-                        p.Sprite.AnimationSequence = "IdleNorth";
-                    }
-                    else if (p.Sprite.AnimationSequence == "WalkEast")
-                    {
-                        p.Sprite.AnimationSequence = "IdleEast";
-                    }
-                    else if (p.Sprite.AnimationSequence == "WalkSouth")
-                    {
-                        p.Sprite.AnimationSequence = "IdleSouth";
-                    }
-                    else if (p.Sprite.AnimationSequence == "WalkWest")
-                    {
-                        p.Sprite.AnimationSequence = "IdleWest";
-                    }
                 })
                 .AddControl(Tower.Keyboard, k => k.WASD.IsPressed, k =>
                 {
@@ -229,7 +206,6 @@ namespace DolphEngine.Demo
                 DebugLogger.EmptyLine,
                 () => $"Speed: ({this.Player.Speed.X}, {this.Player.Speed.Y})",
                 () => $"X: {this.Player.Position.X}, Y: {this.Player.Position.Y}",
-                () => $"Width: {this.Player.Sprite.SpriteSheet.Frames[0].Width}, Height: {this.Player.Sprite.SpriteSheet.Frames[0].Height}",
                 DebugLogger.EmptyLine,
                 () => "Camera info:",
                 DebugLogger.EmptyLine,
