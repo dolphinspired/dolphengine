@@ -11,7 +11,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanHandleEntityWithBulkComponentsEntityFirst()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new BulkComponentsHandler();
 
             ecosystem
@@ -23,7 +23,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanHandleEntityWithBulkComponentsHandlerFirst()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new BulkComponentsHandler();
 
             ecosystem
@@ -36,7 +36,7 @@ namespace DolphEngine.Test.Eco
         [InlineData(1000)]
         public void CanHandleLotsOfBigEntitiesEntityFirst(int numEntities)
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new BulkComponentsHandler();
             var entities = new List<Entity>();
             for (var i = 0; i < numEntities; i++)
@@ -52,7 +52,7 @@ namespace DolphEngine.Test.Eco
         [InlineData(1000)]
         public void CanHandleLotsOfBigEntitiesHandlerFirst(int numEntities)
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new BulkComponentsHandler();
             var entities = new List<Entity>();
             for (var i = 0; i < numEntities; i++)
@@ -68,7 +68,7 @@ namespace DolphEngine.Test.Eco
         [InlineData(1000)]
         public void CanHandleLotsOfBigEntitiesWithComponentsAddedLater(int numEntities)
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new BulkComponentsHandler();
             var entities = new List<Entity>();
             for (var i = 0; i < numEntities; i++)
@@ -85,6 +85,11 @@ namespace DolphEngine.Test.Eco
                 }
             });            
             var elapsedRun = Observe(() => ecosystem.Update());
+        }
+
+        private static Ecosystem TestEco()
+        {
+            return new Ecosystem(new GameTimer());
         }
 
         private static long Observe(Action action)

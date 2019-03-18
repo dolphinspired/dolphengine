@@ -13,7 +13,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanAddHandlerToEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
 
             ecosystem
@@ -26,7 +26,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanAddMultipleHandlersToEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler1 = new MockHandler1();
             var handler2 = new MockHandler2();
 
@@ -41,7 +41,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanAddMultipleHandlersToEcosystemShorthand()
         {
-            var ecosystem = new Ecosystem().AddHandler<MockHandler1>().AddHandler<MockHandler2>();
+            var ecosystem = TestEco().AddHandler<MockHandler1>().AddHandler<MockHandler2>();
 
             ecosystem.Update();
         }
@@ -49,7 +49,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CannotAddNullHandlerToEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
 
             Assert.Throws<ArgumentNullException>(() => ecosystem.AddHandler(null));
         }
@@ -57,7 +57,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CannotAddDuplicateHandlerToEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler1 = new MockHandler1();
 
             ecosystem.AddHandler(handler1);
@@ -68,7 +68,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CannotAddHandlerWithoutSubscriptionsToEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockUnsubscribedHandler();
 
             Assert.Throws<ArgumentException>(() => ecosystem.AddHandler(handler));
@@ -79,7 +79,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CannotSubscribeHandlerToNonComponentType()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockUnsubscribedHandler();
             handler.SetSubscribedTypes(new[] { typeof(MockComponent1), typeof(EcosystemTests) });
 
@@ -89,7 +89,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CannotAddEmptyHandlerListToEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
 
             Assert.Throws<ArgumentException>(() => ecosystem.AddHandlers());
             Assert.Throws<ArgumentException>(() => ecosystem.AddHandlers(new List<EcosystemHandler>()));
@@ -98,7 +98,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanRemoveHandlerFromEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
 
             ecosystem
@@ -112,7 +112,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanRemoveMultipleHandlersFromEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler1 = new MockHandler1();
             var handler2 = new MockHandler2();
 
@@ -128,7 +128,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanClearHandlersFromEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler1 = new MockHandler1();
             var handler2 = new MockHandler2();
 
@@ -191,7 +191,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanAddEntityToEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity();
 
@@ -207,7 +207,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanAddEntityWithComponentsToEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity().AddComponent<MockComponent1>();
 
@@ -223,7 +223,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanRemoveEntityFromEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity();
 
@@ -240,7 +240,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanRemoveEntityWithComponentsFromEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity().AddComponent<MockComponent1>();
 
@@ -257,7 +257,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanAddEntityToEcosystemWithHandlers()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity();
 
@@ -273,7 +273,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanAddEntityWithComponentsToEcosystemWithHandlers()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity().AddComponent<MockComponent1>();
 
@@ -289,7 +289,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanRemoveEntityFromEcosystemWithHandlers()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity();
 
@@ -306,7 +306,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanRemoveEntityWithComponentsFromEcosystemWithHandlers()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity().AddComponent<MockComponent1>();
 
@@ -327,7 +327,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanAddComponentToEntityInEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var entity = new Entity();
 
             ecosystem.AddEntity(entity);
@@ -344,7 +344,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanRemoveComponentFromEntityInEcosystem()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var entity = new Entity();
 
             ecosystem.AddEntity(entity);
@@ -357,7 +357,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanAddComponentToEntityInEcosystemWithHandlers()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity();
 
@@ -374,7 +374,7 @@ namespace DolphEngine.Test.Eco
         [Fact]
         public void CanRemoveComponentFromEntityInEcosystemWithHandlers()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             var handler = new MockHandler1();
             var entity = new Entity();
 
@@ -394,7 +394,7 @@ namespace DolphEngine.Test.Eco
 
         private static Ecosystem CreateEcosystemWithEntities()
         {
-            var ecosystem = new Ecosystem();
+            var ecosystem = TestEco();
             ecosystem.AddEntities(
                 new Entity("empty-1"),
                 new Entity("empty-2"),
@@ -406,6 +406,11 @@ namespace DolphEngine.Test.Eco
                 new Entity("cmp12-2").AddComponent(new MockComponent1("c1-e6", 6)).AddComponent(new MockComponent2("c2-e6", false))
             );
             return ecosystem;
+        }
+
+        private static Ecosystem TestEco()
+        {
+            return new Ecosystem(new GameTimer());
         }
 
         #endregion

@@ -6,6 +6,18 @@ namespace DolphEngine.Eco
 {
     public sealed class Ecosystem
     {
+        #region Constructors
+
+        public Ecosystem(GameTimer timer)
+        {
+            this._timer = timer;
+        }
+
+        
+        private readonly GameTimer _timer;
+
+        #endregion
+
         #region Data structures
 
         // All entities added to the ecosystem, indexed by id
@@ -89,6 +101,7 @@ namespace DolphEngine.Eco
                 }
             }
 
+            handler._timer = this._timer;
             return this;
         }
 
@@ -136,6 +149,7 @@ namespace DolphEngine.Eco
             this._entitiesByLock.Remove(bitLock);
             this.DeindexBitLock(bitLock);
 
+            handler._timer = null;
             return this;
         }
 
@@ -171,6 +185,11 @@ namespace DolphEngine.Eco
 
         public Ecosystem ClearHandlers()
         {
+            foreach (var handler in this._locksByHandler.Keys)
+            {
+                handler._timer = null;
+            }
+
             this._locksByHandler.Clear();
             this._entitiesByLock.Clear();
             this._locksByBits.Clear();
@@ -189,7 +208,6 @@ namespace DolphEngine.Eco
 
                 this._entitiesToRefreshBitKey.Clear();
             }
-            
 
             foreach (var lockByHandler in this._locksByHandler)
             {
