@@ -14,9 +14,42 @@ namespace DolphEngine.Graphics.Animations
         private long? _loopbackDelay;
         private long _finalKeyframe;
 
+        #region Constructors
+
+        public KeyframeAnimation()
+        {
+        }
+
+        public KeyframeAnimation(T keyframe)
+        {
+            this.AddKeyframe(TimeSpan.Zero, keyframe);
+        }
+
+        public KeyframeAnimation(TimeSpan interval, bool loop, IEnumerable<T> keyframes)
+        {
+            if (keyframes == null || keyframes.Count() == 0)
+            {
+                throw new ArgumentException($"At least one keyframe is required!");
+            }
+
+            var time = TimeSpan.Zero;
+            foreach (var keyframe in keyframes)
+            {
+                this.AddKeyframe(time, keyframe);
+                time += interval;
+            }
+
+            if (loop)
+            {
+                this.Loop(interval);
+            }
+        }
+
+        #endregion
+
         #region Public methods
 
-        public KeyframeAnimation<T> AddKeyframe(T keyframe, TimeSpan time)
+        public KeyframeAnimation<T> AddKeyframe(TimeSpan time, T keyframe)
         {
             if (time < TimeSpan.Zero)
             {

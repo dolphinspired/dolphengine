@@ -10,10 +10,10 @@ namespace DolphEngine.Test.Graphics
         public void CanAddKeyframe()
         {
             var anim = new KeyframeAnimation<Rect2d>();
-            anim.AddKeyframe(new Rect2d(1, 2, 3, 4), TimeSpan.Zero);
+            anim.AddKeyframe(TimeSpan.Zero, new Rect2d(1, 2, 3, 4));
             Assert.Single(anim.Keyframes);
 
-            anim.AddKeyframe(new Rect2d(5, 6, 7, 8), TimeSpan.FromMilliseconds(30));
+            anim.AddKeyframe(TimeSpan.FromMilliseconds(30), new Rect2d(5, 6, 7, 8));
             Assert.Equal(2, anim.Keyframes.Count);
         }
 
@@ -21,8 +21,8 @@ namespace DolphEngine.Test.Graphics
         public void CanOverwriteKeyframe()
         {
             var anim = new KeyframeAnimation<Rect2d>();
-            anim.AddKeyframe(new Rect2d(1, 2, 3, 4), TimeSpan.FromMilliseconds(30));
-            anim.AddKeyframe(new Rect2d(5, 6, 7, 8), TimeSpan.FromMilliseconds(30));
+            anim.AddKeyframe(TimeSpan.FromMilliseconds(30), new Rect2d(1, 2, 3, 4));
+            anim.AddKeyframe(TimeSpan.FromMilliseconds(30), new Rect2d(5, 6, 7, 8));
             Assert.Single(anim.Keyframes);
         }
 
@@ -40,7 +40,7 @@ namespace DolphEngine.Test.Graphics
             var time = TimeSpan.FromMinutes(5);
 
             var anim = new KeyframeAnimation<string>();            
-            anim.AddKeyframe(keyframe, time);
+            anim.AddKeyframe(time, keyframe);
 
             Assert.Equal(keyframe, anim.GetFrame(time));
         }
@@ -53,7 +53,7 @@ namespace DolphEngine.Test.Graphics
             var diff = TimeSpan.FromSeconds(15);
 
             var anim = new KeyframeAnimation<string>();
-            anim.AddKeyframe(keyframe, time);
+            anim.AddKeyframe(time, keyframe);
             
             Assert.Equal(keyframe, anim.GetFrame(time.Subtract(diff)));
             Assert.Equal(keyframe, anim.GetFrame(time.Add(diff)));
@@ -70,9 +70,9 @@ namespace DolphEngine.Test.Graphics
             var time3 = TimeSpan.FromMinutes(7);
 
             var anim = new KeyframeAnimation<string>()
-                .AddKeyframe(keyframe1, time1)
-                .AddKeyframe(keyframe2, time2)
-                .AddKeyframe(keyframe3, time3);
+                .AddKeyframe(time1, keyframe1)
+                .AddKeyframe(time2, keyframe2)
+                .AddKeyframe(time3, keyframe3);
             
             Assert.Equal(keyframe1, anim.GetFrame(time1));
             Assert.Equal(keyframe2, anim.GetFrame(time2));
@@ -90,9 +90,9 @@ namespace DolphEngine.Test.Graphics
             var time3 = TimeSpan.FromMinutes(7);
 
             var anim = new KeyframeAnimation<string>()
-                .AddKeyframe(keyframe1, time1)
-                .AddKeyframe(keyframe2, time2)
-                .AddKeyframe(keyframe3, time3);
+                .AddKeyframe(time1, keyframe1)
+                .AddKeyframe(time2, keyframe2)
+                .AddKeyframe(time3, keyframe3);
 
             // Before 1st keyframe
             var mid01 = time1 - ((time2 - time1) / 2);
@@ -128,9 +128,9 @@ namespace DolphEngine.Test.Graphics
             var loopDelay = TimeSpan.FromSeconds(1);
 
             var anim = new KeyframeAnimation<string>()
-                .AddKeyframe(keyframe1, time1)
-                .AddKeyframe(keyframe2, time2)
-                .AddKeyframe(keyframe3, time3)
+                .AddKeyframe(time1, keyframe1)
+                .AddKeyframe(time2, keyframe2)
+                .AddKeyframe(time3, keyframe3)
                 .Loop(loopDelay);
 
             // Before 1st keyframe
@@ -175,13 +175,13 @@ namespace DolphEngine.Test.Graphics
         public void CanTweenKeyframes(bool addZeroFrame, bool addLoop, int time, int expected)
         {
             var anim = new TestAnimation()
-                .AddKeyframe(1000, TimeSpan.FromMilliseconds(1000))
-                .AddKeyframe(2000, TimeSpan.FromMilliseconds(2000))
-                .AddKeyframe(3000, TimeSpan.FromMilliseconds(3000));
+                .AddKeyframe(TimeSpan.FromMilliseconds(1000), 1000)
+                .AddKeyframe(TimeSpan.FromMilliseconds(2000), 2000)
+                .AddKeyframe(TimeSpan.FromMilliseconds(3000), 3000);
 
             if (addZeroFrame)
             {
-                anim.AddKeyframe(0, TimeSpan.Zero);
+                anim.AddKeyframe(TimeSpan.Zero, 0);
             }
 
             if (addLoop)

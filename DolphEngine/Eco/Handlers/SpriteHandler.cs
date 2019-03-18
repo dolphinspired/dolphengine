@@ -66,7 +66,7 @@ namespace DolphEngine.Eco.Handlers
             });
         }
 
-        private static bool TryGetSpritesheetFrame(SpriteComponent sprite, out Rect2d src)
+        private bool TryGetSpritesheetFrame(SpriteComponent sprite, out Rect2d src)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace DolphEngine.Eco.Handlers
             }
         }
 
-        private static bool TryGetAnimationFrame(SpriteComponent sprite, out Rect2d src)
+        private bool TryGetAnimationFrame(SpriteComponent sprite, out Rect2d src)
         {
             if (sprite.Animation == null || sprite.AnimationSequence == null)
             {
@@ -90,14 +90,7 @@ namespace DolphEngine.Eco.Handlers
                 return false;
             }
 
-            if (!sprite.Animation.TryGetAnimation(sprite.AnimationSequence, out var anim))
-            {
-                // No animation sequence exists by the name specified on the component
-                src = Rect2d.Zero;
-                return false;
-            }
-
-            return anim.TryGetCurrentFrame(out src);
+            return sprite.Animation.TryGetFrame(sprite.AnimationSequence, this.Timer.Total, out src);
         }
     }
 }

@@ -4,7 +4,7 @@ namespace DolphEngine.Eco.Components
 {
     public class SpriteComponent : Component
     {
-        public SpriteAnimationLibrary Animation;
+        public SpriteAnimationSet Animation;
 
         public string AnimationSequence;
 

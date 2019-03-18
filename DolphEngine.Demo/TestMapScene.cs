@@ -38,7 +38,7 @@ namespace DolphEngine.Demo
         };
 
         public TestMapScene(ContentManager content, SpriteBatch spriteBatch, int sceneViewWidth, int sceneViewHeight)
-            : base(new Ecosystem(), GetKeycosystem())
+            : base(new Ecosystem(Tower.Timer), GetKeycosystem())
         {
             this.Content = content;
             this.SpriteBatch = spriteBatch;
@@ -133,7 +133,6 @@ namespace DolphEngine.Demo
             var context = new KeyContext("TestMapScene")
                 .AddControl(Tower.Keyboard, k => k.ArrowKeys.IsPressed, k => {
                     var p = this.Player;
-                    var startingAnim = p.Sprite.AnimationSequence;
                     
                     if ((k.ArrowKeys.Direction & Direction2d.Up) > 0)
                     {
@@ -159,12 +158,6 @@ namespace DolphEngine.Demo
                         p.Speed.Y = -1;
                         p.Sprite.AnimationSequence = "WalkWest";
                     }
-
-                    if (startingAnim != p.Sprite.AnimationSequence)
-                    {
-                        var anim = p.Sprite.Animation.GetAnimation(p.Sprite.AnimationSequence);
-                        anim.Play(TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
-                    }
                 })
                 .AddControl(Tower.Keyboard, k => !k.ArrowKeys.IsPressed, k => {
                     var speed = this.Player.Speed;
@@ -173,33 +166,22 @@ namespace DolphEngine.Demo
                 })
                 .AddControl(Tower.Keyboard, k => k.ArrowKeys.JustReleased, k => {
                     var p = this.Player;
-                    bool play = false;
 
                     if (p.Sprite.AnimationSequence == "WalkNorth")
                     {
                         p.Sprite.AnimationSequence = "IdleNorth";
-                        play = true;
                     }
                     else if (p.Sprite.AnimationSequence == "WalkEast")
                     {
                         p.Sprite.AnimationSequence = "IdleEast";
-                        play = true;
                     }
                     else if (p.Sprite.AnimationSequence == "WalkSouth")
                     {
                         p.Sprite.AnimationSequence = "IdleSouth";
-                        play = true;
                     }
                     else if (p.Sprite.AnimationSequence == "WalkWest")
                     {
                         p.Sprite.AnimationSequence = "IdleWest";
-                        play = true;
-                    }
-
-                    if (play)
-                    {
-                        var anim = p.Sprite.Animation.GetAnimation(p.Sprite.AnimationSequence);
-                        anim.Play(TimeSpan.FromMilliseconds(100), DurationMode.Frame, AnimationReplayMode.Loop);
                     }
                 })
                 .AddControl(Tower.Keyboard, k => k.WASD.IsPressed, k =>
