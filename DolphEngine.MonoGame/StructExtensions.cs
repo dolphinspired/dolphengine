@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace DolphEngine.MonoGame.Extensions
+namespace DolphEngine.MonoGame
 {
     public static class StructExtensions
     {

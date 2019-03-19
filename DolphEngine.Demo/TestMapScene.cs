@@ -5,7 +5,7 @@ using DolphEngine.Eco.Components;
 using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
 using DolphEngine.Input;
-using DolphEngine.MonoGame.Eco.Handlers;
+using DolphEngine.MonoGame.Graphics;
 using DolphEngine.MonoGame.Input;
 using DolphEngine.Scenery;
 using Microsoft.Xna.Framework.Content;
@@ -122,7 +122,7 @@ namespace DolphEngine.Demo
                 .AddHandler<SpriteStateHandler>()
                 .AddHandler<TextHandler>()
                 .AddHandler<SpriteHandler>()
-                .AddHandler(new DrawDirectiveHandler(this.SpriteBatch, this.Content, this.Camera));
+                .AddHandler(new DrawHandler(new MonoGameRenderer(this.SpriteBatch, this.Content, this.Camera)));
         }
 
         private void LoadControls()

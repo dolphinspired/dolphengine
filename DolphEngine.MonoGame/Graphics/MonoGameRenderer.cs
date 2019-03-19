@@ -1,33 +1,36 @@
 ﻿using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
+using DolphEngine.Graphics;
 using DolphEngine.Graphics.Directives;
-using DolphEngine.MonoGame.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
-namespace DolphEngine.MonoGame.Eco.Handlers
+namespace DolphEngine.MonoGame.Graphics
 {
-    public partial class DrawDirectiveHandler : EcosystemHandler<DrawComponent>
+    public class MonoGameRenderer : DirectiveRenderer
     {
         private const float FZero = 0.000f;
         private const float FOne = 1.000f;
 
-        public SpriteBatch SpriteBatch;
-        public ContentManager Content;
-        public Entity Camera;
+        protected readonly SpriteBatch SpriteBatch;
+        protected readonly ContentManager Content;
+        protected readonly Entity Camera;
 
         public Color BackgroundColor = Color.CornflowerBlue;
 
-        public DrawDirectiveHandler(SpriteBatch spriteBatch, ContentManager contentManager, Entity camera)
+        public MonoGameRenderer(SpriteBatch spriteBatch, ContentManager contentManager, Entity camera)
         {
             this.SpriteBatch = spriteBatch;
             this.Content = contentManager;
             this.Camera = camera;
+
+            this.AddRenderer<SpriteDirective>(this.DrawSprite)
+                .AddRenderer<TextDirective>(this.DrawText);
         }
 
-        public override void Draw(IEnumerable<Entity> entities)
+        public override bool OnBeforeDraw()
         {
             var cameraSize = this.Camera.GetComponentOrDefault<SizeComponent2d>();
 
@@ -37,7 +40,7 @@ namespace DolphEngine.MonoGame.Eco.Handlers
                 this.SpriteBatch.Begin();
                 this.SpriteBatch.GraphicsDevice.Clear(this.BackgroundColor);
                 this.SpriteBatch.End();
-                return;
+                return false;
             }
 
             var cameraPosition = this.Camera.GetComponentOrDefault(new PositionComponent2d(0, 0));
@@ -69,45 +72,33 @@ namespace DolphEngine.MonoGame.Eco.Handlers
                 transformMatrix: translation);
 
             this.SpriteBatch.GraphicsDevice.Clear(this.BackgroundColor);
+            return true;
+        }
 
-            foreach (var entity in entities)
-            {
-                var drawDirectives = entity.GetComponent<DrawComponent>().Directives;
-
-                if (drawDirectives.Count == 0)
-                {
-                    // There is nothing to draw for this entity
-                    continue;
-                }
-
-                foreach (var directive in drawDirectives)
-                {
-                    // Invoke the draw action using the camera-transformed SpriteBatch
-                    this.RouteDirective(directive);
-                }
-
-                // Remove all delegates once they've been drawn so that they won't be drawn on the next frame
-                drawDirectives.Clear();
-            }
-
+        public override void OnAfterDraw()
+        {
             this.SpriteBatch.End();
         }
 
-        private void RouteDirective(object directive)
+        #region Directive handlers
+
+        private void DrawStuff(IEnumerable<int> coll)
         {
-            var type = directive.GetType();
-            if (type == typeof(SpriteDirective))
-            {
-                var sd = (SpriteDirective)directive;
-                var texture = this.Content.Load<Texture2D>(sd.Asset);
-                this.SpriteBatch.Draw(texture, sd.Destination.ToRectangle(), sd.Source.ToRectangle(), Color.White, sd.Rotation, Vector2.Zero, SpriteEffects.None, 0);
-            }
-            if (type == typeof(TextDirective))
-            {
-                var td = (TextDirective)directive;
-                var font = this.Content.Load<SpriteFont>(td.FontAssetName);
-                this.SpriteBatch.DrawString(font, td.Text, td.Destination.ToVector2(), Color.White);
-            }
+
         }
+
+        private void DrawSprite(SpriteDirective sprite)
+        {
+            var texture = this.Content.Load<Texture2D>(sprite.Asset);
+            this.SpriteBatch.Draw(texture, sprite.Destination.ToRectangle(), sprite.Source.ToRectangle(), Color.White, sprite.Rotation, Vector2.Zero, SpriteEffects.None, 0);
+        }
+
+        private void DrawText(TextDirective text)
+        {
+            var font = this.Content.Load<SpriteFont>(text.FontAssetName);
+            this.SpriteBatch.DrawString(font, text.Text, text.Destination.ToVector2(), Color.White);
+        }
+
+        #endregion
     }
 }
