@@ -11,7 +11,7 @@ namespace DolphEngine.MonoGame
 
         public static Point ToPoint(this Position2d position)
         {
-            return new Point(position.X, position.Y);
+            return new Point((int)position.X, (int)position.Y);
         }
 
         public static Vector2 ToVector2(this Position2d position)
@@ -21,7 +21,7 @@ namespace DolphEngine.MonoGame
 
         public static Rectangle ToRectangle(this Rect2d rect)
         {
-            return new Rectangle(rect.X, rect.Y, rect.Width, rect.Height);
+            return new Rectangle((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
         }
     }
 }

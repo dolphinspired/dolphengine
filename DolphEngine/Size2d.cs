@@ -4,15 +4,15 @@
     {
         public static Size2d Zero = new Size2d(0, 0);
 
-        public Size2d(int width, int height)
+        public Size2d(float width, float height)
         {
             this.Width = width;
             this.Height = height;
         }
 
-        public int Width;
+        public float Width;
 
-        public int Height;
+        public float Height;
 
         public override string ToString()
         {

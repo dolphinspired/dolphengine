@@ -52,8 +52,8 @@ namespace DolphEngine.Graphics.Sprites
             {
                 for (var c = 0; c < columns; c++)
                 {
-                    int x = origin.X + (c * size.Width) + (c * columnPadding);
-                    int y = origin.Y + (r * size.Height) + (r * rowPadding);
+                    float x = origin.X + (c * size.Width) + (c * columnPadding);
+                    float y = origin.Y + (r * size.Height) + (r * rowPadding);
                     frames.Add(new Rect2d(x, y, size.Width, size.Height));
                 }
             }

@@ -4,15 +4,15 @@
     {
         public static Position2d Zero = new Position2d(0, 0);
 
-        public Position2d(int x, int y)
+        public Position2d(float x, float y)
         {
             this.X = x;
             this.Y = y;
         }
 
-        public int X;
+        public float X;
 
-        public int Y;
+        public float Y;
 
         public override string ToString()
         {

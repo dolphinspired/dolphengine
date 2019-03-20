@@ -6,7 +6,7 @@
 
         public Rect2d(Position2d position, Size2d size) : this(position.X, position.Y, size.Width, size.Height) { }
 
-        public Rect2d(int x, int y, int width, int height)
+        public Rect2d(float x, float y, float width, float height)
         {
             this.X = x;
             this.Y = y;
@@ -16,13 +16,13 @@
 
         public static Rect2d Zero = new Rect2d(0, 0, 0, 0);
 
-        public int X;
+        public float X;
 
-        public int Y;
+        public float Y;
 
-        public int Width;
+        public float Width;
 
-        public int Height;
+        public float Height;
 
         public Position2d Position => new Position2d(this.X, this.Y);
 

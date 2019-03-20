@@ -4,16 +4,16 @@
     {
         public PositionComponent2d() : this(0, 0) { }
 
-        public PositionComponent2d(int x, int y)
+        public PositionComponent2d(float x, float y)
         {
             this.Set(x, y);
         }
 
-        public int X;
+        public float X;
 
-        public int Y;
+        public float Y;
 
-        public void Set(int x, int y)
+        public void Set(float x, float y)
         {
             this.X = x;
             this.Y = y;
