@@ -46,8 +46,7 @@ namespace DolphEngine.Demo
 
         protected override void Update(GameTime gameTime)
         {
-            GameTimer.Global.Advance(gameTime.ElapsedGameTime); // todo: kill this
-            Tower.Timer.Advance(gameTime.ElapsedGameTime);
+            Tower.Timer.Advance();
             
             Tower.Keycosystem.Update(gameTime.TotalGameTime);
             Tower.Director.CurrentScene.Update(gameTime.TotalGameTime);

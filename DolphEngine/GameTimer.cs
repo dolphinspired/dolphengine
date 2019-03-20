@@ -1,31 +1,42 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace DolphEngine
 {
     public class GameTimer
     {
-        public GameTimer() : this(TimeSpan.Zero) { }
+        protected readonly Stopwatch Stopwatch;
+        private bool _started;
 
-        public GameTimer(TimeSpan start)
+        public GameTimer()
         {
-            this.Elapsed = TimeSpan.Zero;
-            this.Total = start;
+            this.Stopwatch = new Stopwatch();
         }
 
-        // todo: kill this
-        public static readonly GameTimer Global = new GameTimer();
-
-        public void Advance(TimeSpan elapsed)
+        public GameTimer(Stopwatch sw)
         {
-            this.Elapsed = elapsed;
-            this.Total += elapsed;
+            this.Stopwatch = sw;
+        }
+
+        public virtual void Advance()
+        {
+            if (!_started)
+            {
+                this.Stopwatch.Start();
+                this._started = true;
+            }
+
+            var totalElapsed = this.Stopwatch.Elapsed;
+
+            this.Elapsed = totalElapsed - this.Total;
+            this.Total = totalElapsed;
             this.Frames++;
         }
 
-        public TimeSpan Elapsed { get; private set; }
+        public virtual TimeSpan Elapsed { get; private set; }
 
-        public TimeSpan Total { get; private set; }
+        public virtual TimeSpan Total { get; private set; }
 
-        public int Frames { get; private set; }
+        public virtual int Frames { get; private set; }
     }
 }
