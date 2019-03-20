@@ -87,7 +87,7 @@ namespace DolphEngine.Demo
                     this.Ecosystem
                         .AddEntity(new Entity($"Tile_{i++}")
                         .AddComponent(new PositionComponent2d(x, y))
-                        .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, SpriteSheetIndex = tilevalue })
+                        .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, StaticSprite = tilevalue })
                         .AddComponent<DrawComponent>());
 
                     col++;
@@ -109,12 +109,26 @@ namespace DolphEngine.Demo
 
             var arrow1 = new GlyphEntity(0);
             arrow1.AddComponent(new LinkedPositionComponent2d(this.Player));
-            arrow1.Sprite.Transform = new Transform2d(-50, 30, 2, 2, 0);
+            arrow1.Sprite.StaticTransform = new Transform2d(-50, 30, 2, 2, 0);
+
+            var ball1 = new GlyphEntity(2);
+            ball1.Position.Set(400, 100);
+            ball1.Sprite.StaticTransform = new Transform2d(0, 0, 4, 4, 0);
+            ball1.Sprite.AnimationSet = Animations.Glyph;
+            ball1.Sprite.AnimatedTransform = "Rotate";
+
+            var ball2 = new GlyphEntity(2);
+            ball2.Position.Set(400, 200);
+            ball2.Sprite.StaticTransform = new Transform2d(0, 0, 4, 4, 0);
+            ball2.Sprite.AnimationSet = Animations.Glyph;
+            ball2.Sprite.AnimatedTransform = "Breathe";
 
             this.Ecosystem.AddEntities(
                 this.Player,
                 this.Camera,
-                arrow1);
+                arrow1,
+                ball1,
+                ball2);
 
             this.Ecosystem
                 .AddHandler<SpeedHandler>()

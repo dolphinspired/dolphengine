@@ -12,7 +12,7 @@ namespace DolphEngine.Demo.Entities
                 .AddComponent<PositionComponent2d>()
                 .AddComponent<SpeedComponent>()
                 .AddComponent<FacingComponent>()
-                .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Alphonse, Animation = Animations.Player })
+                .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Alphonse, AnimationSet = Animations.Player })
                 .AddComponent<TextComponent>();
         }
 

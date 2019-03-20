@@ -7,7 +7,7 @@ namespace DolphEngine.Demo.Entities
     {
         public GlyphEntity(int glyphIndex)
         {
-            this.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, SpriteSheetIndex = glyphIndex })
+            this.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, StaticSprite = glyphIndex })
                 .AddComponent<DrawComponent>()
                 .AddComponent<PositionComponent2d>();
         }

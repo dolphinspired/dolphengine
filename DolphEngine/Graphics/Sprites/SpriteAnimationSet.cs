@@ -15,6 +15,9 @@ namespace DolphEngine.Graphics.Sprites
         public IReadOnlyDictionary<string, KeyframeAnimation<int>> Animations => this._animations;
         private readonly Dictionary<string, KeyframeAnimation<int>> _animations = new Dictionary<string, KeyframeAnimation<int>>();
 
+        public IReadOnlyDictionary<string, KeyframeAnimation<Transform2d>> Transforms => this._transforms;
+        private readonly Dictionary<string, KeyframeAnimation<Transform2d>> _transforms = new Dictionary<string, KeyframeAnimation<Transform2d>>();
+
         public SpriteAnimationSet AddAnimation(string name, KeyframeAnimation<int> anim)
         {
             if (this._animations.ContainsKey(name))
@@ -23,6 +26,17 @@ namespace DolphEngine.Graphics.Sprites
             }
 
             this._animations.Add(name, anim);
+            return this;
+        }
+
+        public SpriteAnimationSet AddTransform(string name, KeyframeAnimation<Transform2d> transform)
+        {
+            if (this._transforms.ContainsKey(name))
+            {
+                throw new ArgumentException($"A transform with name '{name}' has already been added!");
+            }
+
+            this._transforms.Add(name, transform);
             return this;
         }
 
@@ -53,6 +67,28 @@ namespace DolphEngine.Graphics.Sprites
             }
 
             frame = this.SpriteSheet.Frames[frameIndex];
+            return true;
+        }
+
+        public Transform2d GetTransform(string name, TimeSpan elapsed)
+        {
+            if (!this.TryGetTransform(name, elapsed, out var transform))
+            {
+                throw new ArgumentException($"No transform has been added with name '{name}'!");
+            }
+
+            return transform;
+        }
+
+        public bool TryGetTransform(string name, TimeSpan elapsed, out Transform2d transform)
+        {
+            if (!this._transforms.TryGetValue(name, out var tranim))
+            {
+                transform = Transform2d.None;
+                return false;
+            }
+
+            transform = tranim.GetFrame(elapsed);
             return true;
         }
     }

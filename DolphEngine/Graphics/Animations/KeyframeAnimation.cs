@@ -74,6 +74,11 @@ namespace DolphEngine.Graphics.Animations
             return this;
         }
 
+        public KeyframeAnimation<T> Loop()
+        {
+            return this.Loop(TimeSpan.Zero);
+        }
+
         public KeyframeAnimation<T> Loop(TimeSpan time)
         {
             this._loopbackDelay = time.Ticks;

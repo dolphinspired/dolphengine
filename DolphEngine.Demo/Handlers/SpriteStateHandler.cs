@@ -21,16 +21,16 @@ namespace DolphEngine.Demo.Handlers
                 switch (facing.Direction)
                 {
                     case Direction2d.Up:
-                        sprite.AnimationSequence = isMoving ? "WalkNorth" : "IdleNorth";
+                        sprite.AnimatedSprite = isMoving ? "WalkNorth" : "IdleNorth";
                         break;
                     case Direction2d.Right:
-                        sprite.AnimationSequence = isMoving ? "WalkEast" : "IdleEast";
+                        sprite.AnimatedSprite = isMoving ? "WalkEast" : "IdleEast";
                         break;
                     case Direction2d.Down:
-                        sprite.AnimationSequence = isMoving ? "WalkSouth" : "IdleSouth";
+                        sprite.AnimatedSprite = isMoving ? "WalkSouth" : "IdleSouth";
                         break;
                     case Direction2d.Left:
-                        sprite.AnimationSequence = isMoving ? "WalkWest" : "IdleWest";
+                        sprite.AnimatedSprite = isMoving ? "WalkWest" : "IdleWest";
                         break;
                 }
             }

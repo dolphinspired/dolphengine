@@ -4,14 +4,16 @@ namespace DolphEngine.Eco.Components
 {
     public class SpriteComponent : Component
     {
-        public SpriteAnimationSet Animation;
+        public SpriteAnimationSet AnimationSet;
 
-        public string AnimationSequence;
+        public string AnimatedSprite;
+
+        public string AnimatedTransform;
 
         public SpriteSheet SpriteSheet;
 
-        public int SpriteSheetIndex;
+        public int StaticSprite;
 
-        public Transform2d? Transform;
+        public Transform2d? StaticTransform;
     }
 }

@@ -31,12 +31,6 @@ namespace DolphEngine.Eco.Handlers
                 dest.X = position.X;
                 dest.Y = position.Y;
             }
-            if (sprite.Transform?.Offset != null)
-            {
-                // Apply any position transforms
-                dest.X += sprite.Transform.Value.Offset.Value.X;
-                dest.Y += sprite.Transform.Value.Offset.Value.Y;
-            }
 
             if (entity.TryGetComponent<SizeComponent2d>(out var size))
             {
@@ -50,11 +44,27 @@ namespace DolphEngine.Eco.Handlers
                 dest.Width = src.Width;
                 dest.Height = src.Height;
             }
-            if (sprite.Transform?.Scale != null)
+
+            float rotation = 0.000f;
+            if (sprite.StaticTransform != null)
             {
-                // Apply any size transforms
-                dest.Width = (int)(dest.Width * sprite.Transform.Value.Scale.Value.X);
-                dest.Height = (int)(dest.Height * sprite.Transform.Value.Scale.Value.Y);
+                // First, apply any static transforms
+                var tf = sprite.StaticTransform.Value;
+                dest.X += tf.Offset.X;
+                dest.Y += tf.Offset.Y;
+                dest.Width *= tf.Scale.X;
+                dest.Height *= tf.Scale.Y;
+                rotation += tf.Rotation;
+            }
+            if (TryGetAnimatedTransform(sprite, out var animatedTransform))
+            {
+                // Then, apply any animated transforms
+                var tf = animatedTransform;
+                dest.X += tf.Offset.X;
+                dest.Y += tf.Offset.Y;
+                dest.Width *= tf.Scale.X;
+                dest.Height *= tf.Scale.Y;
+                rotation += tf.Rotation;
             }
 
             draw.Directives.Add(new SpriteDirective
@@ -62,7 +72,7 @@ namespace DolphEngine.Eco.Handlers
                 Asset = sprite.SpriteSheet.Name,
                 Source = src,
                 Destination = dest,
-                Rotation = sprite.Transform?.Rotation ?? 0.000f // Rotation transform will be applied by the drawing engine
+                Rotation = rotation
             });
         }
 
@@ -70,7 +80,7 @@ namespace DolphEngine.Eco.Handlers
         {
             try
             {
-                src = sprite.SpriteSheet.Frames[sprite.SpriteSheetIndex];
+                src = sprite.SpriteSheet.Frames[sprite.StaticSprite];
                 return true;
             }
             catch (ArgumentOutOfRangeException)
@@ -83,14 +93,25 @@ namespace DolphEngine.Eco.Handlers
 
         private bool TryGetAnimationFrame(SpriteComponent sprite, out Rect2d src)
         {
-            if (sprite.Animation == null || sprite.AnimationSequence == null)
+            if (sprite.AnimationSet == null || sprite.AnimatedSprite == null)
             {
                 // No animation info has been added to the component
                 src = Rect2d.Zero;
                 return false;
             }
 
-            return sprite.Animation.TryGetFrame(sprite.AnimationSequence, this.Timer.Total, out src);
+            return sprite.AnimationSet.TryGetFrame(sprite.AnimatedSprite, this.Timer.Total, out src);
+        }
+
+        private bool TryGetAnimatedTransform(SpriteComponent sprite, out Transform2d transform)
+        {
+            if (sprite.AnimationSet == null || sprite.AnimatedTransform == null)
+            {
+                transform = Transform2d.None;
+                return false;
+            }
+
+            return sprite.AnimationSet.TryGetTransform(sprite.AnimatedTransform, this.Timer.Total, out transform);
         }
     }
 }
