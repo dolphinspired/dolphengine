@@ -65,7 +65,7 @@ namespace DolphEngine.Demo
 
         private void LoadMap()
         {
-            var tileSize = Sprites.Tiles.Frames[0].Size;
+            var tileSize = Sprites.Tiles.Frames[0].GetSize();
             var start = new Position2d(200, 20);
 
             int xShift = 32;
