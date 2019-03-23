@@ -5,7 +5,7 @@ namespace DolphEngine.Eco
         #region Properties
         
         /// <summary>
-        /// A reference to this component's <see cref="Entity"/>, if it has been added to one.
+        /// A reference to this component's <see cref="Eco.Entity"/>, if it has been added to one.
         /// </summary>
         public Entity Entity { get; internal set; }
 
