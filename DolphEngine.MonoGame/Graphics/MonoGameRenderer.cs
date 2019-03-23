@@ -81,12 +81,7 @@ namespace DolphEngine.MonoGame.Graphics
         }
 
         #region Directive handlers
-
-        private void DrawStuff(IEnumerable<int> coll)
-        {
-
-        }
-
+        
         private void DrawSprite(SpriteDirective sprite)
         {
             var texture = this.Content.Load<Texture2D>(sprite.Asset);

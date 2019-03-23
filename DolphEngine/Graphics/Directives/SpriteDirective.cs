@@ -1,6 +1,6 @@
 ﻿namespace DolphEngine.Graphics.Directives
 {
-    public struct SpriteDirective
+    public class SpriteDirective
     {
         public string Asset;
 

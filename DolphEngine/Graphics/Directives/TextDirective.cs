@@ -1,6 +1,6 @@
 ﻿namespace DolphEngine.Graphics.Directives
 {
-    public struct TextDirective
+    public class TextDirective
     {
         public string Text;
 
