@@ -8,5 +8,9 @@
         }
 
         public Entity Target;
+
+        public Anchor2d Anchor;
+
+        public Vector2d Offset;
     }
 }

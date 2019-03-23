@@ -5,7 +5,6 @@ using DolphEngine.Graphics.Directives;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 
 namespace DolphEngine.MonoGame.Graphics
 {
@@ -85,7 +84,7 @@ namespace DolphEngine.MonoGame.Graphics
         private void DrawSprite(SpriteDirective sprite)
         {
             var texture = this.Content.Load<Texture2D>(sprite.Asset);
-            this.SpriteBatch.Draw(texture, sprite.Destination.ToRectangle(), sprite.Source.ToRectangle(), Color.White, sprite.Rotation, Vector2.Zero, SpriteEffects.None, 0);
+            this.SpriteBatch.Draw(texture, sprite.Destination.ToRectangle(), sprite.Source.ToRectangle(), Color.White, sprite.Rotation, sprite.Origin.ToVector2(), SpriteEffects.None, 0);
         }
 
         private void DrawText(TextDirective text)

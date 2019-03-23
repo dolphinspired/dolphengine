@@ -9,5 +9,7 @@
         public Rect2d Destination;
 
         public float Rotation;
+
+        public Vector2d Origin;
     }
 }

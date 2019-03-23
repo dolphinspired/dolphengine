@@ -31,9 +31,87 @@
             return this;
         }
 
+        public Position2d Shift(Vector2d vector)
+        {
+            this.X += vector.X;
+            this.Y += vector.Y;
+            return this;
+        }
+
+        public Position2d Shift(float x, float y)
+        {
+            this.X += x;
+            this.Y += y;
+            return this;
+        }
+
+        public Vector2d ToVector()
+        {
+            return new Vector2d(X, Y);
+        }
+
+        #endregion
+
+        #region Operators
+
+        public static Position2d operator -(Position2d v)
+        {
+            v.X = -v.X;
+            v.Y = -v.Y;
+            return v;
+        }
+
+        public static Position2d operator +(Position2d p1, Position2d p2)
+        {
+            p1.X += p2.X;
+            p1.Y += p2.Y;
+            return p1;
+        }
+
+        public static Position2d operator +(Position2d p, Vector2d v)
+        {
+            p.X += v.X;
+            p.Y += v.Y;
+            return p;
+        }
+
+        public static Position2d operator -(Position2d p1, Position2d p2)
+        {
+            p1.X -= p2.X;
+            p1.Y -= p2.Y;
+            return p1;
+        }
+
+        public static Position2d operator -(Position2d p, Vector2d v)
+        {
+            p.X -= v.X;
+            p.Y -= v.Y;
+            return p;
+        }
+
+        public static bool operator ==(Position2d p1, Position2d p2)
+        {
+            return p1.X == p2.X && p1.Y == p2.Y;
+        }
+
+        public static bool operator !=(Position2d p1, Position2d p2)
+        {
+            return !(p1 == p2);
+        }
+
         #endregion
 
         #region Object overrides
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Position2d) && this == (Position2d)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)(17 * X + 31 * Y);
+        }
 
         public override string ToString()
         {

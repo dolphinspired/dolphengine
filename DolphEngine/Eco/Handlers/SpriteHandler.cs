@@ -1,6 +1,5 @@
 ﻿using DolphEngine.Eco.Components;
 using DolphEngine.Graphics.Directives;
-using System;
 
 namespace DolphEngine.Eco.Handlers
 {
@@ -11,27 +10,13 @@ namespace DolphEngine.Eco.Handlers
             var sprite = entity.GetComponent<SpriteComponent>();
             var draw = entity.GetComponent<DrawComponent>();
 
-            if (sprite.SpriteSheet == null)
+            if (!TryGetAnimatedSprite(sprite, out Rect2d src) && !TryGetStaticSprite(sprite, out src))
             {
-                // If there is no spritesheet to reference, nothing can be drawn
+                // Can't determine a valid sprite to draw
                 return;
             }
 
-            if (!TryGetAnimationFrame(sprite, out Rect2d src) && !TryGetSpritesheetFrame(sprite, out src))
-            {
-                // Unable to get a source frame, nothing to draw
-                return;
-            }
-
-            // DEFAULT: Draw sprite at 0,0
             Rect2d dest = new Rect2d();
-            if (entity.TryGetComponent<PositionComponent2d>(out var position))
-            {
-                // If the entity has a location, draw the sprite there
-                dest.X = position.X;
-                dest.Y = position.Y;
-            }
-
             if (entity.TryGetComponent<SizeComponent2d>(out var size))
             {
                 // If the entity has a size, draw the sprite to match
@@ -45,73 +30,72 @@ namespace DolphEngine.Eco.Handlers
                 dest.Height = src.Height;
             }
 
-            float rotation = 0.000f;
-            if (sprite.StaticTransform != null)
+            if (entity.TryGetComponent<PositionComponent2d>(out var position))
             {
-                // First, apply any static transforms
-                var tf = sprite.StaticTransform.Value;
-                dest.X += tf.Offset.X;
-                dest.Y += tf.Offset.Y;
-                dest.Width *= tf.Scale.X;
-                dest.Height *= tf.Scale.Y;
-                rotation += tf.Rotation;
+                // If the entity has a location, draw the sprite there
+                dest.SetPosition(position.X, position.Y);
             }
-            if (TryGetAnimatedTransform(sprite, out var animatedTransform))
+            else
             {
-                // Then, apply any animated transforms
-                var tf = animatedTransform;
-                dest.X += tf.Offset.X;
-                dest.Y += tf.Offset.Y;
-                dest.Width *= tf.Scale.X;
-                dest.Height *= tf.Scale.Y;
-                rotation += tf.Rotation;
+                // Otherwise, draw at 0,0 centered on the sprite's anchor point
+                dest.SetPosition(0, 0);
             }
 
-            draw.Directives.Add(new SpriteDirective
+            Rotation2d rotation = sprite.Rotation;
+            if (sprite.RotationAnimation != null)
+            {
+                rotation.Turn(sprite.RotationAnimation.GetFrame(this.Timer.Total));
+            }
+
+            dest.Shift(sprite.Offset);
+            if (sprite.OffsetAnimation != null)
+            {
+                dest.Shift(sprite.OffsetAnimation.GetFrame(this.Timer.Total));
+            }
+
+            dest.Scale(sprite.Scale);
+            if (sprite.ScaleAnimation != null)
+            {
+                var animScale = sprite.ScaleAnimation.GetFrame(this.Timer.Total);
+                dest.Scale(animScale);
+            }
+
+            Vector2d origin = (src.GetPosition(sprite.Origin) - src.GetPosition(Anchor2d.TopLeft)).ToVector();
+
+            var directive = new SpriteDirective
             {
                 Asset = sprite.SpriteSheet.Name,
                 Source = src,
                 Destination = dest,
-                Rotation = rotation
-            });
+                Rotation = rotation.Radians,
+                Origin = origin
+            };
+
+            draw.Directives.Add(directive);
         }
 
-        private bool TryGetSpritesheetFrame(SpriteComponent sprite, out Rect2d src)
+        private bool TryGetAnimatedSprite(SpriteComponent sprite, out Rect2d src)
         {
-            try
+            if (sprite.SpriteAnimation == null)
             {
-                src = sprite.SpriteSheet.Frames[sprite.StaticSprite];
-                return true;
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                // An invalid frame was specified, nothing to draw
-                src = Rect2d.Zero;
-                return false;
-            }
-        }
-
-        private bool TryGetAnimationFrame(SpriteComponent sprite, out Rect2d src)
-        {
-            if (sprite.AnimationSet == null || sprite.AnimatedSprite == null)
-            {
-                // No animation info has been added to the component
                 src = Rect2d.Zero;
                 return false;
             }
 
-            return sprite.AnimationSet.TryGetFrame(sprite.AnimatedSprite, this.Timer.Total, out src);
+            return sprite.SpriteAnimation.TryGetFrameRect(this.Timer.Total, out src);
         }
 
-        private bool TryGetAnimatedTransform(SpriteComponent sprite, out Transform2d transform)
+        private static bool TryGetStaticSprite(SpriteComponent sprite, out Rect2d src)
         {
-            if (sprite.AnimationSet == null || sprite.AnimatedTransform == null)
+            if (sprite.SpriteSheet == null || sprite.Index < 0 || sprite.Index >= sprite.SpriteSheet.Frames.Count)
             {
-                transform = Transform2d.None;
+                // If there is no spritesheet to reference, or an invalid frame is selected, nothing can be drawn
+                src = Rect2d.Zero;
                 return false;
             }
 
-            return sprite.AnimationSet.TryGetTransform(sprite.AnimatedTransform, this.Timer.Total, out transform);
+            src = sprite.SpriteSheet.Frames[sprite.Index];
+            return true;
         }
     }
 }

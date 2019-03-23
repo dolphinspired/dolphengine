@@ -10,6 +10,7 @@ using DolphEngine.MonoGame.Input;
 using DolphEngine.Scenery;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Linq;
 
 namespace DolphEngine.Demo
@@ -66,7 +67,8 @@ namespace DolphEngine.Demo
         private void LoadMap()
         {
             var tileSize = Sprites.Tiles.Frames[0].GetSize();
-            var start = new Position2d(200, 20);
+            var start = Position2d.Zero;
+            var origin = new Origin2d(Anchor2d.TopCenter);
 
             int xShift = 32;
             int yShift = 16;
@@ -87,7 +89,7 @@ namespace DolphEngine.Demo
                     this.Ecosystem
                         .AddEntity(new Entity($"Tile_{i++}")
                         .AddComponent(new PositionComponent2d(x, y))
-                        .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, StaticSprite = tilevalue })
+                        .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, Index = tilevalue, Origin = origin })
                         .AddComponent<DrawComponent>());
 
                     col++;
@@ -100,28 +102,30 @@ namespace DolphEngine.Demo
         private void LoadEntities()
         {
             this.Player = new PlayerEntity();
-            this.Player.Position.Set(30, 50);
             this.Player.Text.Text = "Alphonse";
             this.Player.Text.FontAssetName = "Debug";
 
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
             this.Camera.Pan(240, 120);
 
-            var arrow1 = new GlyphEntity(0);
+            var arrow1 = new GlyphEntity(0, "Arrow");
             arrow1.AddComponent(new LinkedPositionComponent2d(this.Player));
-            arrow1.Sprite.StaticTransform = new Transform2d(-50, 30, 2, 2, 0);
+            arrow1.Sprite.Offset = new Vector2d(-20, -32);
+            arrow1.Sprite.Origin = new Origin2d(Anchor2d.MiddleRight);
+            arrow1.Sprite.Scale = new Vector2d(2, 2);
+            arrow1.Sprite.OffsetAnimation = Animations.Select(TimeSpan.FromSeconds(1));
 
-            var ball1 = new GlyphEntity(2);
+            var ball1 = new GlyphEntity(2, "Ball (rotating)");
             ball1.Position.Set(400, 100);
-            ball1.Sprite.StaticTransform = new Transform2d(0, 0, 4, 4, 0);
-            ball1.Sprite.AnimationSet = Animations.Glyph;
-            ball1.Sprite.AnimatedTransform = "Rotate";
+            ball1.Sprite.Scale = new Vector2d(4, 4);
+            ball1.Sprite.Origin = Origin2d.TrueCenter;
+            ball1.Sprite.RotationAnimation = Animations.Rotate(TimeSpan.FromSeconds(1));
 
-            var ball2 = new GlyphEntity(2);
+            var ball2 = new GlyphEntity(2, "Ball (breathing)");
             ball2.Position.Set(400, 200);
-            ball2.Sprite.StaticTransform = new Transform2d(0, 0, 4, 4, 0);
-            ball2.Sprite.AnimationSet = Animations.Glyph;
-            ball2.Sprite.AnimatedTransform = "Breathe";
+            ball2.Sprite.Scale = new Vector2d(4, 4);
+            ball2.Sprite.Origin = Origin2d.TrueCenter;
+            ball2.Sprite.ScaleAnimation = Animations.Breathe(TimeSpan.FromSeconds(4));
 
             this.Ecosystem.AddEntities(
                 this.Player,

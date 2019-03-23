@@ -19,21 +19,24 @@ namespace DolphEngine.Graphics.Animations
             this.SpriteSheet = spritesheet;
         }
         
-        public Rect2d GetFrameRect(TimeSpan time)
+        public bool TryGetFrameRect(TimeSpan time, out Rect2d frame)
         {
             if (this.SpriteSheet == null)
             {
-                throw new InvalidOperationException($"{nameof(SpritesheetAnimation)}: No spritesheet has been specified!");
+                frame = Rect2d.Zero;
+                return false;
             }
 
             var frameIndex = base.GetFrame(time);
 
             if (frameIndex < 0 || frameIndex >= this.SpriteSheet.Frames.Count)
             {
-                throw new InvalidOperationException($"{nameof(SpritesheetAnimation)}: Spritesheet '{this.SpriteSheet.Name}' does not contain a frame at index {frameIndex}!");
+                frame = Rect2d.Zero;
+                return false;
             }
 
-            return this.SpriteSheet.Frames[frameIndex];
+            frame = this.SpriteSheet.Frames[frameIndex];
+            return true;
         }
     }
 }

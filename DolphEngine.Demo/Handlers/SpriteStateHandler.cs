@@ -1,6 +1,7 @@
 ﻿using DolphEngine.Demo.Components;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
+using DolphEngine.Graphics.Animations;
 
 namespace DolphEngine.Demo.Handlers
 {
@@ -18,21 +19,25 @@ namespace DolphEngine.Demo.Handlers
 
             if (entity.TryGetComponent<FacingComponent>(out var facing))
             {
+                string animName;
+
                 switch (facing.Direction)
                 {
                     case Direction2d.Up:
-                        sprite.AnimatedSprite = isMoving ? "WalkNorth" : "IdleNorth";
+                        animName = isMoving ? "WalkNorth" : "IdleNorth";
                         break;
                     case Direction2d.Right:
-                        sprite.AnimatedSprite = isMoving ? "WalkEast" : "IdleEast";
+                        animName = isMoving ? "WalkEast" : "IdleEast";
                         break;
                     case Direction2d.Down:
-                        sprite.AnimatedSprite = isMoving ? "WalkSouth" : "IdleSouth";
+                        animName = isMoving ? "WalkSouth" : "IdleSouth";
                         break;
-                    case Direction2d.Left:
-                        sprite.AnimatedSprite = isMoving ? "WalkWest" : "IdleWest";
+                    default: // Left
+                        animName = isMoving ? "WalkWest" : "IdleWest";
                         break;
                 }
+
+                sprite.SpriteAnimation = Animations.Player.GetAnimation<SpritesheetAnimation>(animName);
             }
         }
     }

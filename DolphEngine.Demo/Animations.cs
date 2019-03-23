@@ -24,14 +24,21 @@ namespace DolphEngine.Demo
             .AddAnimation("Breathe", Breathe(TimeSpan.FromSeconds(4)));
 
         public static RotationAnimation Rotate(TimeSpan time) => new RotationAnimation()
+            .AddKeyframeDegrees(TimeSpan.Zero, 0)
             .AddKeyframeDegrees(time / 2, 180)
             .AddKeyframeDegrees(time, 360)
             .Loop();
 
         public static ScaleAnimation Breathe(TimeSpan time) => new ScaleAnimation()
+            .AddKeyframe(TimeSpan.Zero, 1.0f)
             .AddKeyframe(time / 4, 1.5f)
             .AddKeyframe(time / 2, 1.75f)
             .AddKeyframe(time * 0.75, 1.5f)
             .Loop(time / 4);
+
+        public static PositionAnimation Select(TimeSpan time) => new PositionAnimation()
+            .AddKeyframe(TimeSpan.Zero, Vector2d.Zero)
+            .AddKeyframe(time / 2, new Vector2d(-20, 0))
+            .Loop(time / 2);
     }
 }

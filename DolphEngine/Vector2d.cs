@@ -40,9 +40,73 @@
             return this;
         }
 
+        public Position2d ToPosition()
+        {
+            return new Position2d(X, Y);
+        }
+
+        #endregion
+
+        #region Operators
+
+        public static Vector2d operator -(Vector2d v)
+        {
+            v.X = -v.X;
+            v.Y = -v.Y;
+            return v;
+        }
+
+        public static Vector2d operator +(Vector2d v1, Vector2d v2)
+        {
+            v1.X += v2.X;
+            v1.Y += v2.Y;
+            return v1;
+        }
+
+        public static Vector2d operator -(Vector2d v1, Vector2d v2)
+        {
+            v1.X -= v2.X;
+            v1.Y -= v2.Y;
+            return v1;
+        }
+
+        public static Vector2d operator *(Vector2d v1, Vector2d v2)
+        {
+            v1.X *= v2.X;
+            v1.Y *= v2.Y;
+            return v1;
+        }
+
+        public static Vector2d operator /(Vector2d v1, Vector2d v2)
+        {
+            v1.X /= v2.X;
+            v1.Y /= v2.Y;
+            return v1;
+        }
+
+        public static bool operator ==(Vector2d v1, Vector2d v2)
+        {
+            return v1.X == v2.X && v1.Y == v2.Y;
+        }
+
+        public static bool operator !=(Vector2d v1, Vector2d v2)
+        {
+            return !(v1 == v2);
+        }
+
         #endregion
 
         #region Object overrides
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Vector2d) && this == (Vector2d)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)(17 * X + 31 * Y);
+        }
 
         public override string ToString()
         {
