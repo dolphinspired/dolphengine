@@ -4,7 +4,12 @@ using System.Linq;
 
 namespace DolphEngine.Graphics.Animations
 {
-    public class KeyframeAnimation<T>
+    // todo: Add ability to set an animation start time with .Start(TimeSpan time)
+    public class KeyframeAnimation
+    {
+    }
+
+    public class KeyframeAnimation<T> : KeyframeAnimation
     {
         public IReadOnlyDictionary<long, T> Keyframes => this._keyframes;
         public TimeSpan Duration => new TimeSpan(_finalKeyframe + _loopbackDelay ?? 0);
@@ -146,7 +151,7 @@ namespace DolphEngine.Graphics.Animations
         /// For example, if the earlier frame occurs at 200ms, the later frame at 400ms, and the current elapsed time is 350ms,
         /// then it would be 75% of the way between the frames, or elapsedRatio = 0.75
         /// </remarks>
-        public virtual T Tween(T prevKeyframe, T nextKeyframe, double elapsedRatio)
+        protected virtual T Tween(T prevKeyframe, T nextKeyframe, double elapsedRatio)
         {
             return prevKeyframe;
         }

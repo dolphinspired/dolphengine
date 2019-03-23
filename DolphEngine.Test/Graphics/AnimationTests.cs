@@ -195,7 +195,7 @@ namespace DolphEngine.Test.Graphics
 
         private class TestAnimation : KeyframeAnimation<int>
         {
-            public override int Tween(int prevFrame, int nextFrame, double elapsedRatio)
+            protected override int Tween(int prevFrame, int nextFrame, double elapsedRatio)
             {
                 return prevFrame + (int)((nextFrame - prevFrame) * elapsedRatio);
             }
