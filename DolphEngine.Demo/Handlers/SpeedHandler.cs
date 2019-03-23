@@ -1,6 +1,5 @@
 ﻿using DolphEngine.Demo.Components;
 using DolphEngine.Eco;
-using DolphEngine.Eco.Components;
 
 namespace DolphEngine.Demo.Handlers
 {
@@ -10,11 +9,8 @@ namespace DolphEngine.Demo.Handlers
         {
             var speed = entity.GetComponent<SpeedComponent>();
 
-            if (entity.TryGetComponent<PositionComponent2d>(out var position))
-            {
-                position.X += speed.X;
-                position.Y += speed.Y;
-            }
+            entity.Space.Position.X += speed.X;
+            entity.Space.Position.Y += speed.Y;
         }
     }
 }

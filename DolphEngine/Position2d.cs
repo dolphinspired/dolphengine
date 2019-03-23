@@ -31,6 +31,13 @@
             return this;
         }
 
+        public Position2d Set(Position2d position)
+        {
+            this.X = position.X;
+            this.Y = position.Y;
+            return this;
+        }
+
         public Position2d Shift(Vector2d vector)
         {
             this.X += vector.X;

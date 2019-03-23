@@ -66,7 +66,7 @@ namespace DolphEngine.Demo
 
         private void LoadMap()
         {
-            var tileSize = Sprites.Tiles.Frames[0].GetSize();
+            var tileSize = Sprites.Tiles.Frames[0].Size;
             var start = Position2d.Zero;
             var origin = new Origin2d(Anchor2d.TopCenter);
 
@@ -86,11 +86,13 @@ namespace DolphEngine.Demo
                     var x = row_x + col * xShift;
                     var y = row_y + col * yShift;
 
-                    this.Ecosystem
-                        .AddEntity(new Entity($"Tile_{i++}")
-                        .AddComponent(new PositionComponent2d(x, y))
-                        .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, Index = tilevalue, Origin = origin })
-                        .AddComponent<DrawComponent>());
+                    var tileEntity = new Entity($"Tile_{i++}");
+                    tileEntity.Space.Position.Set(x, y);
+                    tileEntity.Space.Origin = origin;
+                    tileEntity.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, Index = tilevalue });
+                    tileEntity.AddComponent<DrawComponent>();
+
+                    this.Ecosystem.AddEntity(tileEntity);
 
                     col++;
                 }
@@ -106,25 +108,24 @@ namespace DolphEngine.Demo
             this.Player.Text.FontAssetName = "Debug";
 
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
-            this.Camera.Pan(240, 120);
 
             var arrow1 = new GlyphEntity(0, "Arrow");
             arrow1.AddComponent(new LinkedPositionComponent2d(this.Player));
             arrow1.Sprite.Offset = new Vector2d(-20, -32);
-            arrow1.Sprite.Origin = new Origin2d(Anchor2d.MiddleRight);
+            arrow1.Space.Origin = new Origin2d(Anchor2d.MiddleRight);
             arrow1.Sprite.Scale = new Vector2d(2, 2);
             arrow1.Sprite.OffsetAnimation = Animations.Select(TimeSpan.FromSeconds(1));
 
             var ball1 = new GlyphEntity(2, "Ball (rotating)");
-            ball1.Position.Set(400, 100);
+            ball1.Space.Position.Set(100, 50);
             ball1.Sprite.Scale = new Vector2d(4, 4);
-            ball1.Sprite.Origin = Origin2d.TrueCenter;
+            ball1.Space.Origin = Origin2d.TrueCenter;
             ball1.Sprite.RotationAnimation = Animations.Rotate(TimeSpan.FromSeconds(1));
 
             var ball2 = new GlyphEntity(2, "Ball (breathing)");
-            ball2.Position.Set(400, 200);
+            ball2.Space.Position.Set(100, 150);
             ball2.Sprite.Scale = new Vector2d(4, 4);
-            ball2.Sprite.Origin = Origin2d.TrueCenter;
+            ball2.Space.Origin = Origin2d.TrueCenter;
             ball2.Sprite.ScaleAnimation = Animations.Breathe(TimeSpan.FromSeconds(4));
 
             this.Ecosystem.AddEntities(
@@ -141,6 +142,13 @@ namespace DolphEngine.Demo
                 .AddHandler<TextHandler>()
                 .AddHandler<SpriteHandler>()
                 .AddHandler(new DrawHandler(new MonoGameRenderer(this.SpriteBatch, this.Content, this.Camera)));
+
+            Tower.DebugLogger.AddPage(
+                () => Camera.ToString(),
+                () => Player.ToString(),
+                () => arrow1.ToString(),
+                () => ball1.ToString(),
+                () => ball2.ToString());
         }
 
         private void LoadControls()
@@ -183,29 +191,29 @@ namespace DolphEngine.Demo
                 {
                     if ((k.WASD.Direction & Direction2d.Up) > 0)
                     {
-                        this.Camera.Transform.Offset.Y += 8;
+                        this.Camera.Space.Position.Y -= 8;
                     }
                     if ((k.WASD.Direction & Direction2d.Right) > 0)
                     {
-                        this.Camera.Transform.Offset.X -= 8;
+                        this.Camera.Space.Position.X += 8;
                     }
                     if ((k.WASD.Direction & Direction2d.Down) > 0)
                     {
-                        this.Camera.Transform.Offset.Y -= 8;
+                        this.Camera.Space.Position.Y += 8;
                     }
                     if ((k.WASD.Direction & Direction2d.Left) > 0)
                     {
-                        this.Camera.Transform.Offset.X += 8;
+                        this.Camera.Space.Position.X -= 8;
                     }
                 })
                 .AddControl(Tower.Mouse, m => m.Scroll.Y.JustMoved, m =>
                 {
                     var zoom = m.Scroll.Y.PositionDelta > 0 ? 0.25f : -0.25f;
-                    this.Camera.AdjustZoom(zoom);
+                    this.Camera.Lens.Zoom += zoom;
                 })
-                .AddControl(Tower.Mouse, m => m.MiddleClick.JustPressed, m => this.Camera.ResetZoom())
-                .AddControl(Tower.Keyboard, k => k.F.JustPressed, k => this.Camera.ResetPan().Focus.Target = this.Player)
-                .AddControl(Tower.Keyboard, k => k.G.JustPressed, k => this.Camera.Focus.Target = null);
+                .AddControl(Tower.Mouse, m => m.MiddleClick.JustPressed, m => this.Camera.Lens.Zoom = 1.000f)
+                .AddControl(Tower.Keyboard, k => k.F.JustPressed, k => this.Camera.Lens.Focus = this.Player)
+                .AddControl(Tower.Keyboard, k => k.G.JustPressed, k => this.Camera.Lens.Focus = null);
 
             var pauseContext = new KeyContext("Paused");
 
@@ -218,24 +226,6 @@ namespace DolphEngine.Demo
             this.Keycosystem
                 .AddContext(context)
                 .AddContext(pauseContext);
-
-            Tower.DebugLogger.AddPage(
-                () => "Player info:",
-                DebugLogger.EmptyLine,
-                () => $"Speed: ({this.Player.Speed.X}, {this.Player.Speed.Y})",
-                () => $"X: {this.Player.Position.X}, Y: {this.Player.Position.Y}",
-                DebugLogger.EmptyLine,
-                () => "Camera info:",
-                DebugLogger.EmptyLine,
-                () => $"Position: ({this.Camera.Position.X}, {this.Camera.Position.Y})" +
-                $"      Size: ({this.Camera.Size.Width}, {this.Camera.Size.Height})",
-                () => $"Offset: ({this.Camera.Transform.Offset.X:0.000}, {this.Camera.Transform.Offset.Y:0.000})" +
-                $"      Scale: ({this.Camera.Transform.Scale.X:0.000}, {this.Camera.Transform.Scale.Y:0.000})" +
-                $"      Rotation: ({this.Camera.Transform.Rotation:0.000})"
-            );
-
-            Tower.DebugLogger.AddPage(
-                () => $"Entities: {string.Join(',', this.Ecosystem.GetEntities().Where(x => !x.Name.StartsWith("Tile")))}");
         }
 
         public void UnloadControls()

@@ -22,7 +22,7 @@ namespace DolphEngine.Eco
 
         #endregion
 
-        #region Properties
+        #region Information
 
         /// <summary>
         /// An auto-incrementing id number for this entity.
@@ -38,6 +38,12 @@ namespace DolphEngine.Eco
         /// A reference to this entity's <see cref="Ecosystem"/>, if it has been added to one.	
         /// </summary>	
         public Ecosystem Ecosystem { get; internal set; }
+
+        #endregion
+
+        #region Core data
+
+        public Rect2d Space;
 
         #endregion
 
@@ -240,7 +246,7 @@ namespace DolphEngine.Eco
 
         public override string ToString()
         {
-            return $"{{ id: {this.Id}, name: {this.Name} }}";
+            return $"{{ id: {Id}, name: \"{Name}\", components: {_componentsByType.Count}, space: {Space} }}";
         }
 
         #endregion

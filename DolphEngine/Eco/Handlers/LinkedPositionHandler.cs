@@ -2,7 +2,7 @@
 
 namespace DolphEngine.Eco.Handlers
 {
-    public class LinkedPositionHandler : EcosystemHandler<LinkedPositionComponent2d, PositionComponent2d>
+    public class LinkedPositionHandler : EcosystemHandler<LinkedPositionComponent2d>
     {
         public override void Update(Entity entity)
         {
@@ -12,12 +12,7 @@ namespace DolphEngine.Eco.Handlers
                 return;
             }
 
-            if (lp.Target.TryGetComponent<PositionComponent2d>(out var targetPos))
-            {
-                var pos = entity.GetComponent<PositionComponent2d>();
-                pos.X = targetPos.X;
-                pos.Y = targetPos.Y;
-            }
+            entity.Space.Position.Set(lp.Target.Space.Position);
         }
     }
 }

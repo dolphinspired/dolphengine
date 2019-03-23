@@ -4,18 +4,55 @@
     {
         #region Constructors
 
-        public Rect2d(Rect2d rect) 
-            : this(rect.X, rect.Y, rect.Width, rect.Height) { }
+        private static readonly Origin2d DefaultOrigin = Origin2d.TopLeft;
 
-        public Rect2d(Position2d position, Size2d size) 
-            : this(position.X, position.Y, size.Width, size.Height) { }
+        public Rect2d(Rect2d rect)
+        {
+            this.Position = rect.Position;
+            this.Size = rect.Size;
+            this.Origin = rect.Origin;
+        }
+
+        public Rect2d(Position2d position, Size2d size)
+        {
+            this.Position = position;
+            this.Size = size;
+            this.Origin = DefaultOrigin;
+        }
+
+        public Rect2d(Position2d position, Size2d size, Anchor2d anchor)
+        {
+            this.Position = position;
+            this.Size = size;
+            this.Origin = new Origin2d(anchor);
+        }
+
+        public Rect2d(Position2d position, Size2d size, Origin2d origin)
+        {
+            this.Position = position;
+            this.Size = size;
+            this.Origin = origin;
+        }
         
         public Rect2d(float x, float y, float width, float height)
         {
-            this.X = x;
-            this.Y = y;
-            this.Width = width;
-            this.Height = height;
+            this.Position = new Position2d(x, y);
+            this.Size = new Size2d(width, height);
+            this.Origin = DefaultOrigin;
+        }
+
+        public Rect2d(float x, float y, float width, float height, Anchor2d anchor)
+        {
+            this.Position = new Position2d(x, y);
+            this.Size = new Size2d(width, height);
+            this.Origin = new Origin2d(anchor);
+        }
+
+        public Rect2d(float x, float y, float width, float height, Origin2d origin)
+        {
+            this.Position = new Position2d(x, y);
+            this.Size = new Size2d(width, height);
+            this.Origin = origin;
         }
 
         public static Rect2d Zero = new Rect2d(0, 0, 0, 0);
@@ -24,128 +61,137 @@
 
         #region Properties
 
-        public float X;
+        public Position2d Position;
 
-        public float Y;
+        public Size2d Size;
 
-        public float Width;
+        public Origin2d Origin;
 
-        public float Height;
+        #endregion
+
+        #region Derived properties
+
+        public Position2d TopLeft => this.GetAnchorPosition(Anchor2d.TopLeft);
+
+        public Position2d TopRight => this.GetAnchorPosition(Anchor2d.TopRight);
+
+        public Position2d BottomRight => this.GetAnchorPosition(Anchor2d.BottomRight);
+
+        public Position2d BottomLeft => this.GetAnchorPosition(Anchor2d.BottomLeft);
 
         #endregion
 
         #region Public methods
 
-        public Position2d GetPosition()
+        public Position2d GetAnchorPosition(Anchor2d anchor)
         {
-            return this.GetPosition(Anchor2d.TopLeft);
-        }
+            const float None = 0.000f;
+            const float Half = 0.500f;
+            const float Whole = 1.000f;
 
-        public Position2d GetPosition(Anchor2d anchor)
-        {
-            float x = X;
-            float y = Y;
+            Anchor2d thisAnchor = this.Origin.Anchor;
+            float widthDiff;
+            float heightDiff;
 
             if ((anchor & Anchor2d.Center) == Anchor2d.Center)
             {
-                x += Width / 2;
+                if ((thisAnchor & Anchor2d.Center) == Anchor2d.Center)
+                {
+                    widthDiff = None;
+                }
+                else if ((thisAnchor & Anchor2d.Right) == Anchor2d.Right)
+                {
+                    widthDiff = Half;
+                }
+                else
+                {
+                    widthDiff = -Half;
+                }
             }
             else if ((anchor & Anchor2d.Right) == Anchor2d.Right)
             {
-                x += Width;
+                if ((thisAnchor & Anchor2d.Center) == Anchor2d.Center)
+                {
+                    widthDiff = -Half;
+                }
+                else if ((thisAnchor & Anchor2d.Right) == Anchor2d.Right)
+                {
+                    widthDiff = None;
+                }
+                else
+                {
+                    widthDiff = -Whole;
+                }
+            }
+            else
+            {
+                if ((thisAnchor & Anchor2d.Center) == Anchor2d.Center)
+                {
+                    widthDiff = Half;
+                }
+                else if ((thisAnchor & Anchor2d.Right) == Anchor2d.Right)
+                {
+                    widthDiff = Whole;
+                }
+                else
+                {
+                    widthDiff = None;
+                }
             }
 
             if ((anchor & Anchor2d.Middle) == Anchor2d.Middle)
             {
-                y += Height / 2;
+                if ((thisAnchor & Anchor2d.Middle) == Anchor2d.Middle)
+                {
+                    heightDiff = None;
+                }
+                else if ((thisAnchor & Anchor2d.Bottom) == Anchor2d.Bottom)
+                {
+                    heightDiff = Half;
+                }
+                else
+                {
+                    heightDiff = -Half;
+                }
             }
             else if ((anchor & Anchor2d.Bottom) == Anchor2d.Bottom)
             {
-                y += Height;
+                if ((thisAnchor & Anchor2d.Middle) == Anchor2d.Middle)
+                {
+                    heightDiff = -Half;
+                }
+                else if ((thisAnchor & Anchor2d.Bottom) == Anchor2d.Bottom)
+                {
+                    heightDiff = None;
+                }
+                else
+                {
+                    heightDiff = -Whole;
+                }
             }
+            else
+            {
+                if ((thisAnchor & Anchor2d.Middle) == Anchor2d.Middle)
+                {
+                    heightDiff = Half;
+                }
+                else if ((thisAnchor & Anchor2d.Bottom) == Anchor2d.Bottom)
+                {
+                    heightDiff = Whole;
+                }
+                else
+                {
+                    heightDiff = None;
+                }
+            }
+
+            float totalWidthDiff = (this.Size.Width * widthDiff) + this.Origin.Offset.X;
+            float totalHeightDiff = (this.Size.Height * heightDiff) + this.Origin.Offset.Y;
+
+            float x = this.Position.X - totalWidthDiff;
+            float y = this.Position.Y - totalHeightDiff;
 
             return new Position2d(x, y);
-        }
-
-        public Position2d GetPosition(Origin2d origin)
-        {
-            var anchorPosition = this.GetPosition(origin.Anchor);
-            return anchorPosition.Shift(origin.Offset);
-        }
-
-        public Rect2d SetPosition(float x, float y)
-        {
-            return this.SetPosition(x, y, Anchor2d.TopLeft);
-        }
-
-        public Rect2d SetPosition(float x, float y, Anchor2d anchor)
-        {
-            return SetPosition(x, y, new Origin2d(anchor));
-        }
-
-        public Rect2d SetPosition(float x, float y, Origin2d origin)
-        {
-            var anchor = origin.Anchor;
-
-            if ((anchor & Anchor2d.Center) == Anchor2d.Center)
-            {
-                x -= Width / 2;
-            }
-            else if ((anchor & Anchor2d.Right) == Anchor2d.Right)
-            {
-                x -= Width;
-            }
-
-            if ((anchor & Anchor2d.Middle) == Anchor2d.Middle)
-            {
-                y -= Height / 2;
-            }
-            else if ((anchor & Anchor2d.Bottom) == Anchor2d.Bottom)
-            {
-                y -= Height;
-            }
-
-            this.X = x - origin.Offset.X;
-            this.Y = y - origin.Offset.Y;
-            return this;
-        }
-
-        public Rect2d Shift(Vector2d shift)
-        {
-            this.X += shift.X;
-            this.Y += shift.Y;
-            return this;
-        }
-
-        public Rect2d Scale(Vector2d scale)
-        {
-            this.Width *= scale.X;
-            this.Height *= scale.Y;
-            return this;
-        }
-
-        public Rect2d Scale(Vector2d scale, Anchor2d anchor)
-        {
-            return this.Scale(scale, new Origin2d(anchor));
-        }
-
-        public Rect2d Scale(Vector2d scale, Origin2d origin)
-        {
-            var originPoint = this.GetPosition(origin);
-
-            var scaleLeftRatio = (originPoint.X - X) / Width;
-            var scaleUpRatio = (originPoint.Y - Y) / Height;
-            
-            this.X = X - (scale.X * scaleLeftRatio);
-            this.Y = Y - (scale.Y * scaleUpRatio);
-            this.Width = this.Width * scale.X;
-            this.Height = this.Height * scale.Y;
-            return this;
-        }
-
-        public Size2d GetSize()
-        {
-            return new Size2d(this.Width, this.Height);
         }
 
         #endregion
@@ -154,7 +200,7 @@
 
         public override string ToString()
         {
-            return $"[ {X}, {Y}, {Width}, {Height} ]";
+            return $"{{ pos: {Position}, size: {Size}, origin: {Origin} }}";
         }
 
         #endregion

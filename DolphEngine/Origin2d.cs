@@ -21,5 +21,14 @@
         public Anchor2d Anchor;
 
         public Vector2d Offset;
+
+        #region Object overrides
+
+        public override string ToString()
+        {
+            return $"{{ anchor: \"{Anchor}\", offset: {Offset} }}";
+        }
+
+        #endregion
     }
 }

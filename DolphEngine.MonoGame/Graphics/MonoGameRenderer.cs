@@ -31,9 +31,7 @@ namespace DolphEngine.MonoGame.Graphics
 
         public override bool OnBeforeDraw()
         {
-            var cameraSize = this.Camera.GetComponentOrDefault<SizeComponent2d>();
-
-            if (cameraSize == null || cameraSize.Width <= 0 || cameraSize.Height <= 0)
+            if (Camera.Space.Size.Width <= 0 || Camera.Space.Size.Height <= 0)
             {
                 // If the camera is zero-size, nothing can be drawn, but we still need to clear out the last frame
                 this.SpriteBatch.Begin();
@@ -42,29 +40,23 @@ namespace DolphEngine.MonoGame.Graphics
                 return false;
             }
 
-            var cameraPosition = this.Camera.GetComponentOrDefault(new PositionComponent2d(0, 0));
-            var cameraTranslation = this.Camera.GetComponentOrDefault(new TransformComponent2d(0, 0, 0, 0, FZero));
+            var lens = this.Camera.GetComponentOrDefault<CameraComponent>();
 
-            Position2d cameraFocus;
-            if (this.Camera.TryGetComponent<SingleTargetComponent>(out var focus)               // If the camera has a focusing component
-                && focus.Target != null                                                         // And a target is specified
-                && focus.Target.TryGetComponent<PositionComponent2d>(out var targetPosition))   // And that target has a position
+            if (lens.Focus != null)
             {
-                // Then calculate the top-left point of the camera that would "center" it on the target's position
-                cameraFocus = new Position2d(targetPosition.X - cameraSize.Width / 2, targetPosition.Y - cameraSize.Height / 2);
+                this.Camera.Space.Position = lens.Focus.Space.Position;
             }
-            else
-            {
-                cameraFocus = Position2d.Zero;
-            }
+
+            var zoomDiffX = (Camera.Space.Size.Width * lens.Zoom) - Camera.Space.Size.Width;
+            var zoomDiffY = (Camera.Space.Size.Height * lens.Zoom) - Camera.Space.Size.Height;
 
             // This formula adapted from: https://roguesharp.wordpress.com/2014/07/13/tutorial-5-creating-a-2d-camera-with-pan-and-zoom-in-monogame/
             var translation =
-                Matrix.CreateTranslation(-cameraPosition.X, -cameraPosition.Y, 0) *
-                Matrix.CreateRotationZ(cameraTranslation.Rotation) *
-                Matrix.CreateScale(cameraTranslation.Scale.X, cameraTranslation.Scale.Y, FOne) *
-                Matrix.CreateTranslation(-cameraFocus.X, -cameraFocus.Y, 0) *
-                Matrix.CreateTranslation(cameraTranslation.Offset.X, cameraTranslation.Offset.Y, FZero);
+                Matrix.CreateTranslation(-Camera.Space.TopLeft.X, -Camera.Space.TopLeft.Y, FZero) *
+                Matrix.CreateTranslation(lens.Pan.X, lens.Pan.Y, FZero) *
+                //Matrix.CreateRotationZ(cameraTranslation.Rotation) *
+                Matrix.CreateScale(lens.Zoom, lens.Zoom, FOne) *
+                Matrix.CreateTranslation(-zoomDiffX / 2, -zoomDiffY / 2, FZero); // Keep the camera centered after zoom
 
             this.SpriteBatch.Begin(
                 samplerState: SamplerState.PointWrap, // disable anti-aliasing

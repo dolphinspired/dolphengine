@@ -9,16 +9,6 @@ namespace DolphEngine.Test.Core
         private const float W = 30;
         private const float H = 50;
 
-        [Fact]
-        public void CanGetPosition()
-        {
-            var rect = new Rect2d(X, Y, W, H);
-            var pos = rect.GetPosition();
-
-            DolphAssert.EqualF(X, pos.X);
-            DolphAssert.EqualF(Y, pos.Y);
-        }
-
         [Theory]
         [InlineData(Anchor2d.Default,        X, Y)]
         [InlineData(Anchor2d.Left,           X, Y)]
@@ -39,21 +29,10 @@ namespace DolphEngine.Test.Core
         public void CanGetPositionWithAnchor(Anchor2d anchor, float expectedX, float expectedY)
         {
             var rect = new Rect2d(X, Y, W, H);
-            var pos = rect.GetPosition(anchor);
+            var pos = rect.GetAnchorPosition(anchor);
 
             DolphAssert.EqualF(expectedX, pos.X);
             DolphAssert.EqualF(expectedY, pos.Y);
-        }
-
-        [Fact]
-        public void CanSetPosition()
-        {
-            var rect = new Rect2d(0, 0, W, H);
-            rect.SetPosition(X, Y);
-            var pos = rect.GetPosition();
-
-            DolphAssert.EqualF(X, pos.X);
-            DolphAssert.EqualF(Y, pos.Y);
         }
 
         [Theory]
@@ -75,9 +54,8 @@ namespace DolphEngine.Test.Core
         [InlineData(Anchor2d.MiddleCenter,   X-W/2, Y-H/2)]
         public void CanSetPositionWithAnchor(Anchor2d anchor, float expectedX, float expectedY)
         {
-            var rect = new Rect2d(0, 0, W, H);
-            rect.SetPosition(X, Y, anchor);
-            var pos = rect.GetPosition();
+            var rect = new Rect2d(X, Y, W, H, anchor);
+            var pos = rect.GetAnchorPosition(Anchor2d.TopLeft);
 
             DolphAssert.EqualF(expectedX, pos.X);
             DolphAssert.EqualF(expectedY, pos.Y);

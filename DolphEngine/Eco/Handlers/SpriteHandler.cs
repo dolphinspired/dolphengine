@@ -16,30 +16,15 @@ namespace DolphEngine.Eco.Handlers
                 return;
             }
 
-            Rect2d dest = new Rect2d();
-            if (entity.TryGetComponent<SizeComponent2d>(out var size))
+            Rect2d dest = entity.Space;
+            if (dest.Size.Width == 0 || dest.Size.Height == 0)
             {
-                // If the entity has a size, draw the sprite to match
-                dest.Width = size.Width;
-                dest.Height = size.Height;
-            }
-            else
-            {
-                // Otherwise, simply match the size of the source region
-                dest.Width = src.Width;
-                dest.Height = src.Height;
+                // If the entity has no size, simply match the size of the source region
+                dest.Size = src.Size;
             }
 
-            if (entity.TryGetComponent<PositionComponent2d>(out var position))
-            {
-                // If the entity has a location, draw the sprite there
-                dest.SetPosition(position.X, position.Y);
-            }
-            else
-            {
-                // Otherwise, draw at 0,0 centered on the sprite's anchor point
-                dest.SetPosition(0, 0);
-            }
+            // Get the origin before any transformations are applied
+            Vector2d origin = (dest.Position - dest.TopLeft).ToVector();
 
             Rotation2d rotation = sprite.Rotation;
             if (sprite.RotationAnimation != null)
@@ -47,20 +32,18 @@ namespace DolphEngine.Eco.Handlers
                 rotation.Turn(sprite.RotationAnimation.GetFrame(this.Timer.Total));
             }
 
-            dest.Shift(sprite.Offset);
+            dest.Position.Shift(sprite.Offset);
             if (sprite.OffsetAnimation != null)
             {
-                dest.Shift(sprite.OffsetAnimation.GetFrame(this.Timer.Total));
+                dest.Position.Shift(sprite.OffsetAnimation.GetFrame(this.Timer.Total));
             }
 
-            dest.Scale(sprite.Scale);
+            dest.Size.Scale(sprite.Scale);
             if (sprite.ScaleAnimation != null)
             {
                 var animScale = sprite.ScaleAnimation.GetFrame(this.Timer.Total);
-                dest.Scale(animScale);
+                dest.Size.Scale(animScale);
             }
-
-            Vector2d origin = (src.GetPosition(sprite.Origin) - src.GetPosition(Anchor2d.TopLeft)).ToVector();
 
             var directive = new SpriteDirective
             {

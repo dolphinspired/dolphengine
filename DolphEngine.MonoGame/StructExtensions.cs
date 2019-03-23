@@ -21,7 +21,7 @@ namespace DolphEngine.MonoGame
 
         public static Rectangle ToRectangle(this Rect2d rect)
         {
-            return new Rectangle((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
+            return new Rectangle((int)rect.Position.X, (int)rect.Position.Y, (int)rect.Size.Width, (int)rect.Size.Height);
         }
     }
 }

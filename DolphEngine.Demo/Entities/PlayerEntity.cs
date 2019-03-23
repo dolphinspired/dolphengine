@@ -9,14 +9,13 @@ namespace DolphEngine.Demo.Entities
         public PlayerEntity() : base("Player")
         {
             this.AddComponent<DrawComponent>()
-                .AddComponent<PositionComponent2d>()
                 .AddComponent<SpeedComponent>()
                 .AddComponent<FacingComponent>()
-                .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Alphonse, Origin = new Origin2d(Anchor2d.BottomCenter) })
+                .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Alphonse })
                 .AddComponent<TextComponent>();
-        }
 
-        public PositionComponent2d Position => this.GetComponent<PositionComponent2d>();
+            this.Space.Origin = new Origin2d(Anchor2d.BottomCenter);
+        }
 
         public SpeedComponent Speed => this.GetComponent<SpeedComponent>();
 

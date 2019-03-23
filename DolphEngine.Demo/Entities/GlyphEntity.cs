@@ -8,11 +8,8 @@ namespace DolphEngine.Demo.Entities
         public GlyphEntity(int glyphIndex, string name) : base(name)
         {
             this.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, Index = glyphIndex })
-                .AddComponent<DrawComponent>()
-                .AddComponent<PositionComponent2d>();
+                .AddComponent<DrawComponent>();
         }
-
-        public PositionComponent2d Position => this.GetComponent<PositionComponent2d>();
 
         public SpriteComponent Sprite => this.GetComponent<SpriteComponent>();
     }

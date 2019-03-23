@@ -8,7 +8,6 @@ namespace DolphEngine.Eco.Components
         public SpriteComponent()
         {
             this.Scale = Vector2d.One;
-            this.Origin = Origin2d.TopLeft;
         }
 
         public SpriteSheet SpriteSheet;
@@ -28,7 +27,5 @@ namespace DolphEngine.Eco.Components
         public Vector2d Scale;
 
         public ScaleAnimation ScaleAnimation;
-
-        public Origin2d Origin;
     }
 }
