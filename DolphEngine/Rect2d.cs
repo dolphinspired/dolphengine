@@ -97,6 +97,25 @@
             return this;
         }
 
+        public Rect2d Shift(Vector2d shift)
+        {
+            this.X += shift.X;
+            this.Y += shift.Y;
+            return this;
+        }
+
+        public Rect2d Scale(Vector2d scale)
+        {
+            this.Width *= scale.X;
+            this.Height *= scale.Y;
+            return this;
+        }
+
+        public Rect2d Scale(Vector2d scale, Anchor2d anchor)
+        {
+            throw new System.NotImplementedException(); // todo: this
+        }
+
         public Size2d GetSize()
         {
             return new Size2d(this.Width, this.Height);
