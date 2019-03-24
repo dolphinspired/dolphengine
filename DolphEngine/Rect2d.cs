@@ -194,6 +194,11 @@
             return new Position2d(x, y);
         }
 
+        public Polygon2d ToPolygon()
+        {
+            return new Polygon2d(TopLeft, TopRight, BottomRight, BottomLeft).Close();
+        }
+
         #endregion
 
         #region Object overrides

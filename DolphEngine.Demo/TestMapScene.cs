@@ -136,14 +136,12 @@ namespace DolphEngine.Demo
                 .AddComponent(new PolygonComponent
                 {
                     Color = 0xFF0000FF,
-                    Points = new[]
-                    {
+                    Polygon = new Polygon2d(
                         // This should make a "Z" shape
-                        new Vector2d(0, 0),
                         new Vector2d(100, 0),
                         new Vector2d(-100, 100),
                         new Vector2d(100, 0)
-                    }
+                    )
                 })
                 .AddComponent<DrawComponent>();
             shape.Space.Position.Shift(-300, -150);

@@ -61,14 +61,7 @@ namespace DolphEngine.Eco.Handlers
                 draw.Directives.Add(new PolygonDirective
                 {
                     Color = 0xFF00FFFF,
-                    Points = new[]
-                    {
-                        dest.TopLeft,
-                        dest.TopRight,
-                        dest.BottomRight,
-                        dest.BottomLeft,
-                        dest.TopLeft
-                    }
+                    Points = dest.ToPolygon().Points
                 });
             }
         }
