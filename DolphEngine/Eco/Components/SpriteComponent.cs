@@ -27,5 +27,7 @@ namespace DolphEngine.Eco.Components
         public Vector2d Scale;
 
         public ScaleAnimation ScaleAnimation;
+
+        public bool EnableBoxOutline;
     }
 }

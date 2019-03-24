@@ -106,6 +106,7 @@ namespace DolphEngine.Demo
             this.Player = new PlayerEntity();
             this.Player.Text.Text = "Alphonse";
             this.Player.Text.FontAssetName = "Debug";
+            this.Player.Sprite.EnableBoxOutline = true;
 
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
 
@@ -115,25 +116,45 @@ namespace DolphEngine.Demo
             arrow1.Space.Origin = new Origin2d(Anchor2d.MiddleRight);
             arrow1.Sprite.Scale = new Vector2d(2, 2);
             arrow1.Sprite.OffsetAnimation = Animations.Select(TimeSpan.FromSeconds(1));
+            arrow1.Sprite.EnableBoxOutline = true;
 
             var ball1 = new GlyphEntity(2, "Ball (rotating)");
             ball1.Space.Position.Set(100, 50);
             ball1.Sprite.Scale = new Vector2d(4, 4);
             ball1.Space.Origin = Origin2d.TrueCenter;
             ball1.Sprite.RotationAnimation = Animations.Rotate(TimeSpan.FromSeconds(1));
+            ball1.Sprite.EnableBoxOutline = true;
 
             var ball2 = new GlyphEntity(2, "Ball (breathing)");
             ball2.Space.Position.Set(100, 150);
             ball2.Sprite.Scale = new Vector2d(4, 4);
             ball2.Space.Origin = Origin2d.TrueCenter;
             ball2.Sprite.ScaleAnimation = Animations.Breathe(TimeSpan.FromSeconds(4));
+            ball2.Sprite.EnableBoxOutline = true;
+
+            var shape = new Entity("TestPolygon")
+                .AddComponent(new PolygonComponent
+                {
+                    Color = 0xFF0000FF,
+                    Points = new[]
+                    {
+                        // This should make a "Z" shape
+                        new Vector2d(0, 0),
+                        new Vector2d(100, 0),
+                        new Vector2d(-100, 100),
+                        new Vector2d(100, 0)
+                    }
+                })
+                .AddComponent<DrawComponent>();
+            shape.Space.Position.Shift(-300, -150);
 
             this.Ecosystem.AddEntities(
                 this.Player,
                 this.Camera,
                 arrow1,
                 ball1,
-                ball2);
+                ball2,
+                shape);
 
             this.Ecosystem
                 .AddHandler<SpeedHandler>()
@@ -141,6 +162,7 @@ namespace DolphEngine.Demo
                 .AddHandler<SpriteStateHandler>()
                 .AddHandler<TextHandler>()
                 .AddHandler<SpriteHandler>()
+                .AddHandler<PolygonHandler>()
                 .AddHandler(new DrawHandler(new MonoGameRenderer(this.SpriteBatch, this.Content, this.Camera)));
 
             Tower.DebugLogger.AddPage(

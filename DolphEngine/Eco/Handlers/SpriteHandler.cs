@@ -55,6 +55,22 @@ namespace DolphEngine.Eco.Handlers
             };
 
             draw.Directives.Add(directive);
+
+            if (sprite.EnableBoxOutline)
+            {
+                draw.Directives.Add(new PolygonDirective
+                {
+                    Color = 0xFF00FFFF,
+                    Points = new[]
+                    {
+                        dest.TopLeft,
+                        dest.TopRight,
+                        dest.BottomRight,
+                        dest.BottomLeft,
+                        dest.TopLeft
+                    }
+                });
+            }
         }
 
         private bool TryGetAnimatedSprite(SpriteComponent sprite, out Rect2d src)

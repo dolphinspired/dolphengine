@@ -22,5 +22,7 @@ namespace DolphEngine.Demo.Entities
         public FacingComponent Facing => this.GetComponent<FacingComponent>();
 
         public TextComponent Text => this.GetComponent<TextComponent>();
+
+        public SpriteComponent Sprite => this.GetComponent<SpriteComponent>();
     }
 }
