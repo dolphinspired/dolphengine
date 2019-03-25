@@ -9,15 +9,35 @@ namespace DolphEngine.Eco
         #region Constructors/Destructors
 
         /// <summary>
-        /// Creates a new empty entity with no components.
+        /// Creates a named entity.
         /// </summary>
-        /// <param name="name">Optional. A short, descriptive name for the entity. A default name will be used if one is not provided.</param>
         public Entity(string name = null)
         {
             this.Id = ++_idCounter;
-            this.Name = name ?? $"Entity {this.Id}";
+            this.Name = name ?? DefaultName;
         }
 
+        /// <summary>
+        /// Creates a named entity and places it at the provided position.
+        /// </summary>
+        public Entity(Position2d position, string name = null) : this()
+        {
+            this.Id = ++_idCounter;
+            this.Name = name ?? DefaultName;
+            this.Space = new Rect2d(position, Size2d.Zero);
+        }
+
+        /// <summary>
+        /// Creates a named entity and gives it the provided dimensions.
+        /// </summary>
+        public Entity(Rect2d space, string name = null)
+        {
+            this.Id = ++_idCounter;
+            this.Name = name ?? DefaultName;
+            this.Space = space;
+        }
+
+        private string DefaultName => $"Entity {this.Id}";
         private static uint _idCounter;
 
         #endregion

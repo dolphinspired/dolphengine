@@ -14,7 +14,7 @@ namespace DolphEngine.Demo.Entities
                 .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Alphonse })
                 .AddComponent<TextComponent>();
 
-            this.Space.Origin = new Origin2d(Anchor2d.BottomCenter);
+            this.Space = new Rect2d(0, 0, 32, 64, new Origin2d(Anchor2d.BottomCenter));
         }
 
         public SpeedComponent Speed => this.GetComponent<SpeedComponent>();

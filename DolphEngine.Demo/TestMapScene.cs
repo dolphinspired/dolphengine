@@ -11,7 +11,6 @@ using DolphEngine.Scenery;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Linq;
 
 namespace DolphEngine.Demo
 {
@@ -86,9 +85,7 @@ namespace DolphEngine.Demo
                     var x = row_x + col * xShift;
                     var y = row_y + col * yShift;
 
-                    var tileEntity = new Entity($"Tile_{i++}");
-                    tileEntity.Space.Position.Set(x, y);
-                    tileEntity.Space.Origin = origin;
+                    var tileEntity = new Entity(new Rect2d(x, y, tileSize.Width, tileSize.Height, origin), $"Tile_{i++}");
                     tileEntity.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, Index = tilevalue });
                     tileEntity.AddComponent<DrawComponent>();
 
@@ -111,24 +108,21 @@ namespace DolphEngine.Demo
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
 
             var arrow1 = new GlyphEntity(0, "Arrow");
-            arrow1.AddComponent(new LinkedPositionComponent2d(this.Player));
-            arrow1.Sprite.Offset = new Vector2d(-20, -32);
-            arrow1.Space.Origin = new Origin2d(Anchor2d.MiddleRight);
+            arrow1.Space = new Rect2d(0, 0, 21, 11, new Origin2d(Anchor2d.MiddleRight));
+            arrow1.AddComponent(new LinkedPositionComponent(this.Player, e => e.Space.GetAnchorPosition(Anchor2d.MiddleLeft).Shift(new Vector2d(-5, 0))));
             arrow1.Sprite.Scale = new Vector2d(2, 2);
             arrow1.Sprite.OffsetAnimation = Animations.Select(TimeSpan.FromSeconds(1));
             arrow1.Sprite.EnableBoxOutline = true;
 
             var ball1 = new GlyphEntity(2, "Ball (rotating)");
-            ball1.Space.Position.Set(100, 50);
+            ball1.Space = new Rect2d(100, 50, 11, 11, Origin2d.TrueCenter);
             ball1.Sprite.Scale = new Vector2d(4, 4);
-            ball1.Space.Origin = Origin2d.TrueCenter;
             ball1.Sprite.RotationAnimation = Animations.Rotate(TimeSpan.FromSeconds(1));
             ball1.Sprite.EnableBoxOutline = true;
 
             var ball2 = new GlyphEntity(2, "Ball (breathing)");
-            ball2.Space.Position.Set(100, 150);
+            ball2.Space = new Rect2d(100, 150, 11, 11, Origin2d.TrueCenter);
             ball2.Sprite.Scale = new Vector2d(4, 4);
-            ball2.Space.Origin = Origin2d.TrueCenter;
             ball2.Sprite.ScaleAnimation = Animations.Breathe(TimeSpan.FromSeconds(4));
             ball2.Sprite.EnableBoxOutline = true;
 
