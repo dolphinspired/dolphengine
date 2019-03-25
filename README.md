@@ -7,4 +7,4 @@ This is just a hobby project that I work on occasionally to try and learn game d
 
 ## Latest progress!
 
-![Demo](img/demo-2019-03-19.gif?raw=true)
+![Demo](img/demo-2019-03-25.gif?raw=true)
