@@ -17,11 +17,6 @@ namespace DolphEngine.Eco.Handlers
             }
 
             Rect2d dest = entity.Space;
-            if (dest.Size.Width == 0 || dest.Size.Height == 0)
-            {
-                // If the entity has no size, simply match the size of the source region
-                dest.Size = src.Size;
-            }
 
             // Get the origin before any transformations are applied
             Vector2d origin = (dest.Position - dest.TopLeft).ToVector();
