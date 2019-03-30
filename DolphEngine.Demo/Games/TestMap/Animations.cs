@@ -3,7 +3,7 @@ using DolphEngine.Graphics.Sprites;
 using System;
 using System.Collections.Generic;
 
-namespace DolphEngine.Demo
+namespace DolphEngine.Demo.Games.TestMap
 {
     public static class Animations
     {

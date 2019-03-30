@@ -1,5 +1,5 @@
-﻿using DolphEngine.Demo.Entities;
-using DolphEngine.Demo.Handlers;
+﻿using DolphEngine.Demo.Games.TestMap.Entities;
+using DolphEngine.Demo.Games.TestMap.Handlers;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Eco.Entities;
@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace DolphEngine.Demo
+namespace DolphEngine.Demo.Games.TestMap
 {
     public class TestMapScene : Scene
     {

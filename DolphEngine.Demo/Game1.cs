@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DolphEngine.Demo.Games.TestMap;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace DolphEngine.Demo

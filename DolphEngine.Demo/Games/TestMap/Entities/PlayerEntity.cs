@@ -2,7 +2,7 @@
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 
-namespace DolphEngine.Demo.Entities
+namespace DolphEngine.Demo.Games.TestMap.Entities
 {
     public class PlayerEntity : Entity
     {

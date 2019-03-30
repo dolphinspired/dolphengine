@@ -3,7 +3,7 @@ using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Graphics.Animations;
 
-namespace DolphEngine.Demo.Handlers
+namespace DolphEngine.Demo.Games.TestMap.Handlers
 {
     public class SpriteStateHandler : EcosystemHandler<SpriteComponent, DrawComponent>
     {

@@ -1,7 +1,7 @@
 ﻿using DolphEngine.Demo.Components;
 using DolphEngine.Eco;
 
-namespace DolphEngine.Demo.Handlers
+namespace DolphEngine.Demo.Games.TestMap.Handlers
 {
     public class SpeedHandler : EcosystemHandler<SpeedComponent>
     {
