@@ -1,7 +1,7 @@
 ﻿using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 
-namespace DolphEngine.Demo.Games.TestMap.Entities
+namespace DolphEngine.Demo
 {
     public class GlyphEntity : Entity
     {
