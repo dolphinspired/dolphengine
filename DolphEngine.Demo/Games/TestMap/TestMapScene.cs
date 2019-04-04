@@ -6,8 +6,8 @@ using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
 using DolphEngine.Input;
 using DolphEngine.MonoGame.Graphics;
-using DolphEngine.MonoGame.Input;
 using DolphEngine.Scenery;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -35,20 +35,14 @@ namespace DolphEngine.Demo.Games.TestMap
             new int[] { 0, 2, 0, 3, 3, 1 },
         };
 
-        public TestMapScene(ContentManager content, SpriteBatch spriteBatch, int sceneViewWidth, int sceneViewHeight)
-            : base(new Ecosystem(Tower.Timer), GetKeycosystem())
+        public TestMapScene(Ecosystem ecosystem, Keycosystem keycosystem, ContentManager content, SpriteBatch spriteBatch, GraphicsDeviceManager gdm)
+            : base(ecosystem, keycosystem)
         {
             this.Content = content;
             this.SpriteBatch = spriteBatch;
 
-            this._sceneViewWidth = sceneViewWidth;
-            this._sceneViewHeight = sceneViewHeight;
-        }
-
-        private static Keycosystem GetKeycosystem()
-        {
-            var observer = new MonoGameObserver().UseKeyboard().UseMouse();
-            return new Keycosystem(observer);
+            this._sceneViewWidth = gdm.PreferredBackBufferWidth;
+            this._sceneViewHeight = gdm.PreferredBackBufferHeight;
         }
 
         public override void Load()

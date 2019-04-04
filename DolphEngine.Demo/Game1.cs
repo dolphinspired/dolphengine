@@ -1,4 +1,7 @@
 ﻿using DolphEngine.Demo.Games.TestMap;
+using DolphEngine.Eco;
+using DolphEngine.Input;
+using DolphEngine.MonoGame.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -24,6 +27,8 @@ namespace DolphEngine.Demo
 
         protected override void Initialize()
         {
+            this.SpriteBatch = new SpriteBatch(GraphicsDevice);
+
             Tower.Initialize();
 
             Tower.Keycosystem
@@ -33,15 +38,21 @@ namespace DolphEngine.Demo
             Tower.DebugLogger
                 .AddControlInfo(ControlContexts.Keyboard, ControlContexts.Mouse);
 
+            Tower.Director
+                .AddService(() => new Ecosystem(Tower.Timer))
+                .AddService(() => new Keycosystem(new MonoGameObserver().UseKeyboard().UseMouse()))
+                .AddService(this.Content)
+                .AddService(this.SpriteBatch)
+                .AddService(this.Graphics);
+
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            this.SpriteBatch = new SpriteBatch(GraphicsDevice);
-
             Tower.DebugLogger.Font = this.Content.Load<SpriteFont>("Debug");
-            Tower.Director.AddScene("test-map", new TestMapScene(this.Content, this.SpriteBatch, this.Graphics.PreferredBackBufferWidth, this.Graphics.PreferredBackBufferHeight));
+
+            Tower.Director.AddScene<TestMapScene>("test-map");
             Tower.Director.LoadScene("test-map");
         }
 
