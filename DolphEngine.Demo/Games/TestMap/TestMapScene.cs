@@ -1,5 +1,6 @@
 ﻿using DolphEngine.Demo.Games.TestMap.Entities;
 using DolphEngine.Demo.Games.TestMap.Handlers;
+using DolphEngine.DI;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Eco.Entities;
@@ -16,8 +17,8 @@ namespace DolphEngine.Demo.Games.TestMap
 {
     public class TestMapScene : Scene
     {
-        protected readonly ContentManager Content;
-        protected readonly SpriteBatch SpriteBatch;
+        protected ContentManager Content;
+        protected SpriteBatch SpriteBatch;
 
         protected PlayerEntity Player;
         protected CameraEntity Camera;
@@ -35,12 +36,12 @@ namespace DolphEngine.Demo.Games.TestMap
             new int[] { 0, 2, 0, 3, 3, 1 },
         };
 
-        public TestMapScene(Ecosystem ecosystem, Keycosystem keycosystem, ContentManager content, SpriteBatch spriteBatch, GraphicsDeviceManager gdm)
-            : base(ecosystem, keycosystem)
+        public TestMapScene(IServiceProvider services) : base(services)
         {
-            this.Content = content;
-            this.SpriteBatch = spriteBatch;
+            this.Content = this.GetService<ContentManager>();
+            this.SpriteBatch = this.GetService<SpriteBatch>();
 
+            var gdm = this.GetService<GraphicsDeviceManager>();
             this._sceneViewWidth = gdm.PreferredBackBufferWidth;
             this._sceneViewHeight = gdm.PreferredBackBufferHeight;
         }

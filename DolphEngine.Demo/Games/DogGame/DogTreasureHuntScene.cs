@@ -1,6 +1,4 @@
-﻿using DolphEngine.Eco;
-using DolphEngine.Input;
-using DolphEngine.Scenery;
+﻿using DolphEngine.Scenery;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,10 +7,8 @@ namespace DolphEngine.Demo.Games.DogGame
 {
     public class DogTreasureHuntScene : Scene
     {
-        public DogTreasureHuntScene(Ecosystem ecosystem, Keycosystem keycosystem) 
-            : base(ecosystem, keycosystem)
+        public DogTreasureHuntScene(IServiceProvider services) : base(services)
         {
-
         }
 
         public override void Load()

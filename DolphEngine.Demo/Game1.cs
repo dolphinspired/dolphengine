@@ -1,5 +1,6 @@
 ﻿using DolphEngine.Demo.Games.DogGame;
 using DolphEngine.Demo.Games.TestMap;
+using DolphEngine.DI;
 using DolphEngine.Eco;
 using DolphEngine.Input;
 using DolphEngine.MonoGame.Input;
@@ -12,6 +13,9 @@ namespace DolphEngine.Demo
     {
         GraphicsDeviceManager Graphics;
         SpriteBatch SpriteBatch;
+
+        // Use the DolphEngine implementation of DI, not the MonoGame one
+        private readonly new IServiceRepository Services = new ServiceRepository();
 
         private static FpsCounter FpsCounter;
         private static Vector2 FpsPosition;
@@ -40,6 +44,7 @@ namespace DolphEngine.Demo
                 .AddControlInfo(ControlContexts.Keyboard, ControlContexts.Mouse);
 
             Tower.Director
+                .AddService(Tower.Timer)
                 .AddService(() => new Ecosystem(Tower.Timer))
                 .AddService(() => new Keycosystem(new MonoGameObserver().UseKeyboard().UseMouse()))
                 .AddService(this.Content)
@@ -65,7 +70,7 @@ namespace DolphEngine.Demo
             Tower.Timer.Advance();
             
             Tower.Keycosystem.Update(gameTime.TotalGameTime);
-            Tower.Director.Update(gameTime.TotalGameTime);
+            Tower.Director.Update();
 
             base.Update(gameTime);
         }

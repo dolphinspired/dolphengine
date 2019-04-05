@@ -1,33 +1,50 @@
-﻿using DolphEngine.Eco;
+﻿using DolphEngine.DI;
+using DolphEngine.Eco;
 using DolphEngine.Input;
 using System;
 
 namespace DolphEngine.Scenery
 {
-    public abstract class Scene : IScene
+    public abstract class Scene : IScene, IServiceProvider
     {
-        public readonly Ecosystem Ecosystem;
-        public readonly Keycosystem Keycosystem;
+        protected readonly IServiceProvider Services;
 
-        public Scene(Ecosystem ecosystem, Keycosystem keycosystem)
+        protected readonly GameTimer Timer;
+        protected readonly Ecosystem Ecosystem;
+        protected readonly Keycosystem Keycosystem;
+
+        public Scene(IServiceProvider provider)
         {
-            this.Ecosystem = ecosystem;
-            this.Keycosystem = keycosystem;
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
+            this.Services = provider;
+
+            this.Timer = this.GetService<GameTimer>();
+            this.Ecosystem = this.GetService<Ecosystem>();
+            this.Keycosystem = this.GetService<Keycosystem>();
         }
 
         public abstract void Load();
 
         public abstract void Unload();
 
-        public virtual void Update(TimeSpan time)
+        public virtual void Update()
         {
-            this.Keycosystem.Update(time);
+            this.Keycosystem.Update(this.Timer.Total);
             this.Ecosystem.Update();
         }
 
         public virtual void Draw()
         {
             this.Ecosystem.Draw();
+        }
+
+        public object GetService(Type serviceType)
+        {
+            return this.Services.GetService(serviceType);
         }
     }
 
@@ -37,7 +54,7 @@ namespace DolphEngine.Scenery
 
         void Unload();
 
-        void Update(TimeSpan time);
+        void Update();
 
         void Draw();
     }
