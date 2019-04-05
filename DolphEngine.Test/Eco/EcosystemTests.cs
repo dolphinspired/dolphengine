@@ -381,11 +381,14 @@ namespace DolphEngine.Test.Eco
             ecosystem
                 .AddHandler(handler)
                 .AddEntity(entity);
-            entity.AddComponent<MockComponent1>().RemoveComponent<MockComponent1>();
+            entity.AddComponent<MockComponent1>();
             ecosystem.Update();
 
-            Assert.Equal(1, handler.Called);
-            Assert.Empty(handler.EntitiesHandled);
+            entity.RemoveComponent<MockComponent1>();
+            ecosystem.Update();
+
+            Assert.Equal(2, handler.Called);
+            Assert.Empty(handler.EntitiesHandled); // No entities handled on most recent update
         }
 
         #endregion

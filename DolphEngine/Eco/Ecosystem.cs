@@ -449,6 +449,14 @@ namespace DolphEngine.Eco
                     // Add this lock to the known locks that this entity can unlock
                     locksByThisEntityId.Add(bitLock);
                 }
+                else
+                {
+                    // Remove this entity from the list of entities that can unlock this lock (if it's present)
+                    entityByLock.Value.Remove(entity);
+
+                    // Remove this lock from the known locks that this entity can unlock (if it's present)
+                    locksByThisEntityId.Remove(bitLock);
+                }
             }
 
             return bitKey;
