@@ -4,30 +4,26 @@ namespace DolphEngine.DI
 {
     public static class ServiceRepositoryExtensions
     {
-        public static TRepository AddService<TRepository, TService>(this TRepository repository)
-            where TRepository : IServiceRepository
+        public static IServiceRepository AddService<TService>(this IServiceRepository repository)
         {
             repository.AddService(typeof(TService), () => repository.BuildInjectableService<TService, TService>());
             return repository;
         }
 
-        public static TRepository AddService<TRepository, TService, TImplementation>(this TRepository repository)
-            where TRepository : IServiceRepository
+        public static IServiceRepository AddService<TService, TImplementation>(this IServiceRepository repository)
             where TImplementation : TService
         {
             repository.AddService(typeof(TService), () => repository.BuildInjectableService<TService, TImplementation>());
             return repository;
         }
 
-        public static TRepository AddService<TRepository, TService>(this TRepository repository, TService service)
-            where TRepository : IServiceRepository
+        public static IServiceRepository AddService<TService>(this IServiceRepository repository, TService service)
         {
             repository.AddService(typeof(TService), () => service);
             return repository;
         }
 
-        public static TRepository AddService<TRepository, TService>(this TRepository repository, Func<TService> serviceBuilder)
-            where TRepository : IServiceRepository
+        public static IServiceRepository AddService<TService>(this IServiceRepository repository, Func<TService> serviceBuilder)
         {
             repository.AddService(typeof(TService), () => serviceBuilder());
             return repository;
