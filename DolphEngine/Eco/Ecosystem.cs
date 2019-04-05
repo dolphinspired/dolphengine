@@ -12,7 +12,6 @@ namespace DolphEngine.Eco
         {
             this._timer = timer;
         }
-
         
         private readonly GameTimer _timer;
 
