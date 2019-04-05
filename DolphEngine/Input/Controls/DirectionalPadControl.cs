@@ -21,7 +21,7 @@ namespace DolphEngine.Input.Controls
             this.Down.SetInputState(inputState);
             this.Left.SetInputState(inputState);
 
-            this.LastTickDirectionChanged = inputState.CurrentTimestamp;
+            this.LastTickDirectionChanged = inputState?.CurrentTimestamp ?? 0;
         }
 
         public override void Update()

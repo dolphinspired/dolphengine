@@ -221,7 +221,11 @@ namespace DolphEngine.Demo.Games.TestMap
                 })
                 .AddControl(Tower.Mouse, m => m.MiddleClick.JustPressed, m => this.Camera.Lens.Zoom = 1.000f)
                 .AddControl(Tower.Keyboard, k => k.F.JustPressed, k => this.Camera.Lens.Focus = this.Player)
-                .AddControl(Tower.Keyboard, k => k.G.JustPressed, k => this.Camera.Lens.Focus = null);
+                .AddControl(Tower.Keyboard, k => k.G.JustPressed, k => this.Camera.Lens.Focus = null)
+                .AddControl(Tower.Keyboard, k => k.LeftShift.DurationPressed > TimeSpan.FromSeconds(1).Ticks && k.Z.DurationPressed > TimeSpan.FromSeconds(1).Ticks, k =>
+                {
+                    Tower.Director.LoadScene(Scenes.SceneSelect);
+                });
 
             var pauseContext = new KeyContext("Paused");
 

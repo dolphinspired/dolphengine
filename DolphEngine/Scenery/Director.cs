@@ -12,6 +12,9 @@ namespace DolphEngine.Scenery
         public IScene CurrentScene { get; protected set; }
         public string CurrentSceneName { get; protected set; }
 
+        private string _nextScene;
+        private bool _unloadScene;
+
         ~Director()
         {
             this.Dispose();
@@ -100,26 +103,55 @@ namespace DolphEngine.Scenery
             return this;
         }
 
-        public virtual Director LoadScene(string name)
+        public Director LoadScene(string name)
         {
-            if (!this.Scenes.TryGetValue(name, out var sceneBuilder))
-            {
-                throw new ArgumentException($"No scene has been added with name {name}!");
-            }
-
-            if (this.CurrentScene != null)
-            {
-                this.CurrentScene.Unload();
-            }
-
-            this.CurrentScene = sceneBuilder();
-            this.CurrentSceneName = name;
-
-            this.CurrentScene.Load();
+            // The new scene will be loaded before the next update
+            this._nextScene = name;
             return this;
         }
 
-        public virtual Director UnloadScene()
+        public Director UnloadScene()
+        {
+            // The scene will be unloaded before the next update
+            this._unloadScene = true;
+            return this;
+        }
+
+        public void Update(TimeSpan time)
+        {
+            if (this._unloadScene)
+            {
+                this.UnloadCurrentScene();
+                this._unloadScene = false;
+            }
+            else if (this._nextScene != null)
+            {
+                this.LoadNextScene();
+                this._nextScene = null;
+            }
+
+            this.CurrentScene.Update(time);
+        }
+
+        #endregion
+
+        #region Non-public methods
+
+        private void LoadNextScene()
+        {
+            if (!this.Scenes.TryGetValue(this._nextScene, out var sceneBuilder))
+            {
+                throw new InvalidOperationException($"No scene has been added with name '{this._nextScene}'!");
+            }
+
+            this.UnloadCurrentScene();
+
+            this.CurrentScene = sceneBuilder();
+            this.CurrentSceneName = this._nextScene;
+            this.CurrentScene.Load();
+        }
+
+        private void UnloadCurrentScene()
         {
             if (this.CurrentScene != null)
             {
@@ -127,13 +159,7 @@ namespace DolphEngine.Scenery
                 this.CurrentScene = null;
                 this.CurrentSceneName = null;
             }
-
-            return this;
         }
-
-        #endregion
-
-        #region Non-public methods
 
         // Adapted from: https://rlbisbe.net/2014/08/04/creating-a-dependency-injection-engine-with-c/
         private TService BuildInjectableService<TService, TImplementation>()

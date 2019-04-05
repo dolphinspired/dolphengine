@@ -1,4 +1,5 @@
-﻿using DolphEngine.Demo.Games.TestMap;
+﻿using DolphEngine.Demo.Games.DogGame;
+using DolphEngine.Demo.Games.TestMap;
 using DolphEngine.Eco;
 using DolphEngine.Input;
 using DolphEngine.MonoGame.Input;
@@ -52,8 +53,11 @@ namespace DolphEngine.Demo
         {
             Tower.DebugLogger.Font = this.Content.Load<SpriteFont>("Debug");
 
-            Tower.Director.AddScene<TestMapScene>("test-map");
-            Tower.Director.LoadScene("test-map");
+            Tower.Director
+                .AddScene<GameSelectScene>(Scenes.SceneSelect)
+                .AddScene<TestMapScene>(Scenes.TestMapScene)
+                .AddScene<DogTreasureHuntScene>(Scenes.DogTreasureHunt)
+                .LoadScene(Scenes.SceneSelect);
         }
 
         protected override void Update(GameTime gameTime)
@@ -61,7 +65,7 @@ namespace DolphEngine.Demo
             Tower.Timer.Advance();
             
             Tower.Keycosystem.Update(gameTime.TotalGameTime);
-            Tower.Director.CurrentScene.Update(gameTime.TotalGameTime);
+            Tower.Director.Update(gameTime.TotalGameTime);
 
             base.Update(gameTime);
         }
