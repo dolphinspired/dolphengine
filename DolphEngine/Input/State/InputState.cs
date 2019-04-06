@@ -7,7 +7,7 @@ namespace DolphEngine.Input.State
     {
         public long CurrentTimestamp;
 
-        private Dictionary<string, object> _inputValuesByKey = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> _inputValuesByKey = new Dictionary<string, object>();
 
         public bool TryGetValue(string key, out object value)
         {
@@ -51,17 +51,10 @@ namespace DolphEngine.Input.State
 
         public void SetValue(string key, object value)
         {
-            if (this._inputValuesByKey.ContainsKey(key))
-            {
-                this._inputValuesByKey[key] = value;
-            }
-            else
-            {
-                this._inputValuesByKey.Add(key, value);
-            }
+            this._inputValuesByKey[key] = value;
         }
 
-        public void RemoveVector(string key)
+        public void RemoveValue(string key)
         {
             this._inputValuesByKey.Remove(key);
         }
