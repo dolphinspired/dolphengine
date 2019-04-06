@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using DolphEngine.Input.State;
 using DolphEngine.Input;
 
-namespace DolphEngine.MonoGame.Input
+namespace DolphEngine.MonoGame
 {
     public class MonoGameObserver : IKeyStateObserver
     {

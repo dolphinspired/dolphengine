@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
 
-namespace DolphEngine.MonoGame.Graphics
+namespace DolphEngine.MonoGame
 {
     public class MonoGameRenderer : DirectiveRenderer
     {
