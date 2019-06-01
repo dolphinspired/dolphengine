@@ -5,7 +5,15 @@ namespace DolphEngine.DI
 {
     public class ServiceRepository : IServiceRepository
     {
-        protected readonly Dictionary<Type, Func<object>> Services = new Dictionary<Type, Func<object>>();
+        protected readonly Dictionary<Type, Func<object>> Services;
+
+        public ServiceRepository()
+        {
+            this.Services = new Dictionary<Type, Func<object>>
+            {
+                { typeof(ServiceRepository), () => this }
+            };
+        }
 
         public void AddService(Type type, Func<object> serviceBuilder)
         {
@@ -15,6 +23,11 @@ namespace DolphEngine.DI
             }
 
             this.Services.Add(type, () => serviceBuilder());
+        }
+
+        public bool HasService(Type type)
+        {
+            return this.Services.ContainsKey(type);
         }
 
         public object GetService(Type type)

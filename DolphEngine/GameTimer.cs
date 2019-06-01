@@ -3,7 +3,16 @@ using System.Diagnostics;
 
 namespace DolphEngine
 {
-    public class GameTimer
+    public interface IGameTimer
+    {
+        TimeSpan Elapsed { get; }
+
+        TimeSpan Total { get; }
+
+        int Frames { get; }
+    }
+
+    public class GameTimer : IGameTimer
     {
         protected readonly Stopwatch Stopwatch;
         private bool _started;

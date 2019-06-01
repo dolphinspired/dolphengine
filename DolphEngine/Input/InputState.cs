@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DolphEngine.Input.State
+namespace DolphEngine.Input
 {
     public class InputState
     {
-        public long CurrentTimestamp;
-
         private readonly Dictionary<string, object> _inputValuesByKey = new Dictionary<string, object>();
 
         public bool TryGetValue(string key, out object value)

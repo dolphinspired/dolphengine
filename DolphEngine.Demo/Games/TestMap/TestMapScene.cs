@@ -1,12 +1,12 @@
 ﻿using DolphEngine.Demo.Games.TestMap.Entities;
 using DolphEngine.Demo.Games.TestMap.Handlers;
-using DolphEngine.DI;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
 using DolphEngine.Input;
-using DolphEngine.MonoGame.Graphics;
+using DolphEngine.Input.Controllers;
+using DolphEngine.MonoGame;
 using DolphEngine.Scenery;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -15,10 +15,15 @@ using System;
 
 namespace DolphEngine.Demo.Games.TestMap
 {
-    public class TestMapScene : Scene
+    public class TestMapScene : IScene
     {
-        protected ContentManager Content;
-        protected SpriteBatch SpriteBatch;
+        protected readonly Ecosystem Ecosystem;
+        protected readonly Keycosystem Keycosystem;
+        protected readonly DebugLogger DebugLogger;
+        protected readonly Director Director;
+
+        protected readonly ContentManager Content;
+        protected readonly SpriteBatch SpriteBatch;
 
         protected PlayerEntity Player;
         protected CameraEntity Camera;
@@ -36,26 +41,48 @@ namespace DolphEngine.Demo.Games.TestMap
             new int[] { 0, 2, 0, 3, 3, 1 },
         };
 
-        public TestMapScene(IServiceProvider services) : base(services)
+        public TestMapScene(
+            Ecosystem ecosystem, 
+            Keycosystem keycosystem, 
+            DebugLogger debugLogger,
+            SpriteBatch spriteBatch,
+            ContentManager content,
+            GraphicsDeviceManager gdm,
+            Director director)
         {
-            this.Content = this.GetService<ContentManager>();
-            this.SpriteBatch = this.GetService<SpriteBatch>();
+            this.Ecosystem = ecosystem;
+            this.Keycosystem = keycosystem;
+            this.DebugLogger = debugLogger;
 
-            var gdm = this.GetService<GraphicsDeviceManager>();
+            this.Content = content;
+            this.SpriteBatch = spriteBatch;
+
             this._sceneViewWidth = gdm.PreferredBackBufferWidth;
             this._sceneViewHeight = gdm.PreferredBackBufferHeight;
         }
 
-        public override void Load()
+        public void Load()
         {
             this.LoadMap();
             this.LoadEntities();
             this.LoadControls();
         }
 
-        public override void Unload()
+        public void Unload()
         {
             this.UnloadControls();
+        }
+
+        public void Update()
+        {
+            this.Ecosystem.Update();
+            this.Keycosystem.Update();
+        }
+
+        public void Draw()
+        {
+            this.Ecosystem.Draw();
+            this.DebugLogger.Render();
         }
 
         private void LoadMap()
@@ -152,7 +179,7 @@ namespace DolphEngine.Demo.Games.TestMap
                 .AddHandler<PolygonHandler>()
                 .AddHandler(new DrawHandler(new MonoGameRenderer(this.SpriteBatch, this.Content, this.Camera)));
 
-            Tower.DebugLogger.AddPage(
+            this.DebugLogger.AddPage(
                 () => Camera.ToString(),
                 () => Player.ToString(),
                 () => arrow1.ToString(),
@@ -162,8 +189,13 @@ namespace DolphEngine.Demo.Games.TestMap
 
         private void LoadControls()
         {
-            var context = new KeyContext("TestMapScene")
-                .AddControl(Tower.Keyboard, k => k.ArrowKeys.IsPressed, k => {
+            var k = this.Keycosystem.GetController<StandardKeyboard>(1);
+            var m = this.Keycosystem.GetController<StandardMouse>(1);
+
+            this.Keycosystem.AddControlScheme("DebugNav", ControlSchemes.DebugNavigation(this.DebugLogger, k));
+
+            var context = new ControlScheme()
+                .AddControl(() => k.ArrowKeys.IsPressed, () => {
                     var p = this.Player;
                     
                     if ((k.ArrowKeys.Direction & Direction2d.Up) > 0)
@@ -191,12 +223,12 @@ namespace DolphEngine.Demo.Games.TestMap
                         p.Facing.Direction = Direction2d.Left;
                     }
                 })
-                .AddControl(Tower.Keyboard, k => !k.ArrowKeys.IsPressed, k => {
+                .AddControl(() => !k.ArrowKeys.IsPressed, () => {
                     var speed = this.Player.Speed;
                     speed.X = 0;
                     speed.Y = 0;
                 })
-                .AddControl(Tower.Keyboard, k => k.WASD.IsPressed, k =>
+                .AddControl(() => k.WASD.IsPressed, () =>
                 {
                     if ((k.WASD.Direction & Direction2d.Up) > 0)
                     {
@@ -215,37 +247,38 @@ namespace DolphEngine.Demo.Games.TestMap
                         this.Camera.Space.Position.X -= 8;
                     }
                 })
-                .AddControl(Tower.Mouse, m => m.Scroll.Y.JustMoved, m =>
+                .AddControl(() => m.Scroll.Y.JustMoved, () =>
                 {
                     var zoom = m.Scroll.Y.PositionDelta > 0 ? 0.25f : -0.25f;
                     this.Camera.Lens.Zoom += zoom;
                 })
-                .AddControl(Tower.Mouse, m => m.MiddleClick.JustPressed, m => this.Camera.Lens.Zoom = 1.000f)
-                .AddControl(Tower.Keyboard, k => k.F.JustPressed, k => this.Camera.Lens.Focus = this.Player)
-                .AddControl(Tower.Keyboard, k => k.G.JustPressed, k => this.Camera.Lens.Focus = null)
-                .AddControl(Tower.Keyboard, k => k.LeftShift.DurationPressed > TimeSpan.FromSeconds(1).Ticks && k.Z.DurationPressed > TimeSpan.FromSeconds(1).Ticks, k =>
+                .AddControl(() => m.MiddleClick.JustPressed, () => this.Camera.Lens.Zoom = 1.000f)
+                .AddControl(() => k.F.JustPressed, () => this.Camera.Lens.Focus = this.Player)
+                .AddControl(() => k.G.JustPressed, () => this.Camera.Lens.Focus = null)
+                .AddControl(() => k.LeftShift.DurationPressed > TimeSpan.FromSeconds(1).Ticks && k.Z.DurationPressed > TimeSpan.FromSeconds(1).Ticks, () =>
                 {
-                    Tower.Director.LoadScene(Scenes.SceneSelect);
+                    this.Director.LoadScene(Scenes.SceneSelect);
                 });
 
-            var pauseContext = new KeyContext("Paused");
+            var pauseContext = new ControlScheme();
 
             pauseContext
-                .AddControl(Tower.Keyboard, k => k.P.JustPressed, p =>
+                .AddControl(() => k.P.JustPressed, () =>
                 {
                     context.Enabled = !context.Enabled;
                 });
             
             this.Keycosystem
-                .AddContext(context)
-                .AddContext(pauseContext);
+                .AddControlScheme("TestMapScene", context)
+                .AddControlScheme("Paused", pauseContext);
         }
 
         public void UnloadControls()
         {
             this.Keycosystem
-                .RemoveContext("TestMapScene")
-                .RemoveContext("Paused");
+                .RemoveControlScheme("DebugNav")
+                .RemoveControlScheme("TestMapScene")
+                .RemoveControlScheme("Paused");
         }
     }
 }

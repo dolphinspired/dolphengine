@@ -1,16 +1,13 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using DolphEngine.Input.State;
 using DolphEngine.Input;
 
 namespace DolphEngine.MonoGame
 {
-    public class MonoGameObserver : IKeyStateObserver
+    public class MonoGameObserver : KeyStateObserver
     {
         #region Data structures
-
-        protected readonly InputState InputState;
 
         private bool _useKeyboard;
         private KeyboardState _keyboardState;
@@ -270,7 +267,7 @@ namespace DolphEngine.MonoGame
         #region IKeyStateObserver implementation
 
         /// <inheritdoc />
-        public void UpdateState()
+        public override void UpdateState()
         {
             if (this._useKeyboard)
             {
@@ -292,25 +289,24 @@ namespace DolphEngine.MonoGame
         }
 
         /// <inheritdoc />
-        public object GetKeyValue(InputKey key)
+        public override object GetKeyValue(string key)
         {
-            var gkey = key.GenericKey;
-
-            if (KeyboardStateObservers.TryGetValue(gkey, out var kreader))
+            if (KeyboardStateObservers.TryGetValue(key, out var kreader))
             {
                 return kreader(this._keyboardState);
             }
-            else if (MouseStateObservers.TryGetValue(gkey, out var mreader))
+            else if (MouseStateObservers.TryGetValue(key, out var mreader))
             {
                 return mreader(this._mouseState);
             }
-            else if (GamePadStateObservers.TryGetValue(gkey, out var greader))
+            else if (GamePadStateObservers.TryGetValue(key, out var greader))
             {
-                return greader(this._gamepadStatesByPlayer[key.Player]);
+                // todo: Develop scheme for baking player number into the key
+                return greader(this._gamepadStatesByPlayer[1]);
             }
             else
             {
-                throw new ArgumentException($"Unrecognized generic input key ({gkey})!");
+                throw new ArgumentException($"Unrecognized input key '{key}'!");
             }
         }
 

@@ -1,5 +1,4 @@
-﻿using DolphEngine.Input.State;
-using System;
+﻿using System;
 
 namespace DolphEngine.Input.Controls
 {
@@ -13,42 +12,38 @@ namespace DolphEngine.Input.Controls
         private const float DownLeft = 225.00f;
         private const float UpLeft = 315.00f;
 
-        public TwoAxisAnalogControl(string xKey, string yKey)
+        public TwoAxisAnalogControl(
+            string xKey,
+            string yKey,
+            float sensitivity = OneAxisAnalogControl.DefaultSensitivity,
+            float deadzone = OneAxisAnalogControl.DefaultDeadzone)
         {
-            this.X = new OneAxisAnalogControl(xKey);
-            this.Y = new OneAxisAnalogControl(yKey);
-            this.SetKeys(xKey, yKey);
+            this.X = this.AddControl(new OneAxisAnalogControl(xKey, sensitivity, deadzone));
+            this.Y = this.AddControl(new OneAxisAnalogControl(yKey, sensitivity, deadzone));
         }
 
-        public TwoAxisAnalogControl(string xKey, string yKey, float sensitivity, float deadzone)
+        #region Event hooks
+
+        public override void OnConnect()
         {
-            this.X = new OneAxisAnalogControl(xKey, sensitivity, deadzone);
-            this.Y = new OneAxisAnalogControl(yKey, sensitivity, deadzone);
+            this.LastTickMoved = this.Timer.Total.Ticks;
+            this.LastTickPressed = this.Timer.Total.Ticks;
+            this.LastTickReleased = this.Timer.Total.Ticks;
         }
 
-        public override void SetInputState(InputState inputState)
+        public override void OnUpdate()
         {
-            base.SetInputState(inputState);
-            this.X.SetInputState(inputState);
-            this.Y.SetInputState(inputState);
-        }
-
-        public override void Update()
-        {
-            this.X.Update();
-            this.Y.Update();
-
             var isPressed = this.X.IsPressed || this.Y.IsPressed;
 
             if (isPressed && !this.IsPressed)
             {
                 this.IsPressed = true;
-                this.LastTickPressed = this.InputState.CurrentTimestamp;
+                this.LastTickPressed = this.Timer.Total.Ticks;
             }
             else if (!isPressed && this.IsPressed)
             {
                 this.IsPressed = false;
-                this.LastTickReleased = this.InputState.CurrentTimestamp;
+                this.LastTickReleased = this.Timer.Total.Ticks;
             }
 
             this.LastAngle = this.Angle;
@@ -69,7 +64,9 @@ namespace DolphEngine.Input.Controls
                 this.Direction = Direction2d.None;
             }
         }
-        
+
+        #endregion
+
         public readonly OneAxisAnalogControl X;
         public readonly OneAxisAnalogControl Y;
 
@@ -87,7 +84,7 @@ namespace DolphEngine.Input.Controls
         public float MagnitudeDelta => this.Magnitude - this.LastMagnitude;
         public float MagnitudeDeltaAbsolute => Math.Abs(this.MagnitudeDelta);
         public bool JustMoved => DurationHeld == 0;
-        public long DurationHeld => !IsPressed ? -1 : InputState.CurrentTimestamp - LastTickMoved;
+        public long DurationHeld => !IsPressed ? -1 : this.Timer.Total.Ticks - LastTickMoved;
 
         public bool IsPressed { get; private set; }
         public long LastTickPressed { get; private set; }
@@ -95,7 +92,7 @@ namespace DolphEngine.Input.Controls
 
         public bool JustPressed => DurationPressed == 0;
         public bool JustReleased => DurationReleased == 0;
-        public long DurationPressed => !IsPressed ? -1 : InputState.CurrentTimestamp - LastTickPressed;
-        public long DurationReleased => IsPressed ? -1 : InputState.CurrentTimestamp - LastTickReleased;
+        public long DurationPressed => !IsPressed ? -1 : this.Timer.Total.Ticks - LastTickPressed;
+        public long DurationReleased => IsPressed ? -1 : this.Timer.Total.Ticks - LastTickReleased;
     }
 }

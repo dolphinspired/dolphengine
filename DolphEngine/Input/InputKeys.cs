@@ -1,4 +1,4 @@
-﻿namespace DolphEngine.Input.State
+﻿namespace DolphEngine.Input
 {
     public static partial class InputKeys
     {

@@ -3,22 +3,32 @@ using DolphEngine.Demo.Games.TestMap;
 using DolphEngine.DI;
 using DolphEngine.Eco;
 using DolphEngine.Input;
-using DolphEngine.MonoGame.Input;
+using DolphEngine.Input.Controllers;
+using DolphEngine.MonoGame;
+using DolphEngine.Scenery;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace DolphEngine.Demo
 {
     public class Game1 : Game
     {
-        GraphicsDeviceManager Graphics;
-        SpriteBatch SpriteBatch;
+        private GraphicsDeviceManager Graphics;
+        private SpriteBatch SpriteBatch;
 
         // Use the DolphEngine implementation of DI, not the MonoGame one
-        private readonly new IServiceRepository Services = new ServiceRepository();
+        private readonly new IServiceRepository Services;
+        private readonly GameTimer Timer;
+        private readonly Director Director;
 
         private static FpsCounter FpsCounter;
         private static Vector2 FpsPosition;
+        private static SpriteFont FpsFont;
+
+        private readonly StandardKeyboard Keyboard = new StandardKeyboard();
+        private readonly StandardMouse Mouse = new StandardMouse();
 
         public Game1()
         {
@@ -26,7 +36,11 @@ namespace DolphEngine.Demo
             this.Content.RootDirectory = "Content";
             this.IsMouseVisible = true;
 
-            FpsCounter = new FpsCounter(60);
+            this.Services = new ServiceRepository();
+            this.Timer = new GameTimer();
+            this.Director = new Director(this.Services);
+
+            FpsCounter = new FpsCounter(this.Timer, 60);
             FpsPosition = new Vector2(10, Graphics.PreferredBackBufferHeight - 22);
         }
 
@@ -34,31 +48,36 @@ namespace DolphEngine.Demo
         {
             this.SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-            Tower.Initialize();
+            var observer = new MonoGameObserver().UseKeyboard().UseMouse();
 
-            Tower.Keycosystem
-                .AddContext(ControlContexts.System(this))
-                .AddContext(ControlContexts.DebugNavigation());
-
-            Tower.DebugLogger
-                .AddControlInfo(ControlContexts.Keyboard, ControlContexts.Mouse);
-
-            Tower.Director
-                .AddService(Tower.Timer)
-                .AddService(() => new Ecosystem(Tower.Timer))
-                .AddService(() => new Keycosystem(new MonoGameObserver().UseKeyboard().UseMouse()))
-                .AddService(this.Content)
-                .AddService(this.SpriteBatch)
-                .AddService(this.Graphics);
+            this.Services
+                .AddSingleton<IGameTimer>(this.Timer)
+                .AddSingleton<Director>(this.Director)
+                .AddSingleton<SpriteBatch>(this.SpriteBatch)
+                .AddSingleton<ContentManager>(this.Content)
+                .AddSingleton<GraphicsDeviceManager>(this.Graphics)
+                .AddSingleton<KeyStateObserver>(observer)
+                .AddTransient<Ecosystem>()
+                .AddSingletonWithInit<Keycosystem>(keycosystem =>
+                {
+                    keycosystem
+                        .AddController(1, new StandardKeyboard())
+                        .AddController(1, new StandardMouse())
+                        .AddControlScheme("System", ControlSchemes.System(this, this.Keyboard));
+                })
+                .AddSingletonWithInit<DebugLogger>(dl =>
+                {
+                    dl.Font = this.Content.Load<SpriteFont>("Debug");
+                });
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            Tower.DebugLogger.Font = this.Content.Load<SpriteFont>("Debug");
+            FpsFont = this.Content.Load<SpriteFont>("Debug");
 
-            Tower.Director
+            this.Director
                 .AddScene<GameSelectScene>(Scenes.SceneSelect)
                 .AddScene<TestMapScene>(Scenes.TestMapScene)
                 .AddScene<DogTreasureHuntScene>(Scenes.DogTreasureHunt)
@@ -67,21 +86,18 @@ namespace DolphEngine.Demo
 
         protected override void Update(GameTime gameTime)
         {
-            Tower.Timer.Advance();
-            
-            Tower.Keycosystem.Update(gameTime.TotalGameTime);
-            Tower.Director.Update();
+            this.Timer.Advance();
+            this.Director.Update();
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            Tower.Director.CurrentScene.Draw();
-            Tower.DebugLogger.Render(SpriteBatch);
+            this.Director.CurrentScene.Draw();
             
             SpriteBatch.Begin();
-            SpriteBatch.DrawString(Tower.DebugLogger.Font, $"FPS: {FpsCounter.Update():0.0}", FpsPosition, Tower.DebugLogger.FontColor);
+            SpriteBatch.DrawString(FpsFont, $"FPS: {FpsCounter.Update():0.0}", FpsPosition, Color.White);
             SpriteBatch.End();
 
             base.Draw(gameTime);

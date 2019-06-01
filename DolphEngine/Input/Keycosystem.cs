@@ -1,7 +1,6 @@
-﻿using DolphEngine.Input.Controls;
-using DolphEngine.Input.State;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DolphEngine.Input
 {
@@ -9,150 +8,184 @@ namespace DolphEngine.Input
     {
         #region Private properties, indexes
 
-        // An implementation of code that will update each key's state during the update loop
-        private readonly IKeyStateObserver _observer;
+        public readonly IGameTimer Timer;
+        public readonly KeyStateObserver Observer;
 
-        // Each key has exactly one state that gets updated one time per Update()
-        //private readonly Dictionary<int, KeyState> _keyStatesByKey = new Dictionary<int, KeyState>();
-
-        private readonly InputState _inputState = new InputState();
-        private readonly Dictionary<string, InputKeyInfo> _inputKeys = new Dictionary<string, InputKeyInfo>();
-
-        // Keeps track of the contexts in which each unique control is used
-        // Only controls that are being used in a context will be updated
-        private readonly Dictionary<ControlBase, HashSet<string>> _contextsByControl = new Dictionary<ControlBase, HashSet<string>>(ReferenceEqualityComparer<ControlBase>.Instance);
-        private readonly Dictionary<string, HashSet<ControlBase>> _controlsByContext = new Dictionary<string, HashSet<ControlBase>>();
-
-        private readonly Dictionary<string, KeyContext> _contextsByName = new Dictionary<string, KeyContext>();
+        private readonly Dictionary<string, ControlBase> _controllers = new Dictionary<string, ControlBase>();
+        private readonly Dictionary<string, ControlScheme> _controlSchemes = new Dictionary<string, ControlScheme>();
 
         #endregion
 
         #region Constructors
 
-        public Keycosystem(IKeyStateObserver observer)
+        public Keycosystem(IGameTimer timer, KeyStateObserver observer)
         {
-            this._observer = observer;
+            this.Timer = timer;
+            this.Observer = observer;
         }
 
         #endregion
 
         #region Update
 
-        public void Update(TimeSpan time)
+        public void Update()
         {
-            this._inputState.CurrentTimestamp = time.Ticks;
-            
             // First, update the state of the observer (i.e. "initialize" it for this frame)
-            this._observer.UpdateState();
+            this.Observer.Update();
 
-            // Then, update all inputs that we're currently observing
-            foreach (var inputKeyKvp in this._inputKeys)
+            // Update each controller just once
+            foreach (var controller in this._controllers.Select(x => x.Value))
             {
-                var key = inputKeyKvp.Key;
-                var parsed = inputKeyKvp.Value.Parsed;
-
-                this._inputState.SetValue(key, this._observer.GetKeyValue(parsed));
+                controller.Update();
             }
 
-            // Update each unique control in the Keycosystem just once
-            foreach (var control in this._contextsByControl.Keys)
+            // Finally, run all reactions for each enabled control scheme in the order that they were added
+            foreach (var controlScheme in this._controlSchemes.Select(x => x.Value))
             {
-                control.Update();
-            }
-
-            // Then run all reactions for each enabled context in the order that they were added
-            foreach (var contextName in this._controlsByContext.Keys)
-            {
-                var context = this._contextsByName[contextName];
-
-                if (!context.Enabled)
+                if (!controlScheme.Enabled)
                 {
                     continue;
                 }
 
-                foreach (var reaction in context.ControlReactions)
+                foreach (var reaction in controlScheme.Reactions)
                 {
-                    reaction.React();
+                    if (reaction.Condition())
+                    {
+                        reaction.Reaction();
+                    }
                 }
             }
         }
 
         #endregion
+        
+        #region Controllers
 
-        #region Public methods - Context management (core)
-
-        public Keycosystem AddContext<T>(T context) where T : KeyContext
+        public Keycosystem AddController<TController>(int playerNum, TController controller)
+            where TController : ControlBase
         {
-            if (this._contextsByName.ContainsKey(context.Name))
+            if (playerNum < 1)
             {
-                throw new ArgumentException($"A key context with name {context.Name} has already been added!");
+                throw new ArgumentException("Player number must be >= 1!");
             }
 
-            context.SetInputState(this._inputState);
-            this.IndexControls(context);
-            
-            this._contextsByName.Add(context.Name, context);
-            context.Keycosystem = this;
+            var controllerKey = GetControllerKey(playerNum, typeof(TController));
+            if (this._controllers.ContainsKey(controllerKey))
+            {
+                throw new InvalidOperationException($"Player {playerNum} already has a controller of type {typeof(TController).Name}!");
+            }
+
+            this._controllers.Add(controllerKey, controller);
+            this.Observer.Watch(controller);
+            controller.Connect(this);
             return this;
         }
 
-        public bool TryGetContext(string contextName, out KeyContext context)
+        public TController GetController<TController>(int playerNum)
+            where TController : ControlBase
         {
-            return this._contextsByName.TryGetValue(contextName, out context);
-        }
-
-        public KeyContext GetContext(string contextName)
-        {
-            return this._contextsByName[contextName];
-        }
-
-        public Keycosystem RemoveContext(string contextName)
-        {
-            if (!this._contextsByName.TryGetValue(contextName, out var context))
+            if (playerNum < 1)
             {
-                return this;
+                throw new ArgumentException("Player number must be >= 1!");
             }
 
-            context.SetInputState(null);
-            this.DeindexControls(context);
+            var controllerKey = GetControllerKey(playerNum, typeof(TController));
+            if (!this._controllers.TryGetValue(controllerKey, out var controller))
+            {
+                throw new InvalidOperationException($"Player {playerNum} does not have a controller of type {typeof(TController).Name}!");
+            }
 
-            this._contextsByName.Remove(contextName);
-            context.Keycosystem = null;
+            return (TController)controller;
+        }
+
+        public Keycosystem RemoveController<TController>(int playerNum)
+            where TController : ControlBase
+        {
+            if (playerNum < 1)
+            {
+                throw new ArgumentException("Player number must be >= 1!");
+            }
+
+            var key = GetControllerKey(playerNum, typeof(TController));
+            if (this._controllers.TryGetValue(key, out var controller))
+            {
+                this._controllers.Remove(key);
+                this.Observer.Unwatch(controller);
+                // todo: Disconnect controller from keycosystem?
+            }
+
             return this;
         }
 
-        public Keycosystem ClearContexts()
+        public Keycosystem RemovePlayer(int playerNum)
         {
-            foreach (var context in this._contextsByName.Values)
+            if (playerNum < 1)
             {
-                context.Keycosystem = null;
+                throw new ArgumentException("Player number must be >= 1!");
             }
 
-            this._contextsByControl.Clear();
-            this._controlsByContext.Clear();
-            this._contextsByName.Clear();
-            this._inputKeys.Clear();
+            var partialKey = playerNum + ":";
+            foreach (var key in this._controllers.Select(kvp => kvp.Key).Where(k => k.StartsWith(partialKey)))
+            {
+                this._controllers.Remove(key);
+                // todo: Disconnect controller from keycosystem?
+            }
 
+            return this;
+        }
+
+        public Keycosystem ClearControllers()
+        {
+            this._controllers.Clear();
             return this;
         }
 
         #endregion
 
-        #region Public methods - Context management (derived)
+        #region Control scheme management (core)
 
-        public Keycosystem RemoveContext<T>(T context) where T : KeyContext
+        public Keycosystem AddControlScheme(string name, ControlScheme scheme)
         {
-            return this.RemoveContext(context.Name);
-        }
-
-        public Keycosystem SwapContext<T>(T context) where T : KeyContext
-        {
-            if (this._contextsByName.TryGetValue(context.Name, out var oldContext))
+            if (this._controlSchemes.ContainsKey(name))
             {
-                this.RemoveContext(oldContext);
+                throw new InvalidOperationException($"A control scheme with name '{name}' has already been added!");
             }
 
-            this.AddContext(context);
+            this._controlSchemes.Add(name, scheme);
+            return this;
+        }
+
+        public Keycosystem EnableControlScheme(string name)
+        {
+            if (!this._controlSchemes.TryGetValue(name, out var controlScheme))
+            {
+                throw new InvalidOperationException($"No control scheme has been added by name '{name}'!");
+            }
+
+            controlScheme.Enabled = true;
+            return this;
+        }
+
+        public Keycosystem DisableControlScheme(string name)
+        {
+            if (!this._controlSchemes.TryGetValue(name, out var controlScheme))
+            {
+                throw new InvalidOperationException($"No control scheme has been added by name '{name}'!");
+            }
+
+            controlScheme.Enabled = false;
+            return this;
+        }
+
+        public Keycosystem RemoveControlScheme(string name)
+        {
+            this._controlSchemes.Remove(name);
+            return this;
+        }
+
+        public Keycosystem ClearControlSchemes()
+        {
+            this._controlSchemes.Clear();
             return this;
         }
 
@@ -160,114 +193,9 @@ namespace DolphEngine.Input
 
         #region Non-public stuff
 
-        private class InputKeyInfo
+        private static string GetControllerKey(int playerNum, Type type)
         {
-            public InputKeyInfo(InputKey parsed, int count)
-            {
-                this.Parsed = parsed;
-                this.Count = count;
-            }
-
-            public InputKey Parsed;
-
-            public int Count;
-        }
-
-        internal void IndexControls(KeyContext context)
-        {
-            if (!this._controlsByContext.TryGetValue(context.Name, out var controls))
-            {
-                controls = new HashSet<ControlBase>(ReferenceEqualityComparer<ControlBase>.Instance);
-                this._controlsByContext.Add(context.Name, controls);
-            }
-
-            controls.Clear();
-            foreach (var cr in context.ControlReactions)
-            {
-                controls.Add(cr.Control);
-            }
-
-            foreach (var cr in context.ControlReactions)
-            {
-                this.IndexByControl(context, cr.Control);
-
-                foreach (var key in cr.Control.Keys)
-                {
-                    this.IndexByKey(context, key);
-                }
-            }
-        }
-
-        internal void DeindexControls(KeyContext context)
-        {
-            if (this._controlsByContext.ContainsKey(context.Name))
-            {
-                this._controlsByContext.Remove(context.Name);
-            }
-
-            foreach (var cr in context.ControlReactions)
-            {
-                this.DeindexByControl(context, cr.Control);
-
-                foreach (var key in cr.Control.Keys)
-                {
-                    this.DeindexByKey(context, key);
-                }
-            }
-        }
-
-        private void IndexByKey(KeyContext context, string key)
-        {
-            if (this._inputKeys.ContainsKey(key))
-            {
-                // If it's already being tracked by another control or context, simply increment the counter
-                this._inputKeys[key].Count++;
-            }
-            else
-            {
-                // Otherwise, add a new entry so it starts getting tracked
-                this._inputKeys.Add(key, new InputKeyInfo(InputKey.Parse(key), 1));
-            }
-        }
-
-        private void DeindexByKey(KeyContext context, string key)
-        {
-            if (this._inputKeys.TryGetValue(key, out var info))
-            {
-                // Decrement the number of controls tracking this key
-                info.Count--;
-
-                if (info.Count == 0)
-                {
-                    // If this was the last control to reference an input key, stop tracking that key's updates
-                    this._inputKeys.Remove(key);
-                }
-            }
-        }
-
-        private void IndexByControl(KeyContext context, ControlBase control)
-        {
-            if (this._contextsByControl.TryGetValue(control, out var contexts))
-            {
-                contexts.Add(context.Name);
-            }
-            else
-            {
-                this._contextsByControl.Add(control, new HashSet<string> { context.Name });
-            }
-        }
-
-        private void DeindexByControl(KeyContext context, ControlBase control)
-        {
-            if (this._contextsByControl.TryGetValue(control, out var contextNames))
-            {
-                contextNames.Remove(context.Name);
-
-                if (contextNames.Count == 0)
-                {
-                    this._contextsByControl.Remove(control);
-                }
-            }
+            return $"P{playerNum}:{type.FullName}";
         }
 
         #endregion

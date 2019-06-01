@@ -10,7 +10,7 @@ namespace DolphEngine.Demo
     {
         public static readonly Func<string> EmptyLine = () => "";
 
-        public bool Hidden;
+        public bool Hidden = true;
         public int CurrentPage;
 
         public SpriteFont Font;
@@ -20,7 +20,13 @@ namespace DolphEngine.Demo
         public int PaddingLeft = 12;
         public int LineSpacing = 4;
 
+        private readonly SpriteBatch _spriteBatch;
         private readonly List<List<Func<string>>> _pages = new List<List<Func<string>>>();
+
+        public DebugLogger(SpriteBatch spriteBatch)
+        {
+            this._spriteBatch = spriteBatch;
+        }
 
         public int NextPage()
         {
@@ -84,7 +90,7 @@ namespace DolphEngine.Demo
             return this._pages.Count - 1;
         }
 
-        public void Render(SpriteBatch sb)
+        public void Render()
         {
             if (this.Hidden || this._pages.Count == 0 || this.CurrentPage >= this._pages.Count || this.CurrentPage < 0)
             {
@@ -93,15 +99,15 @@ namespace DolphEngine.Demo
 
             var pos = new Vector2(this.PaddingLeft, this.PaddingTop);
 
-            sb.Begin();
+            this._spriteBatch.Begin();
 
             foreach (var line in this._pages[this.CurrentPage])
             {
-                sb.DrawString(this.Font, line(), pos, this.FontColor);
+                this._spriteBatch.DrawString(this.Font, line(), pos, this.FontColor);
                 pos.Y += this.FontSize + this.LineSpacing;
             }
 
-            sb.End();
+            this._spriteBatch.End();
         }
     }
 }

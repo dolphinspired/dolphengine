@@ -1,11 +1,15 @@
-﻿using DolphEngine.Input.Controllers;
+﻿using DolphEngine.Input;
+using DolphEngine.Input.Controllers;
 
 namespace DolphEngine.Demo
 {
     public static class DebugPages
     {
-        public static void AddControlInfo(this DebugLogger debug, StandardKeyboard keyboard, StandardMouse mouse)
+        public static DebugLogger AddControlInfo(this DebugLogger debug, Keycosystem keycosystem)
         {
+            var keyboard = keycosystem.GetController<StandardKeyboard>(1);
+            var mouse = keycosystem.GetController<StandardMouse>(1);
+
             debug.AddPage(
                 () => "Control A:",
                 () => $"IsPressed: {keyboard.A.IsPressed}, LastTickPressed: {keyboard.A.LastTickPressed}, LastTickReleased: {keyboard.A.LastTickReleased}",
@@ -22,6 +26,8 @@ namespace DolphEngine.Demo
                 () => $"X: {mouse.Cursor.X}, Y: {mouse.Cursor.Y}",
                 () => $"Scroll X: {mouse.Scroll.X}, Scroll Y: {mouse.Scroll.Y}, Scroll Click: {mouse.MiddleClick.IsPressed}"
             );
+
+            return debug;
         }
     }
 }

@@ -1,29 +1,40 @@
-﻿using DolphEngine.Input.State;
-
-namespace DolphEngine.Input.Controls
+﻿namespace DolphEngine.Input.Controls
 {
     public class SingleButtonControl : ControlBase
     {
+        private readonly string _key;
+
         public SingleButtonControl(string key)
         {
-            this.SetKeys(key);
+            this._key = key;
+            this.AddKey(key);
         }
 
-        public override void Update()
+        #region Event hooks
+
+        public override void OnConnect()
         {
-            var isPressed = InputState.GetValueOrDefault<bool>(this.Keys[0]);
+            this.LastTickPressed = this.Timer.Total.Ticks;
+            this.LastTickReleased = this.Timer.Total.Ticks;
+        }
+
+        public override void OnUpdate()
+        {
+            var isPressed = InputState.GetValueOrDefault<bool>(this._key);
 
             if (isPressed && !this.IsPressed)
             {
                 this.IsPressed = true;
-                this.LastTickPressed = this.InputState.CurrentTimestamp;
+                this.LastTickPressed = this.Timer.Total.Ticks;
             }
             else if (!isPressed && this.IsPressed)
             {
                 this.IsPressed = false;
-                this.LastTickReleased = this.InputState.CurrentTimestamp;
+                this.LastTickReleased = this.Timer.Total.Ticks;
             }
         }
+
+        #endregion
 
         public bool IsPressed { get; private set; }
         public long LastTickPressed { get; private set; }
@@ -31,7 +42,7 @@ namespace DolphEngine.Input.Controls
 
         public bool JustPressed => DurationPressed == 0;
         public bool JustReleased => DurationReleased == 0;
-        public long DurationPressed => !IsPressed ? -1 : InputState.CurrentTimestamp - LastTickPressed;
-        public long DurationReleased => IsPressed ? -1 : InputState.CurrentTimestamp - LastTickReleased;
+        public long DurationPressed => !IsPressed ? -1 : this.Timer.Total.Ticks - LastTickPressed;
+        public long DurationReleased => IsPressed ? -1 : this.Timer.Total.Ticks - LastTickReleased;
     }
 }

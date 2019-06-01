@@ -1,24 +1,52 @@
-﻿using DolphEngine.Scenery;
+﻿using DolphEngine.Eco;
+using DolphEngine.Input;
+using DolphEngine.Input.Controllers;
+using DolphEngine.Scenery;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace DolphEngine.Demo.Games.DogGame
 {
-    public class DogTreasureHuntScene : Scene
+    public class DogTreasureHuntScene : IScene
     {
-        public DogTreasureHuntScene(IServiceProvider services) : base(services)
+        private readonly Ecosystem Ecosystem;
+        private readonly Keycosystem Keycosystem;
+        private readonly StandardKeyboard Keyboard;
+
+        private readonly SpriteBatch SpriteBatch;
+        private readonly ContentManager Content;
+
+        public DogTreasureHuntScene(Ecosystem ecosystem, Keycosystem keycosystem, SpriteBatch spriteBatch, ContentManager content, StandardKeyboard keyboard)
         {
+            this.Ecosystem = ecosystem;
+            this.Keycosystem = keycosystem;
+            this.Keyboard = keyboard;
+
+            this.SpriteBatch = spriteBatch;
+            this.Content = content;
         }
 
-        public override void Load()
+        public void Load()
         {
-            throw new NotImplementedException();
+            
         }
 
-        public override void Unload()
+        public void Unload()
         {
-            throw new NotImplementedException();
+            
+        }
+
+        public void Update()
+        {
+
+        }
+
+        public void Draw()
+        {
+
         }
     }
 }

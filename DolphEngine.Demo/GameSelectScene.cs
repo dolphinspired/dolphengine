@@ -1,11 +1,11 @@
 ﻿using DolphEngine.Demo.Components;
-using DolphEngine.DI;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
 using DolphEngine.Input;
-using DolphEngine.MonoGame.Graphics;
+using DolphEngine.Input.Controllers;
+using DolphEngine.MonoGame;
 using DolphEngine.Scenery;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -15,8 +15,13 @@ using System.Collections.Generic;
 
 namespace DolphEngine.Demo
 {
-    public class GameSelectScene : Scene
+    public class GameSelectScene : IScene
     {
+        protected readonly Ecosystem Ecosystem;
+        protected readonly Keycosystem Keycosystem;
+        protected readonly Director Director;
+        protected readonly DebugLogger DebugLogger;
+
         protected readonly ContentManager Content;
         protected readonly SpriteBatch SpriteBatch;
 
@@ -36,17 +41,28 @@ namespace DolphEngine.Demo
         private int _selectedIndex;
         private readonly List<Entity> _selectableEntities = new List<Entity>();
 
-        public GameSelectScene(IServiceProvider services) : base(services)
+        public GameSelectScene(
+            Ecosystem ecosystem, 
+            Keycosystem keycosystem,
+            ContentManager content, 
+            SpriteBatch spriteBatch,
+            GraphicsDeviceManager gdm,
+            Director director,
+            DebugLogger debugLogger)
         {
-            this.Content = this.GetService<ContentManager>();
-            this.SpriteBatch = this.GetService<SpriteBatch>();
+            this.Ecosystem = ecosystem;
+            this.Keycosystem = keycosystem;
+            this.Director = director;
+            this.DebugLogger = debugLogger;
 
-            var gdm = this.GetService<GraphicsDeviceManager>();
+            this.Content = content;
+            this.SpriteBatch = spriteBatch;
+
             this._sceneViewWidth = gdm.PreferredBackBufferWidth;
             this._sceneViewHeight = gdm.PreferredBackBufferHeight;
         }
 
-        public override void Load()
+        public void Load()
         {
             this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
             var viewTopLeft = this.Camera.Space.TopLeft;
@@ -102,8 +118,10 @@ namespace DolphEngine.Demo
                 .AddHandler<SpriteHandler>()
                 .AddHandler(new DrawHandler(renderer));
 
-            var keyContext = new KeyContext("SceneSelect")
-                .AddControl(Tower.Keyboard, k => k.Down.JustPressed, k =>
+            var k = this.Keycosystem.GetController<StandardKeyboard>(1);
+
+            var controls = new ControlScheme()
+                .AddControl(() => k.Down.JustPressed, () =>
                 {
                     if (this._selectedIndex < this._selectableEntities.Count - 1)
                     {
@@ -118,7 +136,7 @@ namespace DolphEngine.Demo
                         sel.OnFocus();
                     }
                 })
-                .AddControl(Tower.Keyboard, k => k.Up.JustPressed, k =>
+                .AddControl(() => k.Up.JustPressed, () =>
                 {
                     if (this._selectedIndex > 0)
                     {
@@ -133,18 +151,32 @@ namespace DolphEngine.Demo
                         sel.OnFocus();
                     }
                 })
-                .AddControl(Tower.Keyboard, k => k.Enter.JustPressed, k =>
+                .AddControl(() => k.Enter.JustPressed, () =>
                 {
                     var selectedSceneName = this._selectableScenes[this._selectedIndex];
-                    Tower.Director.LoadScene(selectedSceneName);
+                    this.Director.LoadScene(selectedSceneName);
                 });
 
-            this.Keycosystem.AddContext(keyContext);
+            this.Keycosystem.AddControlScheme("SceneSelect", controls);
+            this.Keycosystem.AddControlScheme("DebugNav", ControlSchemes.DebugNavigation(this.DebugLogger, k));
+            this.DebugLogger.AddControlInfo(this.Keycosystem);
         }
 
-        public override void Unload()
+        public void Unload()
         {
-            this.Keycosystem.RemoveContext("SceneSelect");
+            this.Keycosystem.ClearControlSchemes();
+        }
+
+        public void Update()
+        {
+            this.Ecosystem.Update();
+            this.Keycosystem.Update();
+        }
+
+        public void Draw()
+        {
+            this.Ecosystem.Draw();
+            this.DebugLogger.Render();
         }
     }
 }

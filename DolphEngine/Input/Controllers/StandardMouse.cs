@@ -1,78 +1,34 @@
 ﻿using DolphEngine.Input.Controls;
-using DolphEngine.Input.State;
-using System.Collections.Generic;
 
 namespace DolphEngine.Input.Controllers
 {
     public class StandardMouse : ControlBase
     {
+        // Set to 'true' to swap Primary/Secondary click
         public bool LeftHanded;
-
-        private Dictionary<string, SingleButtonControl> _buttonControls = new Dictionary<string, SingleButtonControl>();
 
         public StandardMouse()
         {
-            this.SetKeys(
-                InputKeys.MouseButton1,
-                InputKeys.MouseButton2,
-                InputKeys.MouseButton3,
-                InputKeys.MouseButton4,
-                InputKeys.MouseButton5,
-                InputKeys.MouseCursorX,
-                InputKeys.MouseCursorY,
-                InputKeys.MouseScrollX,
-                InputKeys.MouseScrollY
-            );
+            this._button1 = this.AddControl(new SingleButtonControl(InputKeys.MouseButton1));
+            this._button2 = this.AddControl(new SingleButtonControl(InputKeys.MouseButton2));
+            this.MiddleClick = this.AddControl(new SingleButtonControl(InputKeys.MouseButton3));
+            this.SideButton1 = this.AddControl(new SingleButtonControl(InputKeys.MouseButton4));
+            this.SideButton2 = this.AddControl(new SingleButtonControl(InputKeys.MouseButton5));
 
-            _buttonControls.Add(InputKeys.MouseButton1, new SingleButtonControl(InputKeys.MouseButton1));
-            _buttonControls.Add(InputKeys.MouseButton2, new SingleButtonControl(InputKeys.MouseButton2));
-            _buttonControls.Add(InputKeys.MouseButton3, new SingleButtonControl(InputKeys.MouseButton3));
-            _buttonControls.Add(InputKeys.MouseButton4, new SingleButtonControl(InputKeys.MouseButton4));
-            _buttonControls.Add(InputKeys.MouseButton5, new SingleButtonControl(InputKeys.MouseButton5));
-
-            this.Cursor = new TwoAxisPositionalControl(InputKeys.MouseCursorX, InputKeys.MouseCursorY);
-            this.Scroll = new TwoAxisPositionalControl(InputKeys.MouseScrollX, InputKeys.MouseScrollY);
+            this.Cursor = this.AddControl(new TwoAxisPositionalControl(InputKeys.MouseCursorX, InputKeys.MouseCursorY));
+            this.Scroll = this.AddControl(new TwoAxisPositionalControl(InputKeys.MouseScrollX, InputKeys.MouseScrollY));
         }
 
-        #region ControlBase implementation
+        private readonly SingleButtonControl _button1;
+        private readonly SingleButtonControl _button2;
 
-        public override void SetInputState(InputState inputState)
-        {
-            base.SetInputState(inputState);
-
-            foreach (var control in this._buttonControls)
-            {
-                control.Value.SetInputState(inputState);
-            }
-
-            this.Cursor.SetInputState(inputState);
-            this.Scroll.SetInputState(inputState);
-        }
-
-        public override void Update()
-        {
-            foreach (var control in this._buttonControls)
-            {
-                control.Value.Update();
-            }
-
-            this.Cursor.Update();
-            this.Scroll.Update();
-        }
-
-        #endregion
-
-        #region Key control getters
-
-        public SingleButtonControl PrimaryClick => LeftHanded ? _buttonControls[InputKeys.MouseButton2] : _buttonControls[InputKeys.MouseButton1];
-        public SingleButtonControl SecondaryClick => LeftHanded ? _buttonControls[InputKeys.MouseButton1] : _buttonControls[InputKeys.MouseButton2];
-        public SingleButtonControl MiddleClick => _buttonControls[InputKeys.MouseButton3];
-        public SingleButtonControl SideButton1 => _buttonControls[InputKeys.MouseButton4];
-        public SingleButtonControl SideButton2 => _buttonControls[InputKeys.MouseButton5];
+        public SingleButtonControl PrimaryClick => LeftHanded ? _button2 : _button1;
+        public SingleButtonControl SecondaryClick => LeftHanded ? _button1 : _button2;
+        public SingleButtonControl MiddleClick { get; private set; }
+        public SingleButtonControl SideButton1 { get; private set; }
+        public SingleButtonControl SideButton2 { get; private set; }
 
         public readonly TwoAxisPositionalControl Cursor;
         public readonly TwoAxisPositionalControl Scroll;
-
-        #endregion
     }
 }

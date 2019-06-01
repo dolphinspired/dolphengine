@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DolphEngine.Scenery
 {
-    public class Director : IServiceRepository, IDisposable
+    public class Director : IDisposable
     {
         protected readonly Dictionary<string, Func<IScene>> Scenes = new Dictionary<string, Func<IScene>>();
         private readonly IServiceRepository _serviceRepo;
@@ -16,10 +16,7 @@ namespace DolphEngine.Scenery
         private string _nextScene;
         private bool _unloadScene;
 
-        public Director()
-        {
-            this._serviceRepo = new ServiceRepository();
-        }
+        #region Constructor/Disposal
 
         public Director(IServiceRepository repository)
         {
@@ -50,38 +47,14 @@ namespace DolphEngine.Scenery
             this.CurrentSceneName = null;
         }
 
-        #region Dependency Injection
-
-        public object GetService(Type serviceType)
-        {
-            return this._serviceRepo.GetService(serviceType);
-        }
-
-        public void AddService(Type type, Func<object> serviceBuilder)
-        {
-            this._serviceRepo.AddService(type, serviceBuilder);
-        }
-
         #endregion
 
         #region Scene Management
 
         public Director AddScene<TScene>(string name)
-            where TScene : Scene
+            where TScene : IScene
         {
-            this.Scenes.Add(name, () => (TScene)Activator.CreateInstance(typeof(TScene), this._serviceRepo));
-            return this;
-        }
-
-        public Director AddScene(string name, Func<IScene> sceneBuilder)
-        {
-            this.Scenes.Add(name, sceneBuilder);
-            return this;
-        }
-
-        public Director AddScene(string name, IScene scene)
-        {
-            this.Scenes.Add(name, () => scene);
+            this.Scenes.Add(name, this._serviceRepo.BuildInjectableService<IScene, TScene>);
             return this;
         }
 

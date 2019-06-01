@@ -1,48 +1,38 @@
-﻿using DolphEngine.Input.State;
-
-namespace DolphEngine.Input.Controls
+﻿namespace DolphEngine.Input.Controls
 {
     public class DirectionalPadControl : ControlBase
     {
         public DirectionalPadControl(string upKey, string rightKey, string downKey, string leftKey)
         {
-            this.Up = new SingleButtonControl(upKey);
-            this.Right = new SingleButtonControl(rightKey);
-            this.Down = new SingleButtonControl(downKey);
-            this.Left = new SingleButtonControl(leftKey);
-            this.SetKeys(upKey, rightKey, downKey, leftKey);
+            this.Up = this.AddControl(new SingleButtonControl(upKey));
+            this.Right = this.AddControl(new SingleButtonControl(rightKey));
+            this.Down = this.AddControl(new SingleButtonControl(downKey));
+            this.Left = this.AddControl(new SingleButtonControl(leftKey));
         }
 
-        public override void SetInputState(InputState inputState)
-        {
-            base.SetInputState(inputState);
-            this.Up.SetInputState(inputState);
-            this.Right.SetInputState(inputState);
-            this.Down.SetInputState(inputState);
-            this.Left.SetInputState(inputState);
+        #region Event hooks
 
-            this.LastTickDirectionChanged = inputState?.CurrentTimestamp ?? 0;
+        public override void OnConnect()
+        {
+            this.LastTickDirectionChanged = this.Timer.Total.Ticks;
+            this.LastTickPressed = this.Timer.Total.Ticks;
+            this.LastTickReleased = this.Timer.Total.Ticks;
         }
 
-        public override void Update()
+        public override void OnUpdate()
         {
-            this.Up.Update();
-            this.Right.Update();
-            this.Down.Update();
-            this.Left.Update();
-
             // Are any of the arrow keys pressed?
             var isPressed = this.Up.IsPressed || this.Right.IsPressed || this.Down.IsPressed || this.Left.IsPressed;
 
             if (isPressed && !this.IsPressed)
             {
                 this.IsPressed = true;
-                this.LastTickPressed = this.InputState.CurrentTimestamp;
+                this.LastTickPressed = this.Timer.Total.Ticks;
             }
             else if (!isPressed && this.IsPressed)
             {
                 this.IsPressed = false;
-                this.LastTickReleased = this.InputState.CurrentTimestamp;
+                this.LastTickReleased = this.Timer.Total.Ticks;
             }
 
             // What direction do the pressed arrow keys form?
@@ -71,9 +61,11 @@ namespace DolphEngine.Input.Controls
             if (direction != this.Direction)
             {
                 this.Direction = direction;
-                this.LastTickDirectionChanged = InputState.CurrentTimestamp;
+                this.LastTickDirectionChanged = this.Timer.Total.Ticks;
             }
         }
+
+        #endregion
 
         public readonly SingleButtonControl Up;
         public readonly SingleButtonControl Right;
@@ -84,7 +76,7 @@ namespace DolphEngine.Input.Controls
         public long LastTickDirectionChanged { get; private set; }
 
         public bool DirectionJustChanged => LastTickDirectionChanged == 0;
-        public long DurationDirectionHeld => InputState.CurrentTimestamp - LastTickDirectionChanged;
+        public long DurationDirectionHeld => this.Timer.Total.Ticks - LastTickDirectionChanged;
 
         public bool IsPressed { get; private set; }
         public long LastTickPressed { get; private set; }
@@ -92,7 +84,7 @@ namespace DolphEngine.Input.Controls
 
         public bool JustPressed => DurationPressed == 0;
         public bool JustReleased => DurationReleased == 0;
-        public long DurationPressed => !IsPressed ? -1 : InputState.CurrentTimestamp - LastTickPressed;
-        public long DurationReleased => IsPressed ? -1 : InputState.CurrentTimestamp - LastTickReleased;
+        public long DurationPressed => !IsPressed ? -1 : this.Timer.Total.Ticks - LastTickPressed;
+        public long DurationReleased => IsPressed ? -1 : this.Timer.Total.Ticks - LastTickReleased;
     }
 }

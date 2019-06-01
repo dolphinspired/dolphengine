@@ -1,5 +1,4 @@
 ﻿using System;
-using DolphEngine.Input.State;
 
 namespace DolphEngine.Input.Controls
 {
@@ -7,23 +6,19 @@ namespace DolphEngine.Input.Controls
     {
         public TwoAxisPositionalControl(string xKey, string yKey)
         {
-            this.X = new OneAxisPositionalControl(xKey);
-            this.Y = new OneAxisPositionalControl(yKey);
-            this.SetKeys(xKey, yKey);
+            this.X = this.AddControl(new OneAxisPositionalControl(xKey));
+            this.Y = this.AddControl(new OneAxisPositionalControl(yKey));
         }
 
-        public override void SetInputState(InputState inputState)
+        #region Event hooks
+
+        public override void OnConnect()
         {
-            base.SetInputState(inputState);
-            this.X.SetInputState(inputState);
-            this.Y.SetInputState(inputState);
+            this.LastTickMoved = this.Timer.Total.Ticks;
         }
 
-        public override void Update()
+        public override void OnUpdate()
         {
-            this.X.Update();
-            this.Y.Update();
-
             this.Direction = Direction2d.None;
 
             if (this.X.JustMoved || this.Y.JustMoved)
@@ -50,6 +45,8 @@ namespace DolphEngine.Input.Controls
             }
         }
 
+        #endregion
+
         public readonly OneAxisPositionalControl X;
         public readonly OneAxisPositionalControl Y;
 
@@ -57,6 +54,6 @@ namespace DolphEngine.Input.Controls
         public long LastTickMoved { get; private set; } 
 
         public bool JustMoved => DurationHeld == 0;
-        public long DurationHeld => InputState.CurrentTimestamp - LastTickMoved;
+        public long DurationHeld => this.Timer.Total.Ticks - LastTickMoved;
     }
 }

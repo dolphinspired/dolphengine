@@ -4,23 +4,20 @@ using Microsoft.Xna.Framework;
 
 namespace DolphEngine.Demo
 {
-    public static class ControlContexts
+    public static class ControlSchemes
     {
-        public static readonly StandardKeyboard Keyboard = new StandardKeyboard();
-        public static readonly StandardMouse Mouse = new StandardMouse();
-        
-        public static KeyContext System(Game game)
+        public static ControlScheme System(Game game, StandardKeyboard k)
         {
-            return new KeyContext("System")
-                .AddControl(Keyboard, k => k.Escape.IsPressed, k => game.Exit());
+            return new ControlScheme()
+                .AddControl(() => k.Escape.IsPressed, game.Exit);
         }
 
-        public static KeyContext DebugNavigation()
+        public static ControlScheme DebugNavigation(DebugLogger debugLogger, StandardKeyboard k)
         {
-            return new KeyContext("DebugLogger")
-                .AddControl(Keyboard, k => k.OemTilde.JustPressed, k => Tower.DebugLogger.Hidden = !Tower.DebugLogger.Hidden)
-                .AddControl(Keyboard, k => k.F1.JustPressed, k => Tower.DebugLogger.PrevPage())
-                .AddControl(Keyboard, k => k.F2.JustPressed, k => Tower.DebugLogger.NextPage());
+            return new ControlScheme()
+                .AddControl(() => k.OemTilde.JustPressed, () => debugLogger.Hidden = !debugLogger.Hidden)
+                .AddControl(() => k.F1.JustPressed, () => debugLogger.PrevPage())
+                .AddControl(() => k.F2.JustPressed, () => debugLogger.NextPage());
         }
     }
 }

@@ -4,21 +4,33 @@ namespace DolphEngine.Input.Controls
 {
     public class OneAxisPositionalControl : ControlBase
     {
+        private readonly string _key;
+
         public OneAxisPositionalControl(string key)
         {
-            this.SetKeys(key);
+            this._key = key;
+            this.AddKey(key);
         }
 
-        public override void Update()
+        #region Event hooks
+
+        public override void OnConnect()
+        {
+            this.LastTickMoved = this.Timer.Total.Ticks;
+        }
+
+        public override void OnUpdate()
         {
             this.LastPosition = this.Position;
-            this.Position = this.InputState.GetValueOrDefault<int>(this.Keys[0]);
+            this.Position = this.InputState.GetValueOrDefault<int>(this._key);
 
             if (this.Position != this.LastPosition)
             {
-                this.LastTickMoved = this.InputState.CurrentTimestamp;
+                this.LastTickMoved = this.Timer.Total.Ticks;
             }
         }
+
+        #endregion
 
         private int LastPosition;
         public int Position { get; private set; }
@@ -27,6 +39,6 @@ namespace DolphEngine.Input.Controls
         public int PositionDelta => this.Position - this.LastPosition;
         public int PositionDeltaAbsolute => Math.Abs(this.PositionDelta);
         public bool JustMoved => this.PositionDelta != 0;
-        public long DurationHeld => InputState.CurrentTimestamp - LastTickMoved;
+        public long DurationHeld => this.Timer.Total.Ticks - LastTickMoved;
     }
 }

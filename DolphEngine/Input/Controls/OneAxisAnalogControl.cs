@@ -1,24 +1,36 @@
-﻿using DolphEngine.Input.State;
-using System;
+﻿using System;
 
 namespace DolphEngine.Input.Controls
 {
     public class OneAxisAnalogControl : ControlBase
     {
-        private const float Idle = 0.00f;
-        private const float DefaultSensitivity = 0.01f;
-        private const float DefaultDeadzone = 0.25f;
+        private readonly string _key;
 
+        private const float Idle = 0.00f;
+        public const float DefaultSensitivity = 0.01f;
+        public const float DefaultDeadzone = 0.25f;
+        
         public OneAxisAnalogControl(string key, float sensitivity = DefaultSensitivity, float deadzone = DefaultDeadzone)
         {
-            this.SetKeys(key);
+            this._key = key;
+            this.AddKey(key);
+
             this.Sensitivity = sensitivity;
             this.Deadzone = deadzone;
         }
 
-        public override void Update()
+        #region Event hooks
+
+        public override void OnConnect()
         {
-            if (!this.InputState.TryGetValue<float>(this.Keys[0], out var raw) || raw < this.Deadzone)
+            this.LastTickMoved = this.Timer.Total.Ticks;
+            this.LastTickPressed = this.Timer.Total.Ticks;
+            this.LastTickReleased = this.Timer.Total.Ticks;
+        }
+
+        public override void OnUpdate()
+        {
+            if (!this.InputState.TryGetValue<float>(this._key, out var raw) || raw < this.Deadzone)
             {
                 // Key is not registered or is sitting in the deadzone
                 this.LastMagnitude = this.Magnitude;
@@ -26,7 +38,7 @@ namespace DolphEngine.Input.Controls
                 if (this.IsPressed)
                 {
                     this.IsPressed = false;
-                    this.LastTickReleased = this.InputState.CurrentTimestamp;
+                    this.LastTickReleased = this.Timer.Total.Ticks;
                 }
                 return;
             }
@@ -40,15 +52,17 @@ namespace DolphEngine.Input.Controls
             // Key is pressed (outside of deadzone) and moved significantly
             this.LastMagnitude = this.Magnitude;
             this.Magnitude = raw;
-            this.LastTickMoved = this.InputState.CurrentTimestamp;
+            this.LastTickMoved = this.Timer.Total.Ticks;
 
             if (!this.IsPressed)
             {
                 this.IsPressed = true;
-                this.LastTickPressed = this.InputState.CurrentTimestamp;
+                this.LastTickPressed = this.Timer.Total.Ticks;
             }
         }
-        
+
+        #endregion
+
         public float Sensitivity;
         public float Deadzone;
 
@@ -59,7 +73,7 @@ namespace DolphEngine.Input.Controls
         public float MagnitudeDelta => this.Magnitude - this.LastMagnitude;
         public float MagnitudeDeltaAbsolute => Math.Abs(this.MagnitudeDelta);
         public bool JustMoved => DurationHeld == 0;
-        public long DurationHeld => !IsPressed ? -1 : InputState.CurrentTimestamp - LastTickMoved;
+        public long DurationHeld => !IsPressed ? -1 : this.Timer.Total.Ticks - LastTickMoved;
 
         public bool IsPressed { get; private set; }
         public long LastTickPressed { get; private set; }
@@ -67,7 +81,7 @@ namespace DolphEngine.Input.Controls
 
         public bool JustPressed => DurationPressed == 0;
         public bool JustReleased => DurationReleased == 0;
-        public long DurationPressed => !IsPressed ? -1 : InputState.CurrentTimestamp - LastTickPressed;
-        public long DurationReleased => IsPressed ? -1 : InputState.CurrentTimestamp - LastTickReleased;
+        public long DurationPressed => !IsPressed ? -1 : this.Timer.Total.Ticks - LastTickPressed;
+        public long DurationReleased => IsPressed ? -1 : this.Timer.Total.Ticks - LastTickReleased;
     }
 }

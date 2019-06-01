@@ -8,12 +8,12 @@ namespace DolphEngine.Eco
     {
         #region Constructors
 
-        public Ecosystem(GameTimer timer)
+        public Ecosystem(IGameTimer timer)
         {
             this._timer = timer;
         }
         
-        private readonly GameTimer _timer;
+        private readonly IGameTimer _timer;
 
         #endregion
 
