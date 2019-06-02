@@ -13,13 +13,6 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Debug.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:PremultiplyAlpha=True
-/processorParam:TextureFormat=Compressed
-/build:Debug.spritefont
-
 #begin Assets/link_walk_simple.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -79,4 +72,32 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Assets/dog_game.png
+
+#begin Assets/Debug10.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Assets/Debug10.spritefont
+
+#begin Assets/Zelda12.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Assets/Zelda12.spritefont
+
+#begin Assets/Zelda24.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Assets/Zelda24.spritefont
+
+#begin Assets/Zelda36.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Assets/Zelda36.spritefont
 
