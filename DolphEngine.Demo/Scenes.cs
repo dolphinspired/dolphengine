@@ -9,5 +9,6 @@ namespace DolphEngine.Demo
         public const string SceneSelect = "scene-select";
         public const string TestMapScene = "test-map-scene";
         public const string DogTreasureHunt = "dog-treasure-hunt";
+        public const string InputTester = "input-tester";
     }
 }

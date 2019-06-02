@@ -4,13 +4,10 @@ using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
+using DolphEngine.Graphics;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
-using DolphEngine.MonoGame;
 using DolphEngine.Scenery;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace DolphEngine.Demo.Games.TestMap
@@ -21,15 +18,10 @@ namespace DolphEngine.Demo.Games.TestMap
         protected readonly Keycosystem Keycosystem;
         protected readonly DebugLogger DebugLogger;
         protected readonly Director Director;
-
-        protected readonly ContentManager Content;
-        protected readonly SpriteBatch SpriteBatch;
+        protected readonly DirectiveRenderer Renderer;
 
         protected PlayerEntity Player;
         protected CameraEntity Camera;
-
-        private readonly int _sceneViewWidth;
-        private readonly int _sceneViewHeight;
 
         private readonly int[][] TestBoard = new int[][]
         {
@@ -45,20 +37,15 @@ namespace DolphEngine.Demo.Games.TestMap
             Ecosystem ecosystem, 
             Keycosystem keycosystem, 
             DebugLogger debugLogger,
-            SpriteBatch spriteBatch,
-            ContentManager content,
-            GraphicsDeviceManager gdm,
-            Director director)
+            Director director,
+            CameraEntity camera,
+            DirectiveRenderer renderer)
         {
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
             this.DebugLogger = debugLogger;
-
-            this.Content = content;
-            this.SpriteBatch = spriteBatch;
-
-            this._sceneViewWidth = gdm.PreferredBackBufferWidth;
-            this._sceneViewHeight = gdm.PreferredBackBufferHeight;
+            this.Camera = camera;
+            this.Renderer = renderer;
         }
 
         public void Load()
@@ -124,10 +111,8 @@ namespace DolphEngine.Demo.Games.TestMap
         {
             this.Player = new PlayerEntity();
             this.Player.Text.Text = "Alphonse";
-            this.Player.Text.FontAssetName = "Debug";
+            this.Player.Text.FontAssetName = "Assets/Debug10";
             this.Player.Sprite.EnableBoxOutline = true;
-
-            this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
 
             var arrow1 = new GlyphEntity(0, "Arrow");
             arrow1.Space = new Rect2d(0, 0, 21, 11, new Origin2d(Anchor2d.MiddleRight));
@@ -177,7 +162,7 @@ namespace DolphEngine.Demo.Games.TestMap
                 .AddHandler<TextHandler>()
                 .AddHandler<SpriteHandler>()
                 .AddHandler<PolygonHandler>()
-                .AddHandler(new DrawHandler(new MonoGameRenderer(this.SpriteBatch, this.Content, this.Camera)));
+                .AddHandler(new DrawHandler(this.Renderer));
 
             this.DebugLogger.AddPage(
                 () => Camera.ToString(),

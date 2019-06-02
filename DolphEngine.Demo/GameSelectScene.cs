@@ -3,14 +3,10 @@ using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
 using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
+using DolphEngine.Graphics;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
-using DolphEngine.MonoGame;
 using DolphEngine.Scenery;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
 
 namespace DolphEngine.Demo
@@ -21,21 +17,15 @@ namespace DolphEngine.Demo
         protected readonly Keycosystem Keycosystem;
         protected readonly Director Director;
         protected readonly DebugLogger DebugLogger;
-
-        protected readonly ContentManager Content;
-        protected readonly SpriteBatch SpriteBatch;
+        protected readonly DirectiveRenderer Renderer;
 
         protected CameraEntity Camera;
-
-        private readonly int _sceneViewWidth;
-        private readonly int _sceneViewHeight;
 
         private readonly string[] _selectableScenes = new[]
         {
             Scenes.TestMapScene,
             Scenes.DogTreasureHunt,
-            "not a real scene",
-            "just padding the list length",
+            Scenes.InputTester,
         };
 
         private int _selectedIndex;
@@ -44,27 +34,23 @@ namespace DolphEngine.Demo
         public GameSelectScene(
             Ecosystem ecosystem, 
             Keycosystem keycosystem,
-            ContentManager content, 
-            SpriteBatch spriteBatch,
-            GraphicsDeviceManager gdm,
             Director director,
-            DebugLogger debugLogger)
+            DebugLogger debugLogger,
+            CameraEntity camera,
+            DirectiveRenderer renderer)
         {
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
             this.Director = director;
             this.DebugLogger = debugLogger;
+            this.Camera = camera;
+            this.Renderer = renderer;
 
-            this.Content = content;
-            this.SpriteBatch = spriteBatch;
-
-            this._sceneViewWidth = gdm.PreferredBackBufferWidth;
-            this._sceneViewHeight = gdm.PreferredBackBufferHeight;
+            // this.Renderer.BackgroundColor = Color.Black;
         }
 
         public void Load()
         {
-            this.Camera = new CameraEntity(this._sceneViewWidth, this._sceneViewHeight);
             var viewTopLeft = this.Camera.Space.TopLeft;
 
             var entities = new List<Entity> { this.Camera };
@@ -73,7 +59,7 @@ namespace DolphEngine.Demo
             // There will be a better way to do this in the future
             var title = new Entity("Title");
             title.Space = new Rect2d(viewTopLeft + new Vector2d(10, 10), Size2d.Zero); // Text doesn't use size yet
-            title.AddComponent(new TextComponent { Text = "Select a scene:", FontAssetName = "Debug" });
+            title.AddComponent(new TextComponent { Text = "Select a scene:", FontAssetName = "Assets/Zelda12" });
             title.AddComponent<DrawComponent>();
             entities.Add(title);
 
@@ -88,7 +74,7 @@ namespace DolphEngine.Demo
             {
                 var option = new Entity($"scene:{sceneName}");
                 option.Space = new Rect2d(title.Space.TopLeft + new Vector2d(20, ++i * 30), Size2d.Zero, Anchor2d.MiddleLeft);
-                option.AddComponent(new TextComponent { Text = sceneName, FontAssetName = "Debug" });
+                option.AddComponent(new TextComponent { Text = sceneName, FontAssetName = "Assets/Zelda12" });
 
                 var selectable = new SelectableItemComponent();
                 selectable.OnFocus = () => cursor.Space.Position = option.Space.Position + new Vector2d(-5, 6); // text alignment is broken af right now
@@ -110,13 +96,10 @@ namespace DolphEngine.Demo
 
             this.Ecosystem.AddEntities(entities);
 
-            var renderer = new MonoGameRenderer(this.SpriteBatch, this.Content, this.Camera);
-            renderer.BackgroundColor = Color.Black;
-
             this.Ecosystem
                 .AddHandler<TextHandler>()
                 .AddHandler<SpriteHandler>()
-                .AddHandler(new DrawHandler(renderer));
+                .AddHandler(new DrawHandler(this.Renderer));
 
             var k = this.Keycosystem.GetController<StandardKeyboard>(1);
 

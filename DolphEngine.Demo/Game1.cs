@@ -1,7 +1,10 @@
 ﻿using DolphEngine.Demo.Games.DogGame;
+using DolphEngine.Demo.Games.InputTester;
 using DolphEngine.Demo.Games.TestMap;
 using DolphEngine.DI;
 using DolphEngine.Eco;
+using DolphEngine.Eco.Entities;
+using DolphEngine.Graphics;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
 using DolphEngine.MonoGame;
@@ -9,7 +12,6 @@ using DolphEngine.Scenery;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
 namespace DolphEngine.Demo
 {
@@ -67,21 +69,24 @@ namespace DolphEngine.Demo
                 })
                 .AddSingletonWithInit<DebugLogger>(dl =>
                 {
-                    dl.Font = this.Content.Load<SpriteFont>("Debug");
-                });
+                    dl.Font = this.Content.Load<SpriteFont>("Assets/Debug10");
+                })
+                .AddTransient<CameraEntity, BasicCamera>()
+                .AddTransient<DirectiveRenderer, BasicRenderer>();
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            FpsFont = this.Content.Load<SpriteFont>("Debug");
+            FpsFont = this.Content.Load<SpriteFont>("Assets/Debug10");
 
             this.Director
                 .AddScene<GameSelectScene>(Scenes.SceneSelect)
                 .AddScene<TestMapScene>(Scenes.TestMapScene)
                 .AddScene<DogTreasureHuntScene>(Scenes.DogTreasureHunt)
-                .LoadScene(Scenes.SceneSelect);
+                .AddScene<KbScene>(Scenes.InputTester)
+                .LoadScene(Scenes.InputTester);
         }
 
         protected override void Update(GameTime gameTime)
@@ -101,6 +106,21 @@ namespace DolphEngine.Demo
             SpriteBatch.End();
 
             base.Draw(gameTime);
+        }
+    }
+
+    public class BasicCamera : CameraEntity
+    {
+        public BasicCamera(GraphicsDeviceManager gdm) : base(gdm.PreferredBackBufferWidth, gdm.PreferredBackBufferHeight)
+        {
+        }
+    }
+
+    public class BasicRenderer : MonoGameRenderer
+    {
+        public BasicRenderer(SpriteBatch sb, ContentManager content, CameraEntity camera) : base(sb, content, camera)
+        {
+            this.BackgroundColor = Color.Black; // todo: make configurable
         }
     }
 }
