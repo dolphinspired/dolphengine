@@ -6,7 +6,7 @@ namespace DolphEngine.Demo.Games.TestMap.Entities
 {
     public class PlayerEntity : Entity
     {
-        public PlayerEntity() : base("Player")
+        public PlayerEntity()
         {
             this.AddComponent<DrawComponent>()
                 .AddComponent<SpeedComponent>()

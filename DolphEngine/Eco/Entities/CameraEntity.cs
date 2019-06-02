@@ -8,7 +8,7 @@ namespace DolphEngine.Eco.Entities
         {
         }
 
-        public CameraEntity(int width, int height, int x, int y) : base("Camera")
+        public CameraEntity(int width, int height, int x, int y)
         {
             this.Space = new Rect2d(x, y, width, height, Origin2d.TrueCenter);
             this.AddComponent<CameraComponent>();

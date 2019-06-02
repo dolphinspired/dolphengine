@@ -53,27 +53,24 @@ namespace DolphEngine.Demo
         {
             var viewTopLeft = this.Camera.Space.TopLeft;
 
-            var entities = new List<Entity> { this.Camera };
+            this.Ecosystem.AddEntity("Camera", this.Camera);
 
             // All of the below is some really hacked together proto-UI garbage
             // There will be a better way to do this in the future
-            var title = new Entity("Title");
-            title.Space = new Rect2d(viewTopLeft + new Vector2d(10, 10), Size2d.Zero); // Text doesn't use size yet
+            var title = new Entity(new Rect2d(viewTopLeft + new Vector2d(10, 10), Size2d.Zero)); // Text doesn't use size yet
             title.AddComponent(new TextComponent { Text = "Select a scene:", FontAssetName = "Assets/Zelda12" });
             title.AddComponent<DrawComponent>();
-            entities.Add(title);
+            this.Ecosystem.AddEntity("Title", title);
 
-            var cursor = new Entity("Cursor");
-            cursor.Space = new Rect2d(0, 0, 7, 11, Anchor2d.MiddleRight);
+            var cursor = new Entity(new Rect2d(0, 0, 7, 11, Anchor2d.MiddleRight));
             cursor.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, Index = 1 });
             cursor.AddComponent<DrawComponent>();
-            entities.Add(cursor);
+            this.Ecosystem.AddEntity("Cursor", cursor);
 
             int i = 0;
             foreach (var sceneName in this._selectableScenes)
             {
-                var option = new Entity($"scene:{sceneName}");
-                option.Space = new Rect2d(title.Space.TopLeft + new Vector2d(20, ++i * 30), Size2d.Zero, Anchor2d.MiddleLeft);
+                var option = new Entity(new Rect2d(title.Space.TopLeft + new Vector2d(20, ++i * 30), Size2d.Zero, Anchor2d.MiddleLeft));
                 option.AddComponent(new TextComponent { Text = sceneName, FontAssetName = "Assets/Zelda12" });
 
                 var selectable = new SelectableItemComponent();
@@ -90,11 +87,9 @@ namespace DolphEngine.Demo
                     _selectedIndex = 0;
                 }
 
-                entities.Add(option);
+                this.Ecosystem.AddEntity($"scene:{sceneName}", option);
                 this._selectableEntities.Add(option);
             }
-
-            this.Ecosystem.AddEntities(entities);
 
             this.Ecosystem
                 .AddHandler<TextHandler>()

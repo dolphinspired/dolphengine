@@ -8,6 +8,9 @@ namespace DolphEngine.Test.Eco
 {
     public class EcosystemBenchmarks
     {
+        private const string NAME = "TestEntity";
+        private static string NAME_GEN(int i) => $"{NAME}-{i}";
+
         [Fact]
         public void CanHandleEntityWithBulkComponentsEntityFirst()
         {
@@ -15,7 +18,7 @@ namespace DolphEngine.Test.Eco
             var handler = new BulkComponentsHandler();
 
             ecosystem
-                .AddEntity(AddBulkComponents(new Entity()))
+                .AddEntity(NAME, AddBulkComponents(new Entity()))
                 .AddHandler(handler)
                 .Update();
         }
@@ -28,7 +31,7 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandler(handler)
-                .AddEntity(AddBulkComponents(new Entity()))                
+                .AddEntity(NAME, AddBulkComponents(new Entity()))                
                 .Update();
         }
 
@@ -44,7 +47,7 @@ namespace DolphEngine.Test.Eco
                 entities.Add(AddBulkComponents(new Entity()));
             }
 
-            var elapsedSetup = Observe(() => ecosystem.AddEntities(entities).AddHandler(handler));
+            var elapsedSetup = Observe(() => ecosystem.AddEntities(NAME_GEN, entities).AddHandler(handler));
             var elapsedRun = Observe(() => ecosystem.Update());
         }
 
@@ -60,7 +63,7 @@ namespace DolphEngine.Test.Eco
                 entities.Add(AddBulkComponents(new Entity()));
             }
 
-            var elapsedSetup = Observe(() => ecosystem.AddHandler(handler).AddEntities(entities));
+            var elapsedSetup = Observe(() => ecosystem.AddHandler(handler).AddEntities(NAME_GEN, entities));
             var elapsedRun = Observe(() => ecosystem.Update());
         }
 
@@ -76,7 +79,7 @@ namespace DolphEngine.Test.Eco
                 entities.Add(new Entity());
             }
 
-            var elapsedSetup = Observe(() => ecosystem.AddHandler(handler).AddEntities(entities));
+            var elapsedSetup = Observe(() => ecosystem.AddHandler(handler).AddEntities(NAME_GEN, entities));
             var elapsedComponents = Observe(() =>
             {
                 foreach (var entity in entities)

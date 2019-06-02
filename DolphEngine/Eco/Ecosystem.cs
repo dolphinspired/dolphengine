@@ -20,7 +20,7 @@ namespace DolphEngine.Eco
         #region Data structures
 
         // All entities added to the ecosystem, indexed by id
-        private readonly Dictionary<uint, Entity> _entitiesById = new Dictionary<uint, Entity>();
+        private readonly Dictionary<string, Entity> _entitiesById = new Dictionary<string, Entity>();
         
         // All types of components for which at least one handler has been registered to this ecosystem at some point, paired with the
         // bitPosition by which the type is represented in a BitLock or BitKey
@@ -39,11 +39,11 @@ namespace DolphEngine.Eco
         // In other words, all of the entities that have a PositionComponent are grouped together; all the entities that have
         // a PositionComponent _and_ a SpriteComponent are groupd together, etc. This makes getting the arguments for a handler an O(1) operation.
         private readonly Dictionary<BitLock, HashSet<Entity>> _entitiesByLock = new Dictionary<BitLock, HashSet<Entity>>(ReferenceEqualityComparer<BitLock>.Instance);
-        private readonly Dictionary<uint, HashSet<BitLock>> _locksByEntity = new Dictionary<uint, HashSet<BitLock>>();
+        private readonly Dictionary<string, HashSet<BitLock>> _locksByEntity = new Dictionary<string, HashSet<BitLock>>();
 
         // A pairing of all entities in the ecosystem with a BitKey that represents the components they currently have.
         // If the BitKey is null, then the entity's components have changed and its BitKey needs to be regenerated.
-        private readonly Dictionary<uint, BitKey> _bitKeysByEntityId = new Dictionary<uint, BitKey>();
+        private readonly Dictionary<string, BitKey> _bitKeysByEntityId = new Dictionary<string, BitKey>();
 
         // If an entity within the ecosystem has a component added or removed, its BitKey will need to be refreshed
         // before we can know which BitLocks (handlers) it should be sent to.
@@ -228,21 +228,27 @@ namespace DolphEngine.Eco
 
         #region Entity methods
 
-        public Ecosystem AddEntity(Entity entity)
+        public Ecosystem AddEntity(string id, Entity entity)
         {
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            if (this._entitiesById.ContainsKey(entity.Id))
+            if (entity.Id != null)
             {
-                throw new ArgumentException($"Entity '{entity.Name}' ({entity.Id}) has already been added to this {nameof(Ecosystem)}!");
+                throw new InvalidOperationException($"Cannot add entity with id '{id}', it has already been assigned id '{entity.Id}'!");
+            }
+
+            if (this._entitiesById.ContainsKey(id))
+            {
+                throw new InvalidOperationException($"An entity with id '{id}' has already been added to this {nameof(Ecosystem)}!");
             }
 
             // Index the entity by its id
-            this._entitiesById.Add(entity.Id, entity);
-            
+            this._entitiesById.Add(id, entity);
+            entity.Id = id;
+
             // Index the entity by its BitKey
             this.CreateAndIndexBitKey(entity);
 
@@ -250,37 +256,23 @@ namespace DolphEngine.Eco
             return this;
         }        
 
-        public Ecosystem AddEntities(IEnumerable<Entity> entities)
+        public Ecosystem AddEntities(Func<int, string> idBuilder, IEnumerable<Entity> entities)
         {
             if (entities == null || !entities.Any())
             {
                 throw new ArgumentException(nameof(entities), "There are no entities to add!");
             }
 
+            var i = 0;
             foreach (var entity in entities)
             {
-                this.AddEntity(entity);
+                this.AddEntity(idBuilder(i++), entity);
             }
 
             return this;
         }
 
-        public Ecosystem AddEntities(params Entity[] entities)
-        {
-            if (entities == null || !entities.Any())
-            {
-                throw new ArgumentException(nameof(entities), "There are no entities to add!");
-            }
-
-            foreach (var entity in entities)
-            {
-                this.AddEntity(entity);
-            }
-
-            return this;
-        }
-
-        public Entity GetEntity(uint id)
+        public Entity GetEntity(string id)
         {
             return this._entitiesById[id];
         }
@@ -290,7 +282,7 @@ namespace DolphEngine.Eco
             return this._entitiesById.Select(x => x.Value);
         }
 
-        public bool TryGetEntity(uint id, out Entity entity)
+        public bool TryGetEntity(string id, out Entity entity)
         {
             if (!this._entitiesById.TryGetValue(id, out var indexedEntity))
             {
@@ -302,10 +294,9 @@ namespace DolphEngine.Eco
             return true;
         }
 
-        public Ecosystem RemoveEntity(Entity entity)
+        public Ecosystem RemoveEntity(string id)
         {
-            var id = entity.Id;
-            if (!this._entitiesById.ContainsKey(id))
+            if (!this._entitiesById.TryGetValue(id, out var entity))
             {
                 return this;
             }
@@ -320,35 +311,21 @@ namespace DolphEngine.Eco
                 this._entitiesByLock[bitLock].Remove(entity);
             }
 
+            entity.Id = null;
             entity.Ecosystem = null;
             return this;
         }
 
-        public Ecosystem RemoveEntities(IEnumerable<Entity> entities)
+        public Ecosystem RemoveEntities(IEnumerable<string> ids)
         {
-            if (entities == null || !entities.Any())
+            if (ids == null || !ids.Any())
             {
                 return this;
             }
 
-            foreach (var entity in entities)
+            foreach (var id in ids)
             {
-                this.RemoveEntity(entity);
-            }
-
-            return this;
-        }
-
-        public Ecosystem RemoveEntities(params Entity[] entities)
-        {
-            if (entities == null || !entities.Any())
-            {
-                return this;
-            }
-
-            foreach (var entity in entities)
-            {
-                this.RemoveEntity(entity);
+                this.RemoveEntity(id);
             }
 
             return this;

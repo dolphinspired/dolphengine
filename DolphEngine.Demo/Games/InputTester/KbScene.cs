@@ -274,7 +274,7 @@ namespace DolphEngine.Demo.Games.InputTester
                         Polygon = new Rect2d(0, 0, rect.Size.Width, rect.Size.Height).ToPolygon(),
                         Color = 0x00FFFFFF });
                     keyEntity.AddComponent<DrawComponent>();
-                    this.Ecosystem.AddEntity(keyEntity);
+                    this.Ecosystem.AddEntity($"KB_{kdd.KeyToRead}", keyEntity);
 
                     var keyboardKey = kdd.KeyboardKey(keyboard);
                     controlScheme.AddControl(() => keyboardKey.JustPressed, () => keyEntity.GetComponent<PolygonComponent>().Color = 0x000000FF);
@@ -287,7 +287,7 @@ namespace DolphEngine.Demo.Games.InputTester
             this.Keycosystem.AddControlScheme("KeyHighlighter", controlScheme);
 
             this.Ecosystem
-                .AddEntity(this.Camera)
+                .AddEntity("Camera", this.Camera)
                 .AddHandler<PolygonHandler>()
                 .AddHandler(new DrawHandler(this.Renderer));
 

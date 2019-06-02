@@ -11,30 +11,6 @@ namespace DolphEngine.Test.Eco
         private const string Tag3 = "tag3";
         private const string Tag4 = "tag4";
 
-        #region Entity tests
-
-        [Fact]
-        public void CanSetDefaultNameOnEntity()
-        {
-            var entity1 = new Entity();
-            var entity2 = new Entity();
-
-            Assert.False(string.IsNullOrEmpty(entity1.Name));
-            Assert.False(string.IsNullOrEmpty(entity2.Name));
-            Assert.NotEqual(entity1.Name, entity2.Name);
-        }
-
-        [Fact]
-        public void CanSetCustomNameOnEntity()
-        {
-            var testName = "yee";
-            var entity = new Entity(testName);
-
-            Assert.Equal(testName, entity.Name);
-        }
-
-        #endregion
-
         #region Component tests
 
         [Fact]

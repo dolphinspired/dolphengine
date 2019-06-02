@@ -24,15 +24,15 @@ namespace DolphEngine.DI
             return repository;
         }
 
-        public static IServiceRepository AddTransientWithInit<TService>(this IServiceRepository repository, Action<TService> onInit)
-        {
-            repository.AddService(typeof(TService), () => {
-                var service = repository.BuildInjectableService<TService, TService>();
-                onInit(service);
-                return service;
-            });
-            return repository;
-        }
+        //public static IServiceRepository AddTransientWithInit<TService>(this IServiceRepository repository, Action<TService> onInit)
+        //{
+        //    repository.AddService(typeof(TService), () => {
+        //        var service = repository.BuildInjectableService<TService, TService>();
+        //        onInit(service);
+        //        return service;
+        //    });
+        //    return repository;
+        //}
 
         public static IServiceRepository AddSingleton<TService>(this IServiceRepository repository)
         {
@@ -53,15 +53,15 @@ namespace DolphEngine.DI
             return repository;
         }
 
-        public static IServiceRepository AddSingletonWithInit<TService>(this IServiceRepository repository, Action<TService> onInit)
-        {
-            repository.AddServiceAsSingleton(typeof(TService), () => {
-                var service = repository.BuildInjectableService<TService, TService>();
-                onInit(service);
-                return service;
-            });
-            return repository;
-        }
+        //public static IServiceRepository AddSingletonWithInit<TService>(this IServiceRepository repository, Action<TService> onInit)
+        //{
+        //    repository.AddServiceAsSingleton(typeof(TService), () => {
+        //        var service = repository.BuildInjectableService<TService, TService>();
+        //        onInit(service);
+        //        return service;
+        //    });
+        //    return repository;
+        //}
 
         public static TService GetService<TService>(this IServiceProvider provider)
         {

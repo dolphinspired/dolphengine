@@ -5,7 +5,7 @@ namespace DolphEngine.Demo
 {
     public class GlyphEntity : Entity
     {
-        public GlyphEntity(int glyphIndex, string name) : base(name)
+        public GlyphEntity(int glyphIndex)
         {
             this.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, Index = glyphIndex })
                 .AddComponent<DrawComponent>();

@@ -8,7 +8,7 @@ namespace DolphEngine.Demo.Games.DogGame.Entities
 {
     public class DogEntity : Entity
     {
-        public DogEntity() : base("Dog")
+        public DogEntity()
         {
             this.AddComponent(new SpriteComponent { SpriteSheet = Sprites.DogStuff, Index = 0 });
         }

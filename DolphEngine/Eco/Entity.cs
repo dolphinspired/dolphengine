@@ -9,55 +9,41 @@ namespace DolphEngine.Eco
         #region Constructors/Destructors
 
         /// <summary>
-        /// Creates a named entity.
+        /// Creates an entity.
         /// </summary>
-        public Entity(string name = null)
+        public Entity()
         {
-            this.Id = ++_idCounter;
-            this.Name = name ?? DefaultName;
         }
 
         /// <summary>
-        /// Creates a named entity and places it at the provided position.
+        /// Creates an entity and places it at the provided position.
         /// </summary>
-        public Entity(Position2d position, string name = null) : this()
+        public Entity(Position2d position)
         {
-            this.Id = ++_idCounter;
-            this.Name = name ?? DefaultName;
             this.Space = new Rect2d(position, Size2d.Zero);
         }
 
         /// <summary>
-        /// Creates a named entity and gives it the provided dimensions.
+        /// Creates an entity and places it at the provided position with the given size.
         /// </summary>
-        public Entity(Rect2d space, string name = null)
+        public Entity(Rect2d space)
         {
-            this.Id = ++_idCounter;
-            this.Name = name ?? DefaultName;
             this.Space = space;
         }
-
-        private string DefaultName => $"Entity {this.Id}";
-        private static uint _idCounter;
 
         #endregion
 
         #region Information
-
-        /// <summary>
-        /// An auto-incrementing id number for this entity.
-        /// </summary>
-        public readonly uint Id;
         
-        /// <summary>
-        /// An descriptivate name for the entity, to help with logging or debugging.
-        /// </summary>
-        public readonly string Name;
-
         /// <summary>	
         /// A reference to this entity's <see cref="Ecosystem"/>, if it has been added to one.	
         /// </summary>	
         public Ecosystem Ecosystem { get; internal set; }
+
+        /// <summary>
+        /// Each entity is assigned an Id when it's added to an <see cref="Ecosystem"/>.
+        /// </summary>
+        public string Id { get; internal set; }
 
         #endregion
 
@@ -78,12 +64,12 @@ namespace DolphEngine.Eco
 
             if (component.Entity != null)
             {
-                throw new InvalidOperationException($"Component '{type}' is already registered to Entity {component.Entity}");
+                throw new InvalidOperationException($"Component '{type}' is already registered to Entity {component.Entity}!");
             }
             
             if (this._componentsByType.ContainsKey(type))
             {
-                throw new InvalidOperationException($"Entity '{this.Name}' ({this.Id}) already has component of type {type}");
+                throw new InvalidOperationException($"Entity already has component of type {type}!");
             }
 
             component.Entity = this;
@@ -173,7 +159,6 @@ namespace DolphEngine.Eco
             }
 
             this._tags.Add(tag);
-            //this.Scene?.RegisterTag(this, tag);
             return this;
         }
 
@@ -200,7 +185,6 @@ namespace DolphEngine.Eco
             }
 
             this._tags.Remove(tag);
-            //this.Scene?.DeregisterTag(this, tag);
             return this;
         }
 
@@ -228,7 +212,7 @@ namespace DolphEngine.Eco
         {
             if (tags == null || tags.Length == 0)
             {
-                throw new ArgumentException($"Entity '{this.Name}': No tags specified for HasAnyTags");
+                throw new ArgumentException($"Entity: No tags specified for HasAnyTags!");
             }
 
             foreach (var tag in tags)
@@ -246,7 +230,7 @@ namespace DolphEngine.Eco
         {
             if (tags == null || tags.Length == 0)
             {
-                throw new ArgumentException($"Entity '{this.Name}': No tags specified for HasAllTags");
+                throw new ArgumentException($"Entity: No tags specified for HasAllTags!");
             }
 
             foreach (var tag in tags)
@@ -266,7 +250,7 @@ namespace DolphEngine.Eco
 
         public override string ToString()
         {
-            return $"{{ id: {Id}, name: \"{Name}\", components: {_componentsByType.Count}, space: {Space} }}";
+            return $"{{ id: {Id}, components: {_componentsByType.Count}, space: {Space} }}";
         }
 
         #endregion

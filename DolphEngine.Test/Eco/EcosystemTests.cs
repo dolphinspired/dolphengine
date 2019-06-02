@@ -8,6 +8,9 @@ namespace DolphEngine.Test.Eco
 {
     public class EcosystemTests
     {
+        private const string NAME = "TestEntity";
+        private static string NAME_GEN(int i) => $"{NAME}-{i}";
+
         #region Handler add/remove tests
 
         [Fact]
@@ -196,7 +199,7 @@ namespace DolphEngine.Test.Eco
             var entity = new Entity();
 
             ecosystem
-                .AddEntity(entity)
+                .AddEntity(NAME, entity)
                 .AddHandler(handler)
                 .Update();
 
@@ -212,7 +215,7 @@ namespace DolphEngine.Test.Eco
             var entity = new Entity().AddComponent<MockComponent1>();
 
             ecosystem
-                .AddEntity(entity)
+                .AddEntity(NAME, entity)
                 .AddHandler(handler)
                 .Update();
 
@@ -228,8 +231,8 @@ namespace DolphEngine.Test.Eco
             var entity = new Entity();
 
             ecosystem
-                .AddEntity(entity)
-                .RemoveEntity(entity)
+                .AddEntity(NAME, entity)
+                .RemoveEntity(NAME)
                 .AddHandler(handler)
                 .Update();
 
@@ -245,8 +248,8 @@ namespace DolphEngine.Test.Eco
             var entity = new Entity().AddComponent<MockComponent1>();
 
             ecosystem
-                .AddEntity(entity)
-                .RemoveEntity(entity)
+                .AddEntity(NAME, entity)
+                .RemoveEntity(NAME)
                 .AddHandler(handler)
                 .Update();
 
@@ -263,7 +266,7 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandler(handler)
-                .AddEntity(entity)
+                .AddEntity(NAME, entity)
                 .Update();
 
             Assert.Equal(1, handler.Called);
@@ -279,7 +282,7 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandler(handler)
-                .AddEntity(entity)
+                .AddEntity(NAME, entity)
                 .Update();
 
             Assert.Equal(1, handler.Called);
@@ -295,8 +298,8 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandler(handler)
-                .AddEntity(entity)
-                .RemoveEntity(entity)
+                .AddEntity(NAME, entity)
+                .RemoveEntity(NAME)
                 .Update();
 
             Assert.Equal(1, handler.Called);
@@ -312,8 +315,8 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandler(handler)
-                .AddEntity(entity)
-                .RemoveEntity(entity)
+                .AddEntity(NAME, entity)
+                .RemoveEntity(NAME)
                 .Update();
 
             Assert.Equal(1, handler.Called);
@@ -330,7 +333,7 @@ namespace DolphEngine.Test.Eco
             var ecosystem = TestEco();
             var entity = new Entity();
 
-            ecosystem.AddEntity(entity);
+            ecosystem.AddEntity(NAME, entity);
 
             var entitiesWithComponent = ecosystem.GetEntities().Where(x => x.HasComponent<MockComponent1>());            
             Assert.Empty(entitiesWithComponent);
@@ -347,7 +350,7 @@ namespace DolphEngine.Test.Eco
             var ecosystem = TestEco();
             var entity = new Entity();
 
-            ecosystem.AddEntity(entity);
+            ecosystem.AddEntity(NAME, entity);
             entity.AddComponent<MockComponent1>().RemoveComponent<MockComponent1>();
 
             var entitiesWithComponent = ecosystem.GetEntities().Where(x => x.HasComponent<MockComponent1>());
@@ -363,7 +366,7 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandler(handler)
-                .AddEntity(entity);
+                .AddEntity(NAME, entity);
             entity.AddComponent<MockComponent1>();
             ecosystem.Update();
 
@@ -380,7 +383,7 @@ namespace DolphEngine.Test.Eco
 
             ecosystem
                 .AddHandler(handler)
-                .AddEntity(entity);
+                .AddEntity(NAME, entity);
             entity.AddComponent<MockComponent1>();
             ecosystem.Update();
 
@@ -398,16 +401,16 @@ namespace DolphEngine.Test.Eco
         private static Ecosystem CreateEcosystemWithEntities()
         {
             var ecosystem = TestEco();
-            ecosystem.AddEntities(
-                new Entity("empty-1"),
-                new Entity("empty-2"),
-                new Entity("comp1-1").AddComponent(new MockComponent1("c1-e1", 1)),
-                new Entity("comp1-2").AddComponent(new MockComponent1("c1-e2", 2)),
-                new Entity("comp2-1").AddComponent(new MockComponent2("c2-e3", true)),
-                new Entity("comp2-2").AddComponent(new MockComponent2("c2-e4", false)),
-                new Entity("cmp12-1").AddComponent(new MockComponent1("c1-e5", 5)).AddComponent(new MockComponent2("c2-e5", true)),
-                new Entity("cmp12-2").AddComponent(new MockComponent1("c1-e6", 6)).AddComponent(new MockComponent2("c2-e6", false))
-            );
+            ecosystem.AddEntities(NAME_GEN, new[] {
+                new Entity(),
+                new Entity(),
+                new Entity().AddComponent(new MockComponent1("c1-e1", 1)),
+                new Entity().AddComponent(new MockComponent1("c1-e2", 2)),
+                new Entity().AddComponent(new MockComponent2("c2-e3", true)),
+                new Entity().AddComponent(new MockComponent2("c2-e4", false)),
+                new Entity().AddComponent(new MockComponent1("c1-e5", 5)).AddComponent(new MockComponent2("c2-e5", true)),
+                new Entity().AddComponent(new MockComponent1("c1-e6", 6)).AddComponent(new MockComponent2("c2-e6", false))
+            });
             return ecosystem;
         }
 

@@ -9,6 +9,7 @@ using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
 using DolphEngine.Scenery;
 using System;
+using System.Collections.Generic;
 
 namespace DolphEngine.Demo.Games.TestMap
 {
@@ -83,6 +84,8 @@ namespace DolphEngine.Demo.Games.TestMap
 
             var i = 0;
             var row = 0;
+            var entities = new List<Entity>();
+
             foreach (var tilerow in this.TestBoard)
             {
                 var row_x = start.X - row * xShift;
@@ -94,46 +97,53 @@ namespace DolphEngine.Demo.Games.TestMap
                     var x = row_x + col * xShift;
                     var y = row_y + col * yShift;
 
-                    var tileEntity = new Entity(new Rect2d(x, y, tileSize.Width, tileSize.Height, origin), $"Tile_{i++}");
+                    var tileEntity = new Entity(new Rect2d(x, y, tileSize.Width, tileSize.Height, origin));
                     tileEntity.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, Index = tilevalue });
                     tileEntity.AddComponent<DrawComponent>();
-
-                    this.Ecosystem.AddEntity(tileEntity);
+                    entities.Add(tileEntity);
 
                     col++;
                 }
 
                 row++;
             }
+
+            this.Ecosystem.AddEntities(n => $"Tile_{n}", entities);
         }
 
         private void LoadEntities()
         {
+            this.Ecosystem.AddEntity("Camera", this.Camera);
+
             this.Player = new PlayerEntity();
             this.Player.Text.Text = "Alphonse";
             this.Player.Text.FontAssetName = "Assets/Debug10";
             this.Player.Sprite.EnableBoxOutline = true;
+            this.Ecosystem.AddEntity("Player", this.Player);
 
-            var arrow1 = new GlyphEntity(0, "Arrow");
+            var arrow1 = new GlyphEntity(0);
             arrow1.Space = new Rect2d(0, 0, 21, 11, new Origin2d(Anchor2d.MiddleRight));
             arrow1.AddComponent(new LinkedPositionComponent(this.Player, e => e.Space.GetAnchorPosition(Anchor2d.MiddleLeft).Shift(new Vector2d(-5, 0))));
             arrow1.Sprite.Scale = new Vector2d(2, 2);
             arrow1.Sprite.OffsetAnimation = Animations.Select(TimeSpan.FromSeconds(1));
             arrow1.Sprite.EnableBoxOutline = true;
+            this.Ecosystem.AddEntity("Arrow", arrow1);
 
-            var ball1 = new GlyphEntity(2, "Ball (rotating)");
+            var ball1 = new GlyphEntity(2);
             ball1.Space = new Rect2d(100, 50, 11, 11, Origin2d.TrueCenter);
             ball1.Sprite.Scale = new Vector2d(4, 4);
             ball1.Sprite.RotationAnimation = Animations.Rotate(TimeSpan.FromSeconds(1));
             ball1.Sprite.EnableBoxOutline = true;
+            this.Ecosystem.AddEntity("Ball (rotating)", ball1);
 
-            var ball2 = new GlyphEntity(2, "Ball (breathing)");
+            var ball2 = new GlyphEntity(2);
             ball2.Space = new Rect2d(100, 150, 11, 11, Origin2d.TrueCenter);
             ball2.Sprite.Scale = new Vector2d(4, 4);
             ball2.Sprite.ScaleAnimation = Animations.Breathe(TimeSpan.FromSeconds(4));
             ball2.Sprite.EnableBoxOutline = true;
+            this.Ecosystem.AddEntity("Ball (breathing)", ball2);
 
-            var shape = new Entity("TestPolygon")
+            var shape = new Entity()
                 .AddComponent(new PolygonComponent
                 {
                     Color = 0xFF0000FF,
@@ -146,14 +156,7 @@ namespace DolphEngine.Demo.Games.TestMap
                 })
                 .AddComponent<DrawComponent>();
             shape.Space.Position.Shift(-300, -150);
-
-            this.Ecosystem.AddEntities(
-                this.Player,
-                this.Camera,
-                arrow1,
-                ball1,
-                ball2,
-                shape);
+            this.Ecosystem.AddEntity("TestPolygon", shape);
 
             this.Ecosystem
                 .AddHandler<SpeedHandler>()

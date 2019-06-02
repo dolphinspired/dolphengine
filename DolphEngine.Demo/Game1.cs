@@ -12,6 +12,7 @@ using DolphEngine.Scenery;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace DolphEngine.Demo
 {
@@ -28,9 +29,6 @@ namespace DolphEngine.Demo
         private static FpsCounter FpsCounter;
         private static Vector2 FpsPosition;
         private static SpriteFont FpsFont;
-
-        private readonly StandardKeyboard Keyboard = new StandardKeyboard();
-        private readonly StandardMouse Mouse = new StandardMouse();
 
         public Game1()
         {
@@ -53,6 +51,7 @@ namespace DolphEngine.Demo
             var observer = new MonoGameObserver().UseKeyboard().UseMouse();
 
             this.Services
+                .AddSingleton<Game>(this)
                 .AddSingleton<IGameTimer>(this.Timer)
                 .AddSingleton<Director>(this.Director)
                 .AddSingleton<SpriteBatch>(this.SpriteBatch)
@@ -60,17 +59,8 @@ namespace DolphEngine.Demo
                 .AddSingleton<GraphicsDeviceManager>(this.Graphics)
                 .AddSingleton<KeyStateObserver>(observer)
                 .AddTransient<Ecosystem>()
-                .AddSingletonWithInit<Keycosystem>(keycosystem =>
-                {
-                    keycosystem
-                        .AddController(1, new StandardKeyboard())
-                        .AddController(1, new StandardMouse())
-                        .AddControlScheme("System", ControlSchemes.System(this, this.Keyboard));
-                })
-                .AddSingletonWithInit<DebugLogger>(dl =>
-                {
-                    dl.Font = this.Content.Load<SpriteFont>("Assets/Debug10");
-                })
+                .AddTransient<Keycosystem, BasicKeycosystem>()
+                .AddTransient<DebugLogger, BasicDebugLogger>()
                 .AddTransient<CameraEntity, BasicCamera>()
                 .AddTransient<DirectiveRenderer, BasicRenderer>();
 
@@ -86,7 +76,7 @@ namespace DolphEngine.Demo
                 .AddScene<TestMapScene>(Scenes.TestMapScene)
                 .AddScene<DogTreasureHuntScene>(Scenes.DogTreasureHunt)
                 .AddScene<KbScene>(Scenes.InputTester)
-                .LoadScene(Scenes.InputTester);
+                .LoadScene(Scenes.SceneSelect);
         }
 
         protected override void Update(GameTime gameTime)
@@ -121,6 +111,29 @@ namespace DolphEngine.Demo
         public BasicRenderer(SpriteBatch sb, ContentManager content, CameraEntity camera) : base(sb, content, camera)
         {
             this.BackgroundColor = Color.Black; // todo: make configurable
+        }
+    }
+
+    public class BasicKeycosystem : Keycosystem
+    {
+        public BasicKeycosystem(Game game, Director director, IGameTimer timer, KeyStateObserver observer) : base(timer, observer)
+        {
+            var k = new StandardKeyboard();
+            var scheme = new ControlScheme()
+                .AddControl(() => k.Escape.IsPressed, game.Exit)
+                .AddControl(() => k.F2.DurationPressed > TimeSpan.FromSeconds(2).Ticks, () => director.LoadScene(Scenes.SceneSelect));
+
+            this.AddController(1, k)
+                .AddController(1, new StandardMouse())
+                .AddControlScheme("System", scheme);
+        }
+    }
+
+    public class BasicDebugLogger : DebugLogger
+    {
+        public BasicDebugLogger(ContentManager content, SpriteBatch spriteBatch) : base(spriteBatch)
+        {
+            this.Font = content.Load<SpriteFont>("Assets/Debug10");
         }
     }
 }
