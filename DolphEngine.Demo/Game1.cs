@@ -18,17 +18,11 @@ namespace DolphEngine.Demo
 {
     public class Game1 : Game
     {
-        private GraphicsDeviceManager Graphics;
-        private SpriteBatch SpriteBatch;
-
         // Use the DolphEngine implementation of DI, not the MonoGame one
         private readonly new IServiceRepository Services;
+        private readonly GraphicsDeviceManager Graphics;
         private readonly GameTimer Timer;
-        private readonly Director Director;
-
-        private static FpsCounter FpsCounter;
-        private static Vector2 FpsPosition;
-        private static SpriteFont FpsFont;
+        private Director Director;
 
         public Game1()
         {
@@ -38,38 +32,32 @@ namespace DolphEngine.Demo
 
             this.Services = new ServiceRepository();
             this.Timer = new GameTimer();
-            this.Director = new Director(this.Services);
-
-            FpsCounter = new FpsCounter(this.Timer, 60);
-            FpsPosition = new Vector2(10, Graphics.PreferredBackBufferHeight - 22);
         }
 
         protected override void Initialize()
         {
-            this.SpriteBatch = new SpriteBatch(GraphicsDevice);
-
-            var observer = new MonoGameObserver().UseKeyboard().UseMouse();
-
             this.Services
+                .AddSingleton<IServiceRepository>(this.Services)
                 .AddSingleton<Game>(this)
                 .AddSingleton<IGameTimer>(this.Timer)
-                .AddSingleton<Director>(this.Director)
-                .AddSingleton<SpriteBatch>(this.SpriteBatch)
+                .AddSingleton<Director>()
+                .AddSingleton<SpriteBatch>(new SpriteBatch(this.GraphicsDevice))
                 .AddSingleton<ContentManager>(this.Content)
                 .AddSingleton<GraphicsDeviceManager>(this.Graphics)
-                .AddSingleton<KeyStateObserver>(observer)
+                .AddSingleton<KeyStateObserver>(new MonoGameObserver().UseKeyboard().UseMouse())
                 .AddTransient<Ecosystem>()
                 .AddTransient<Keycosystem, BasicKeycosystem>()
                 .AddTransient<DebugLogger, BasicDebugLogger>()
                 .AddTransient<CameraEntity, BasicCamera>()
-                .AddTransient<DirectiveRenderer, BasicRenderer>();
+                .AddTransient<DirectiveRenderer, BasicRenderer>()
+                .AddTransient<FpsCounter, BasicFpsCounter>();
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            FpsFont = this.Content.Load<SpriteFont>("Assets/Debug10");
+            this.Director = this.Services.GetService<Director>();
 
             this.Director
                 .AddScene<GameSelectScene>(Scenes.SceneSelect)
@@ -81,7 +69,7 @@ namespace DolphEngine.Demo
 
         protected override void Update(GameTime gameTime)
         {
-            this.Timer.Advance();
+            this.Timer.Update();
             this.Director.Update();
 
             base.Update(gameTime);
@@ -89,15 +77,13 @@ namespace DolphEngine.Demo
 
         protected override void Draw(GameTime gameTime)
         {
-            this.Director.CurrentScene.Draw();
-            
-            SpriteBatch.Begin();
-            SpriteBatch.DrawString(FpsFont, $"FPS: {FpsCounter.Update():0.0}", FpsPosition, Color.White);
-            SpriteBatch.End();
+            this.Director.Draw();
 
             base.Draw(gameTime);
         }
     }
+
+    #region Basic DI implementations
 
     public class BasicCamera : CameraEntity
     {
@@ -111,6 +97,14 @@ namespace DolphEngine.Demo
         public BasicRenderer(SpriteBatch sb, ContentManager content, CameraEntity camera) : base(sb, content, camera)
         {
             this.BackgroundColor = Color.Black; // todo: make configurable
+        }
+    }
+
+    public class BasicEcosystem : Ecosystem
+    {
+        public BasicEcosystem(IGameTimer timer) : base(timer)
+        {
+            // Put entities common to every scene here, they will be initialized with each scene
         }
     }
 
@@ -136,4 +130,16 @@ namespace DolphEngine.Demo
             this.Font = content.Load<SpriteFont>("Assets/Debug10");
         }
     }
+
+    public class BasicFpsCounter : FpsCounter
+    {
+        public BasicFpsCounter(GraphicsDeviceManager gdm, ContentManager content, SpriteBatch sb, IGameTimer timer) : base(sb, timer)
+        {
+            this.Font = content.Load<SpriteFont>("Assets/Debug10");
+            this.Position = new Vector2d(10, gdm.PreferredBackBufferHeight - 22);
+            this.SetSampleSize(60);
+        }
+    }
+
+    #endregion
 }

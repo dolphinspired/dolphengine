@@ -49,6 +49,30 @@ namespace DolphEngine.Scenery
 
         #endregion
 
+        public void Update()
+        {
+            if (this._unloadScene)
+            {
+                this.UnloadCurrentScene();
+                this._unloadScene = false;
+            }
+            else if (this._nextScene != null)
+            {
+                this.LoadNextScene();
+                this._nextScene = null;
+            }
+
+            this.CurrentScene.Update();
+        }
+
+        public void Draw()
+        {
+            if (this.CurrentScene != null)
+            {
+                this.CurrentScene.Draw();
+            }
+        }
+
         #region Scene Management
 
         public Director AddScene<TScene>(string name)
@@ -76,22 +100,6 @@ namespace DolphEngine.Scenery
             // The scene will be unloaded before the next update
             this._unloadScene = true;
             return this;
-        }
-
-        public void Update()
-        {
-            if (this._unloadScene)
-            {
-                this.UnloadCurrentScene();
-                this._unloadScene = false;
-            }
-            else if (this._nextScene != null)
-            {
-                this.LoadNextScene();
-                this._nextScene = null;
-            }
-
-            this.CurrentScene.Update();
         }
 
         #endregion

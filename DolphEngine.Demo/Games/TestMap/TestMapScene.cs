@@ -20,6 +20,7 @@ namespace DolphEngine.Demo.Games.TestMap
         protected readonly DebugLogger DebugLogger;
         protected readonly Director Director;
         protected readonly DirectiveRenderer Renderer;
+        protected readonly FpsCounter FpsCounter;
 
         protected PlayerEntity Player;
         protected CameraEntity Camera;
@@ -40,13 +41,15 @@ namespace DolphEngine.Demo.Games.TestMap
             DebugLogger debugLogger,
             Director director,
             CameraEntity camera,
-            DirectiveRenderer renderer)
+            DirectiveRenderer renderer,
+            FpsCounter fpsCounter)
         {
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
             this.DebugLogger = debugLogger;
             this.Camera = camera;
             this.Renderer = renderer;
+            this.FpsCounter = fpsCounter;
         }
 
         public void Load()
@@ -65,12 +68,14 @@ namespace DolphEngine.Demo.Games.TestMap
         {
             this.Ecosystem.Update();
             this.Keycosystem.Update();
+            this.FpsCounter.Update();
         }
 
         public void Draw()
         {
             this.Ecosystem.Draw();
-            this.DebugLogger.Render();
+            this.DebugLogger.Draw();
+            this.FpsCounter.Draw();
         }
 
         private void LoadMap()

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DolphEngine.Eco
 {
-    public sealed class Ecosystem
+    public class Ecosystem
     {
         #region Constructors
 

@@ -18,6 +18,7 @@ namespace DolphEngine.Demo
         protected readonly Director Director;
         protected readonly DebugLogger DebugLogger;
         protected readonly DirectiveRenderer Renderer;
+        protected readonly FpsCounter FpsCounter;
 
         protected CameraEntity Camera;
 
@@ -32,12 +33,13 @@ namespace DolphEngine.Demo
         private readonly List<Entity> _selectableEntities = new List<Entity>();
 
         public GameSelectScene(
-            Ecosystem ecosystem, 
+            Ecosystem ecosystem,
             Keycosystem keycosystem,
             Director director,
             DebugLogger debugLogger,
             CameraEntity camera,
-            DirectiveRenderer renderer)
+            DirectiveRenderer renderer,
+            FpsCounter fpsCounter)
         {
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
@@ -45,6 +47,7 @@ namespace DolphEngine.Demo
             this.DebugLogger = debugLogger;
             this.Camera = camera;
             this.Renderer = renderer;
+            this.FpsCounter = fpsCounter;
 
             // this.Renderer.BackgroundColor = Color.Black;
         }
@@ -149,12 +152,14 @@ namespace DolphEngine.Demo
         {
             this.Ecosystem.Update();
             this.Keycosystem.Update();
+            this.FpsCounter.Update();
         }
 
         public void Draw()
         {
             this.Ecosystem.Draw();
-            this.DebugLogger.Render();
+            this.DebugLogger.Draw();
+            this.FpsCounter.Draw();
         }
     }
 }

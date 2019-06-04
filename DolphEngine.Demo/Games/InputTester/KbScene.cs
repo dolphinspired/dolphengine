@@ -19,6 +19,7 @@ namespace DolphEngine.Demo.Games.InputTester
         private readonly Keycosystem Keycosystem;
         private readonly CameraEntity Camera;
         private readonly DirectiveRenderer Renderer;
+        private readonly FpsCounter FpsCounter;
 
         private const int HT = 24; // The height of a key on the rendered keyboard
         private const int SPC = 4; // The spacing between keys on the rendered keyboard
@@ -203,12 +204,14 @@ namespace DolphEngine.Demo.Games.InputTester
             Ecosystem ecosystem,
             Keycosystem keycosystem,
             CameraEntity camera,
-            DirectiveRenderer renderer)
+            DirectiveRenderer renderer,
+            FpsCounter fpsCounter)
         {
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
             this.Camera = camera;
             this.Renderer = renderer;
+            this.FpsCounter = fpsCounter;
         }
 
         public void Load()
@@ -226,11 +229,13 @@ namespace DolphEngine.Demo.Games.InputTester
         {
             this.Ecosystem.Update();
             this.Keycosystem.Update();
+            this.FpsCounter.Update();
         }
 
         public void Draw()
         {
             this.Ecosystem.Draw();
+            this.FpsCounter.Draw();
         }
 
         private void LoadEntities()

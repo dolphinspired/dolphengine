@@ -5,6 +5,8 @@ namespace DolphEngine
 {
     public interface IGameTimer
     {
+        void Update();
+
         TimeSpan Elapsed { get; }
 
         TimeSpan Total { get; }
@@ -27,7 +29,7 @@ namespace DolphEngine
             this.Stopwatch = sw;
         }
 
-        public virtual void Advance()
+        public virtual void Update()
         {
             if (!_started)
             {

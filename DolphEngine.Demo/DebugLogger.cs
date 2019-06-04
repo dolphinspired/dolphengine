@@ -90,7 +90,7 @@ namespace DolphEngine.Demo
             return this._pages.Count - 1;
         }
 
-        public void Render()
+        public void Draw()
         {
             if (this.Hidden || this._pages.Count == 0 || this.CurrentPage >= this._pages.Count || this.CurrentPage < 0)
             {
