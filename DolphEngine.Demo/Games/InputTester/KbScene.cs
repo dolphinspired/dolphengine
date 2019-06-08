@@ -276,7 +276,7 @@ namespace DolphEngine.Demo.Games.InputTester
                     var rect = new Rect2d(x, row * (HT + SPC), kdd.Width, HT);
                     keyEntity.Space = rect;
                     keyEntity.AddComponent(new PolygonComponent {
-                        Polygon = new Rect2d(0, 0, rect.Size.Width, rect.Size.Height).ToPolygon(),
+                        Polygon = new Rect2d(0, 0, rect.Width, rect.Height).ToPolygon(),
                         Color = 0x00FFFFFF });
                     keyEntity.AddComponent<DrawComponent>();
                     this.Ecosystem.AddEntity($"KB_{kdd.KeyToRead}", keyEntity);
@@ -298,8 +298,8 @@ namespace DolphEngine.Demo.Games.InputTester
 
             // todo: none of this works to move the camera?
             // this.Camera.Lens.Pan = new Vector2d(200, 100);
-            this.Camera.Space.Position.X += 200;
-            this.Camera.Space.Position.Y += 100;
+            this.Camera.Space.X += 200;
+            this.Camera.Space.Y += 100;
         }
 
         private void LoadControls()

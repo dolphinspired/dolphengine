@@ -19,7 +19,7 @@ namespace DolphEngine.Eco.Handlers
             Rect2d dest = entity.Space;
 
             // Get the origin before any transformations are applied
-            Vector2d origin = (dest.Position - dest.TopLeft).ToVector();
+            Vector2d origin = (dest.GetOriginPosition() - dest.TopLeft).ToVector();
 
             Rotation2d rotation = sprite.Rotation;
             if (sprite.RotationAnimation != null)
@@ -27,25 +27,25 @@ namespace DolphEngine.Eco.Handlers
                 rotation.Turn(sprite.RotationAnimation.GetFrame(this.Timer.Total));
             }
 
-            dest.Position.Shift(sprite.Offset);
+            dest.Shift(sprite.Offset);
             if (sprite.OffsetAnimation != null)
             {
-                dest.Position.Shift(sprite.OffsetAnimation.GetFrame(this.Timer.Total));
+                dest.Shift(sprite.OffsetAnimation.GetFrame(this.Timer.Total));
             }
 
-            dest.Size.Scale(sprite.Scale);
+            dest.Scale(sprite.Scale);
             if (sprite.ScaleAnimation != null)
             {
                 var animScale = sprite.ScaleAnimation.GetFrame(this.Timer.Total);
-                dest.Size.Scale(animScale);
+                dest.Scale(animScale);
             }
 
             var directive = new SpriteDirective
             {
                 Asset = sprite.SpriteSheet.Name,
                 Source = src,
-                Destination = dest.Position,
-                Size = dest.Size,
+                Destination = dest.GetOriginPosition(),
+                Size = dest.GetSize(),
                 Rotation = rotation.Radians,
                 Origin = origin
             };

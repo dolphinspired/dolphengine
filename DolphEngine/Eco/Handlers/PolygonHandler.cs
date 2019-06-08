@@ -11,12 +11,10 @@ namespace DolphEngine.Eco.Handlers
             var poly = entity.GetComponent<PolygonComponent>();
             var draw = entity.GetComponent<DrawComponent>();
 
-
-
             draw.Directives.Add(new PolygonDirective
             {
                 Color = poly.Color,
-                Points = poly.Polygon.Points.Select(x => x.Shift(entity.Space.Position.ToVector())).ToList()
+                Points = poly.Polygon.Points.Select(x => x.Shift(entity.Space.GetOriginPosition().ToVector())).ToList()
             });
         }
     }

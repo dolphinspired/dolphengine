@@ -14,11 +14,11 @@ namespace DolphEngine.Eco.Handlers
 
             if (lp.GetPosition != null)
             {
-                entity.Space.Position = lp.GetPosition(lp.Target);
+                entity.Space.MoveTo(lp.GetPosition(lp.Target));
             }
             else
             {
-                entity.Space.Position.Set(lp.Target.Space.Position);
+                entity.Space.MoveTo(lp.Target.Space);
             }
         }
     }

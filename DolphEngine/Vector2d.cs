@@ -1,4 +1,6 @@
-﻿namespace DolphEngine
+﻿using System;
+
+namespace DolphEngine
 {
     public struct Vector2d
     {
@@ -86,7 +88,7 @@
 
         public static bool operator ==(Vector2d v1, Vector2d v2)
         {
-            return v1.X == v2.X && v1.Y == v2.Y;
+            return Math.Abs(v1.X - v2.X) < Constants.FloatTolerance && Math.Abs(v1.Y - v2.Y) < Constants.FloatTolerance;
         }
 
         public static bool operator !=(Vector2d v1, Vector2d v2)
@@ -105,7 +107,13 @@
 
         public override int GetHashCode()
         {
-            return (int)(17 * X + 31 * Y);
+            unchecked
+            {
+                int hash = 173;
+                hash = hash * 179 + X.GetHashCode();
+                hash = hash * 179 + Y.GetHashCode();
+                return hash;
+            }            
         }
 
         public override string ToString()

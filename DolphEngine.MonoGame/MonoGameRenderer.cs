@@ -39,7 +39,7 @@ namespace DolphEngine.MonoGame
 
         public override bool OnBeforeDraw()
         {
-            if (Camera.Space.Size.Width <= 0 || Camera.Space.Size.Height <= 0)
+            if (Camera.Space.Width <= 0 || Camera.Space.Height <= 0)
             {
                 // If the camera is zero-size, nothing can be drawn, but we still need to clear out the last frame
                 this.SpriteBatch.Begin();
@@ -52,11 +52,11 @@ namespace DolphEngine.MonoGame
 
             if (lens.Focus != null)
             {
-                this.Camera.Space.Position = lens.Focus.Space.Position;
+                this.Camera.Space.MoveTo(lens.Focus.Space);
             }
 
-            var zoomDiffX = (Camera.Space.Size.Width * lens.Zoom) - Camera.Space.Size.Width;
-            var zoomDiffY = (Camera.Space.Size.Height * lens.Zoom) - Camera.Space.Size.Height;
+            var zoomDiffX = (Camera.Space.Width * lens.Zoom) - Camera.Space.Width;
+            var zoomDiffY = (Camera.Space.Height * lens.Zoom) - Camera.Space.Height;
 
             // This formula adapted from: https://roguesharp.wordpress.com/2014/07/13/tutorial-5-creating-a-2d-camera-with-pan-and-zoom-in-monogame/
             var translation =

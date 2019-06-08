@@ -1,4 +1,6 @@
-﻿namespace DolphEngine
+﻿using System;
+
+namespace DolphEngine
 {
     public struct Size2d
     {
@@ -47,7 +49,37 @@
 
         #endregion
 
+        #region Operators
+
+        public static bool operator ==(Size2d s1, Size2d s2)
+        {
+            return Math.Abs(s1.Width - s2.Width) < Constants.FloatTolerance && Math.Abs(s1.Height - s2.Height) < Constants.FloatTolerance;
+        }
+
+        public static bool operator !=(Size2d s1, Size2d s2)
+        {
+            return !(s1 == s2);
+        }
+
+        #endregion
+
         #region Object overrides
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Size2d) && this == (Size2d)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 163;
+                hash = hash * 167 + Width.GetHashCode();
+                hash = hash * 167 + Height.GetHashCode();
+                return hash;
+            }
+        }
 
         public override string ToString()
         {

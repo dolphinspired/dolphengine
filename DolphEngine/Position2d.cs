@@ -1,4 +1,6 @@
-﻿namespace DolphEngine
+﻿using System;
+
+namespace DolphEngine
 {
     public struct Position2d
     {
@@ -24,14 +26,14 @@
 
         #region Public methods
 
-        public Position2d Set(float x, float y)
+        public Position2d MoveTo(float x, float y)
         {
             this.X = x;
             this.Y = y;
             return this;
         }
 
-        public Position2d Set(Position2d position)
+        public Position2d MoveTo(Position2d position)
         {
             this.X = position.X;
             this.Y = position.Y;
@@ -98,7 +100,7 @@
 
         public static bool operator ==(Position2d p1, Position2d p2)
         {
-            return p1.X == p2.X && p1.Y == p2.Y;
+            return Math.Abs(p1.X - p2.X) < Constants.FloatTolerance && Math.Abs(p1.Y - p2.Y) < Constants.FloatTolerance;
         }
 
         public static bool operator !=(Position2d p1, Position2d p2)
@@ -117,7 +119,13 @@
 
         public override int GetHashCode()
         {
-            return (int)(17 * X + 31 * Y);
+            unchecked
+            {
+                int hash = 151;
+                hash = hash * 157 + X.GetHashCode();
+                hash = hash * 157 + Y.GetHashCode();
+                return hash;
+            }
         }
 
         public override string ToString()

@@ -77,7 +77,7 @@ namespace DolphEngine.Demo
                 option.AddComponent(new TextComponent { Text = sceneName, FontAssetName = "Assets/Zelda12" });
 
                 var selectable = new SelectableItemComponent();
-                selectable.OnFocus = () => cursor.Space.Position = option.Space.Position + new Vector2d(-5, 6); // text alignment is broken af right now
+                selectable.OnFocus = () => cursor.Space.MoveTo(option.Space.GetOriginPosition() + new Vector2d(-5, 6)); // text alignment is broken af right now
                 selectable.OnBlur = () => { /* Nothing right now! */ };
                 option.AddComponent(selectable);
                 option.AddComponent<DrawComponent>();

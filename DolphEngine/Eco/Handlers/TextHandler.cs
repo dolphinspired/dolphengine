@@ -19,7 +19,7 @@ namespace DolphEngine.Eco.Handlers
             draw.Directives.Add(new TextDirective
             {
                 FontAssetName = text.FontAssetName,
-                Destination = entity.Space.Position,
+                Destination = entity.Space.GetOriginPosition(),
                 Text = text.Text
             });
         }

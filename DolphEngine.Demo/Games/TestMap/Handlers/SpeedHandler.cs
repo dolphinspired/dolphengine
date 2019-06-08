@@ -9,8 +9,8 @@ namespace DolphEngine.Demo.Games.TestMap.Handlers
         {
             var speed = entity.GetComponent<SpeedComponent>();
 
-            entity.Space.Position.X += speed.X;
-            entity.Space.Position.Y += speed.Y;
+            entity.Space.X += speed.X;
+            entity.Space.Y += speed.Y;
         }
     }
 }

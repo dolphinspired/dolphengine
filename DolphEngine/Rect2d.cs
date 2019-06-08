@@ -8,50 +8,36 @@
 
         public Rect2d(Rect2d rect)
         {
-            this.Position = rect.Position;
-            this.Size = rect.Size;
+            this.X = rect.X;
+            this.Y = rect.Y;
+            this.Width = rect.Width;
+            this.Height = rect.Height;
             this.Origin = rect.Origin;
         }
 
-        public Rect2d(Position2d position, Size2d size)
-        {
-            this.Position = position;
-            this.Size = size;
-            this.Origin = DefaultOrigin;
-        }
+        public Rect2d(Position2d position, Size2d size) : this(position, size, DefaultOrigin) { }
 
-        public Rect2d(Position2d position, Size2d size, Anchor2d anchor)
-        {
-            this.Position = position;
-            this.Size = size;
-            this.Origin = new Origin2d(anchor);
-        }
+        public Rect2d(Position2d position, Size2d size, Anchor2d anchor) : this (position, size, new Origin2d(anchor)) { }
 
         public Rect2d(Position2d position, Size2d size, Origin2d origin)
         {
-            this.Position = position;
-            this.Size = size;
+            this.X = position.X;
+            this.Y = position.Y;
+            this.Width = size.Width;
+            this.Height = size.Height;
             this.Origin = origin;
         }
-        
-        public Rect2d(float x, float y, float width, float height)
-        {
-            this.Position = new Position2d(x, y);
-            this.Size = new Size2d(width, height);
-            this.Origin = DefaultOrigin;
-        }
 
-        public Rect2d(float x, float y, float width, float height, Anchor2d anchor)
-        {
-            this.Position = new Position2d(x, y);
-            this.Size = new Size2d(width, height);
-            this.Origin = new Origin2d(anchor);
-        }
+        public Rect2d(float x, float y, float width, float height) : this(x, y, width, height, DefaultOrigin) { }
+
+        public Rect2d(float x, float y, float width, float height, Anchor2d anchor) : this(x, y, width, height, new Origin2d(anchor)) { }
 
         public Rect2d(float x, float y, float width, float height, Origin2d origin)
         {
-            this.Position = new Position2d(x, y);
-            this.Size = new Size2d(width, height);
+            this.X = x;
+            this.Y = y;
+            this.Width = width;
+            this.Height = height;
             this.Origin = origin;
         }
 
@@ -61,9 +47,13 @@
 
         #region Properties
 
-        public Position2d Position;
+        public float X;
 
-        public Size2d Size;
+        public float Y;
+
+        public float Width;
+
+        public float Height;
 
         public Origin2d Origin;
 
@@ -82,6 +72,16 @@
         #endregion
 
         #region Public methods
+
+        public Size2d GetSize()
+        {
+            return new Size2d(this.Width, this.Height);
+        }
+
+        public Position2d GetOriginPosition()
+        {
+            return this.GetAnchorPosition(this.Origin.Anchor);
+        }
 
         public Position2d GetAnchorPosition(Anchor2d anchor)
         {
@@ -185,11 +185,11 @@
                 }
             }
 
-            float totalWidthDiff = (this.Size.Width * widthDiff) + this.Origin.Offset.X;
-            float totalHeightDiff = (this.Size.Height * heightDiff) + this.Origin.Offset.Y;
+            float totalWidthDiff = (this.Width * widthDiff) + this.Origin.Offset.X;
+            float totalHeightDiff = (this.Height * heightDiff) + this.Origin.Offset.Y;
 
-            float x = this.Position.X - totalWidthDiff;
-            float y = this.Position.Y - totalHeightDiff;
+            float x = this.X - totalWidthDiff;
+            float y = this.Y - totalHeightDiff;
 
             return new Position2d(x, y);
         }
@@ -199,13 +199,101 @@
             return new Polygon2d(TopLeft, TopRight, BottomRight, BottomLeft).Close();
         }
 
+        public Rect2d MoveTo(Position2d position)
+        {
+            this.X = position.X;
+            this.Y = position.Y;
+            return this;
+        }
+
+        public Rect2d MoveTo(float x, float y)
+        {
+            this.X = x;
+            this.Y = y;
+            return this;
+        }
+
+        public Rect2d MoveTo(Rect2d rect)
+        {
+            this.X = rect.X;
+            this.Y = rect.Y;
+            return this;
+        }
+
+        public Rect2d Shift(Vector2d vector)
+        {
+            this.X += vector.X;
+            this.Y += vector.Y;
+            return this;
+        }
+
+        public Rect2d Shift(float x, float y)
+        {
+            this.X += x;
+            this.Y += y;
+            return this;
+        }
+
+        public Rect2d Scale(float magnitude)
+        {
+            this.Width *= magnitude;
+            this.Height *= magnitude;
+            return this;
+        }
+
+        public Rect2d Scale(float x, float y)
+        {
+            this.Width *= x;
+            this.Height *= y;
+            return this;
+        }
+
+        public Rect2d Scale(Vector2d scale)
+        {
+            this.Width *= scale.X;
+            this.Height *= scale.Y;
+            return this;
+        }
+
+        #endregion
+
+        #region Operators
+
+        public static bool operator ==(Rect2d r1, Rect2d r2)
+        {
+            return r1.X == r2.X && r1.Y == r2.Y && r1.Width == r2.Width && r1.Height == r2.Height && r1.Origin == r2.Origin;
+        }
+
+        public static bool operator !=(Rect2d r1, Rect2d r2)
+        {
+            return !(r1 == r2);
+        }
+
         #endregion
 
         #region Object overrides
 
+        public override bool Equals(object obj)
+        {
+            return (obj is Rect2d) && this == (Rect2d)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 67;
+                hash = hash * 71 + X.GetHashCode();
+                hash = hash * 71 + Y.GetHashCode();
+                hash = hash * 71 + Width.GetHashCode();
+                hash = hash * 71 + Height.GetHashCode();
+                return hash;
+            }
+        }
+
         public override string ToString()
         {
-            return $"{{ pos: {Position}, size: {Size}, origin: {Origin} }}";
+            return $"{{ pos: [ {X}, {Y} ], size: [ {Width}, {Height} ], origin: {Origin} }}";
         }
 
         #endregion

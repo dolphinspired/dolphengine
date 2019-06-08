@@ -75,13 +75,6 @@ namespace DolphEngine.Demo.Games.TestMap
         {
             this.Ecosystem.Update();
             this.Keycosystem.Update();
-
-            // Every 10 frames, just to throttle updates
-            if (this.Timer.Frames % 10 == 0)
-            {
-                this.MessageRouter.Publish("player-position", this.Player);
-            }
-
             this.MessageRouter.Update();
             this.FpsCounter.Update();
         }
@@ -95,7 +88,7 @@ namespace DolphEngine.Demo.Games.TestMap
 
         private void LoadMap()
         {
-            var tileSize = Sprites.Tiles.Frames[0].Size;
+            var tileSize = Sprites.Tiles.Frames[0].GetSize();
             var start = Position2d.Zero;
             var origin = new Origin2d(Anchor2d.TopCenter);
 
@@ -140,6 +133,7 @@ namespace DolphEngine.Demo.Games.TestMap
             this.Player.Text.FontAssetName = "Assets/Debug10";
             this.Player.Sprite.EnableBoxOutline = true;
             this.Ecosystem.AddEntity("Player", this.Player);
+            // this.MessageRouter.Publish("player-position", new Listener<PlayerEntity>(() => this.Player, (p1, p2) => p1.Space != p2.Space));
 
             var arrow1 = new GlyphEntity(0);
             arrow1.Space = new Rect2d(0, 0, 21, 11, new Origin2d(Anchor2d.MiddleRight));
@@ -175,20 +169,20 @@ namespace DolphEngine.Demo.Games.TestMap
                     )
                 })
                 .AddComponent<DrawComponent>();
-            shape.Space.Position.Shift(-300, -150);
+            shape.Space.Shift(-300, -150);
             this.Ecosystem.AddEntity("TestPolygon", shape);
 
-            this.MessageRouter.Subscribe<PlayerEntity>("player-position", player => {
-                var polygon = shape.GetComponent<PolygonComponent>();
-                if (player.Space.Position.Y < 0)
-                {
-                    polygon.Color = 0x0000FFFF;
-                }
-                else
-                {
-                    polygon.Color = 0x000000FF;
-                }
-            });
+            //this.MessageRouter.Subscribe<PlayerEntity>("player-position", player => {
+            //    var polygon = shape.GetComponent<PolygonComponent>();
+            //    if (player.Space.Position.Y < 0)
+            //    {
+            //        polygon.Color = 0x0000FFFF;
+            //    }
+            //    else
+            //    {
+            //        polygon.Color = 0x000000FF;
+            //    }
+            //});
 
             this.Ecosystem
                 .AddHandler<SpeedHandler>()
@@ -252,19 +246,19 @@ namespace DolphEngine.Demo.Games.TestMap
                 {
                     if ((k.WASD.Direction & Direction2d.Up) > 0)
                     {
-                        this.Camera.Space.Position.Y -= 8;
+                        this.Camera.Space.Y -= 8;
                     }
                     if ((k.WASD.Direction & Direction2d.Right) > 0)
                     {
-                        this.Camera.Space.Position.X += 8;
+                        this.Camera.Space.X += 8;
                     }
                     if ((k.WASD.Direction & Direction2d.Down) > 0)
                     {
-                        this.Camera.Space.Position.Y += 8;
+                        this.Camera.Space.Y += 8;
                     }
                     if ((k.WASD.Direction & Direction2d.Left) > 0)
                     {
-                        this.Camera.Space.Position.X -= 8;
+                        this.Camera.Space.X -= 8;
                     }
                 })
                 .AddControl(() => m.Scroll.Y.JustMoved, () =>
