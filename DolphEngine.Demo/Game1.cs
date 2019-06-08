@@ -7,6 +7,7 @@ using DolphEngine.Eco.Entities;
 using DolphEngine.Graphics;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
+using DolphEngine.Messaging;
 using DolphEngine.MonoGame;
 using DolphEngine.Scenery;
 using Microsoft.Xna.Framework;
@@ -50,7 +51,8 @@ namespace DolphEngine.Demo
                 .AddScoped<DebugLogger, BasicDebugLogger>()
                 .AddScoped<CameraEntity, BasicCamera>()
                 .AddScoped<DirectiveRenderer, BasicRenderer>()
-                .AddScoped<FpsCounter, BasicFpsCounter>();
+                .AddScoped<FpsCounter, BasicFpsCounter>()
+                .AddScoped<MessageRouter>();
 
             base.Initialize();
         }

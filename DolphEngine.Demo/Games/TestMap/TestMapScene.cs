@@ -7,6 +7,7 @@ using DolphEngine.Eco.Handlers;
 using DolphEngine.Graphics;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
+using DolphEngine.Messaging;
 using DolphEngine.Scenery;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,8 @@ namespace DolphEngine.Demo.Games.TestMap
         protected readonly Director Director;
         protected readonly DirectiveRenderer Renderer;
         protected readonly FpsCounter FpsCounter;
+        protected readonly MessageRouter MessageRouter;
+        protected readonly IGameTimer Timer;
 
         protected PlayerEntity Player;
         protected CameraEntity Camera;
@@ -42,7 +45,9 @@ namespace DolphEngine.Demo.Games.TestMap
             Director director,
             CameraEntity camera,
             DirectiveRenderer renderer,
-            FpsCounter fpsCounter)
+            FpsCounter fpsCounter,
+            MessageRouter messageRouter,
+            IGameTimer timer)
         {
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
@@ -50,6 +55,8 @@ namespace DolphEngine.Demo.Games.TestMap
             this.Camera = camera;
             this.Renderer = renderer;
             this.FpsCounter = fpsCounter;
+            this.MessageRouter = messageRouter;
+            this.Timer = timer;
         }
 
         public void Load()
@@ -68,6 +75,14 @@ namespace DolphEngine.Demo.Games.TestMap
         {
             this.Ecosystem.Update();
             this.Keycosystem.Update();
+
+            // Every 10 frames, just to throttle updates
+            if (this.Timer.Frames % 10 == 0)
+            {
+                this.MessageRouter.Publish("player-position", this.Player);
+            }
+
+            this.MessageRouter.Update();
             this.FpsCounter.Update();
         }
 
@@ -151,7 +166,7 @@ namespace DolphEngine.Demo.Games.TestMap
             var shape = new Entity()
                 .AddComponent(new PolygonComponent
                 {
-                    Color = 0xFF0000FF,
+                    Color = 0x000000FF,
                     Polygon = new Polygon2d(
                         // This should make a "Z" shape
                         new Vector2d(100, 0),
@@ -162,6 +177,18 @@ namespace DolphEngine.Demo.Games.TestMap
                 .AddComponent<DrawComponent>();
             shape.Space.Position.Shift(-300, -150);
             this.Ecosystem.AddEntity("TestPolygon", shape);
+
+            this.MessageRouter.Subscribe<PlayerEntity>("player-position", player => {
+                var polygon = shape.GetComponent<PolygonComponent>();
+                if (player.Space.Position.Y < 0)
+                {
+                    polygon.Color = 0x0000FFFF;
+                }
+                else
+                {
+                    polygon.Color = 0x000000FF;
+                }
+            });
 
             this.Ecosystem
                 .AddHandler<SpeedHandler>()
