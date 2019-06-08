@@ -222,7 +222,7 @@ namespace DolphEngine.Demo.Games.InputTester
 
         public void Unload()
         {
-            this.Keycosystem.RemoveControlScheme("KeyHighlighter");
+            
         }
 
         public void Update()

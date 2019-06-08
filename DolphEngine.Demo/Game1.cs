@@ -45,12 +45,12 @@ namespace DolphEngine.Demo
                 .AddSingleton<ContentManager>(this.Content)
                 .AddSingleton<GraphicsDeviceManager>(this.Graphics)
                 .AddSingleton<KeyStateObserver>(new MonoGameObserver().UseKeyboard().UseMouse())
-                .AddTransient<Ecosystem>()
-                .AddTransient<Keycosystem, BasicKeycosystem>()
-                .AddTransient<DebugLogger, BasicDebugLogger>()
-                .AddTransient<CameraEntity, BasicCamera>()
-                .AddTransient<DirectiveRenderer, BasicRenderer>()
-                .AddTransient<FpsCounter, BasicFpsCounter>();
+                .AddScoped<Ecosystem>()
+                .AddScoped<Keycosystem, BasicKeycosystem>()
+                .AddScoped<DebugLogger, BasicDebugLogger>()
+                .AddScoped<CameraEntity, BasicCamera>()
+                .AddScoped<DirectiveRenderer, BasicRenderer>()
+                .AddScoped<FpsCounter, BasicFpsCounter>();
 
             base.Initialize();
         }

@@ -5,6 +5,8 @@ namespace DolphEngine.DI
 {
     public static class ServiceRepositoryExtensions
     {
+        #region Transient
+
         public static IServiceRepository AddTransient<TService>(this IServiceRepository repository)
         {
             repository.AddService(typeof(TService), () => repository.BuildInjectableService<TService, TService>());
@@ -24,15 +26,42 @@ namespace DolphEngine.DI
             return repository;
         }
 
-        //public static IServiceRepository AddTransientWithInit<TService>(this IServiceRepository repository, Action<TService> onInit)
-        //{
-        //    repository.AddService(typeof(TService), () => {
-        //        var service = repository.BuildInjectableService<TService, TService>();
-        //        onInit(service);
-        //        return service;
-        //    });
-        //    return repository;
-        //}
+        #endregion
+
+        #region Scoped
+
+        public static IServiceRepository ResetScope(this IServiceRepository repository)
+        {
+            if (ScopedCache.TryGetValue(repository, out var serviceMap))
+            {
+                serviceMap.Clear();
+                ScopedCache.Remove(repository);
+            }
+            return repository;
+        }
+
+        public static IServiceRepository AddScoped<TService>(this IServiceRepository repository)
+        {
+            repository.AddServiceAsScoped(typeof(TService), () => repository.BuildInjectableService<TService, TService>());
+            return repository;
+        }
+
+        public static IServiceRepository AddScoped<TService, TImplementation>(this IServiceRepository repository)
+            where TImplementation : TService
+        {
+            repository.AddServiceAsScoped(typeof(TService), () => repository.BuildInjectableService<TService, TImplementation>());
+            return repository;
+        }
+
+        public static IServiceRepository AddScoped<TService>(this IServiceRepository repository, Func<TService> serviceBuilder)
+        {
+            repository.AddServiceAsScoped(typeof(TService), () => serviceBuilder);
+            return repository;
+        }
+
+        #endregion
+
+        #region Singleton
 
         public static IServiceRepository AddSingleton<TService>(this IServiceRepository repository)
         {
@@ -53,15 +82,7 @@ namespace DolphEngine.DI
             return repository;
         }
 
-        //public static IServiceRepository AddSingletonWithInit<TService>(this IServiceRepository repository, Action<TService> onInit)
-        //{
-        //    repository.AddServiceAsSingleton(typeof(TService), () => {
-        //        var service = repository.BuildInjectableService<TService, TService>();
-        //        onInit(service);
-        //        return service;
-        //    });
-        //    return repository;
-        //}
+        #endregion
 
         public static TService GetService<TService>(this IServiceProvider provider)
         {
@@ -93,6 +114,8 @@ namespace DolphEngine.DI
             }
         }
 
+        #region Non-public methods
+
         private static readonly Dictionary<Type, object> SingletonCache = new Dictionary<Type, object>();
 
         private static void AddServiceAsSingleton(this IServiceRepository repository, Type type, Func<object> serviceBuilder)
@@ -109,5 +132,31 @@ namespace DolphEngine.DI
                 return service;
             });
         }
+
+        private static readonly Dictionary<IServiceRepository, Dictionary<Type, object>> ScopedCache 
+            = new Dictionary<IServiceRepository, Dictionary<Type, object>>(ReferenceEqualityComparer<IServiceRepository>.Instance);
+
+        private static void AddServiceAsScoped(this IServiceRepository repository, Type type, Func<object> serviceBuilder)
+        {
+            repository.AddService(type, () =>
+            {
+                if (!ScopedCache.TryGetValue(repository, out var serviceMap))
+                {
+                    serviceMap = new Dictionary<Type, object>();
+                    ScopedCache.Add(repository, serviceMap);
+                }
+
+                if (!serviceMap.TryGetValue(type, out var service))
+                {
+                    // Build the service on first retrieval, then store it for future use
+                    service = serviceBuilder();
+                    serviceMap.Add(type, service);
+                }
+
+                return service;
+            });
+        }
+
+        #endregion
     }
 }

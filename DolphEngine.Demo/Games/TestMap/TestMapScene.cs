@@ -61,7 +61,7 @@ namespace DolphEngine.Demo.Games.TestMap
 
         public void Unload()
         {
-            this.UnloadControls();
+            
         }
 
         public void Update()
@@ -264,14 +264,6 @@ namespace DolphEngine.Demo.Games.TestMap
             this.Keycosystem
                 .AddControlScheme("TestMapScene", context)
                 .AddControlScheme("Paused", pauseContext);
-        }
-
-        public void UnloadControls()
-        {
-            this.Keycosystem
-                .RemoveControlScheme("DebugNav")
-                .RemoveControlScheme("TestMapScene")
-                .RemoveControlScheme("Paused");
         }
     }
 }

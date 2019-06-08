@@ -145,7 +145,7 @@ namespace DolphEngine.Demo
 
         public void Unload()
         {
-            this.Keycosystem.ClearControlSchemes();
+            
         }
 
         public void Update()

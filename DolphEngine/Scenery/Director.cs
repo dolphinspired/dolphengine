@@ -17,10 +17,11 @@ namespace DolphEngine.Scenery
         private bool _unloadScene;
 
         #region Constructor/Disposal
-
+        
         public Director(IServiceRepository repository)
         {
             this._serviceRepo = repository;
+            this._serviceRepo.ResetScope();
         }
 
         ~Director()
@@ -115,6 +116,7 @@ namespace DolphEngine.Scenery
 
             this.UnloadCurrentScene();
 
+            this._serviceRepo.ResetScope();
             this.CurrentScene = sceneBuilder();
             this.CurrentSceneName = this._nextScene;
             this.CurrentScene.Load();
