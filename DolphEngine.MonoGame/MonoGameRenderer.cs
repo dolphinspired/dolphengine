@@ -84,7 +84,8 @@ namespace DolphEngine.MonoGame
         private void DrawSprite(SpriteDirective sprite)
         {
             var texture = this.Content.Load<Texture2D>(sprite.Asset);
-            this.SpriteBatch.Draw(texture, sprite.Destination.ToRectangle(), sprite.Source.ToRectangle(), Color.White, sprite.Rotation, sprite.Origin.ToVector2(), SpriteEffects.None, 0);
+            var dest = new Rectangle(sprite.Destination.ToPoint(), sprite.Size.ToPoint());
+            this.SpriteBatch.Draw(texture, dest, sprite.Source.ToRectangle(), Color.White, sprite.Rotation, sprite.Origin.ToVector2(), SpriteEffects.None, 0);
         }
 
         private void DrawText(TextDirective text)

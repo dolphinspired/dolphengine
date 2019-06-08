@@ -1,21 +1,23 @@
-﻿using System;
+﻿using DolphEngine.Graphics.Directives;
+using System;
 using System.Collections.Generic;
 
 namespace DolphEngine.Graphics
 {
     public abstract class DirectiveRenderer
     {
-        private readonly Dictionary<Type, Action<object>> _renderers = new Dictionary<Type, Action<object>>();
+        private readonly Dictionary<Type, Action<DrawDirective>> _renderers = new Dictionary<Type, Action<DrawDirective>>();
 
         #region Core methods
 
         public DirectiveRenderer AddRenderer<TDirective>(Action<TDirective> handler)
+            where TDirective : DrawDirective
         {
-            this._renderers.Add(typeof(TDirective), new Action<object>(o => handler((TDirective)o)));
+            this._renderers.Add(typeof(TDirective), new Action<DrawDirective>(dir => handler((TDirective)dir)));
             return this;
         }
 
-        public void Draw(IEnumerable<object> directives)
+        public void Draw(IEnumerable<DrawDirective> directives)
         {
             if (this._renderers.Count == 0)
             {

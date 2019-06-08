@@ -2,7 +2,7 @@
 
 namespace DolphEngine.Graphics.Directives
 {
-    public class PolygonDirective
+    public class PolygonDirective : DrawDirective
     {
         // todo: Get a real color struct
         public uint Color;

@@ -44,7 +44,8 @@ namespace DolphEngine.Eco.Handlers
             {
                 Asset = sprite.SpriteSheet.Name,
                 Source = src,
-                Destination = dest,
+                Destination = dest.Position,
+                Size = dest.Size,
                 Rotation = rotation.Radians,
                 Origin = origin
             };

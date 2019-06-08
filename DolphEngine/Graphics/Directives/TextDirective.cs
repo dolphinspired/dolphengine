@@ -1,11 +1,9 @@
 ﻿namespace DolphEngine.Graphics.Directives
 {
-    public class TextDirective
+    public class TextDirective : DrawDirective
     {
         public string Text;
 
         public string FontAssetName;
-
-        public Position2d Destination;
     }
 }

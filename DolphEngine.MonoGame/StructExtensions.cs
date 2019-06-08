@@ -14,6 +14,11 @@ namespace DolphEngine.MonoGame
             return new Point((int)position.X, (int)position.Y);
         }
 
+        public static Point ToPoint(this Size2d size)
+        {
+            return new Point((int)size.Width, (int)size.Height);
+        }
+
         public static Vector2 ToVector2(this Position2d position)
         {
             return new Vector2(position.X, position.Y);

@@ -1,12 +1,12 @@
 ﻿namespace DolphEngine.Graphics.Directives
 {
-    public class SpriteDirective
+    public class SpriteDirective : DrawDirective
     {
         public string Asset;
 
         public Rect2d Source;
 
-        public Rect2d Destination;
+        public Size2d Size;
 
         public float Rotation;
 
