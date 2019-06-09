@@ -1,7 +1,6 @@
 ﻿using DolphEngine.DI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DolphEngine.Scenery
 {
@@ -15,40 +14,12 @@ namespace DolphEngine.Scenery
 
         private string _nextScene;
         private bool _unloadScene;
-
-        #region Constructor/Disposal
         
         public Director(IServiceRepository repository)
         {
             this._serviceRepo = repository;
             this._serviceRepo.ResetScope();
         }
-
-        ~Director()
-        {
-            this.Dispose();
-        }
-
-        public void Dispose()
-        {
-            foreach (var sceneBuilder in this.Scenes.Select(x => x.Value))
-            {
-                try
-                {
-                    sceneBuilder().Unload();
-                }
-                catch
-                {
-                }
-            }
-
-            this.Scenes.Clear();
-
-            this.CurrentScene = null;
-            this.CurrentSceneName = null;
-        }
-
-        #endregion
 
         public void Update()
         {
@@ -129,6 +100,50 @@ namespace DolphEngine.Scenery
                 this.CurrentScene.Unload();
                 this.CurrentScene = null;
                 this.CurrentSceneName = null;
+            }
+        }
+
+        #endregion
+
+        #region Disposal
+
+        // Following the pattern suggested here: https://stackoverflow.com/a/151244
+
+        ~Director()
+        {
+            this.Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private bool _disposed = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this._disposed)
+            {
+                if (disposing)
+                {
+                    try
+                    {
+                        this.CurrentScene.Unload();
+                    }
+                    catch
+                    {
+                        // todo: log error here
+                    }
+
+                    this.Scenes.Clear();
+
+                    this.CurrentScene = null;
+                    this.CurrentSceneName = null;
+                }
+
+                this._disposed = true;
             }
         }
 
