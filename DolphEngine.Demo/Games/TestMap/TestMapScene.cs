@@ -27,6 +27,8 @@ namespace DolphEngine.Demo.Games.TestMap
 
         protected PlayerEntity Player;
         protected CameraEntity Camera;
+        protected PubKey<Position2d> PlayerPosition;
+        protected SubKey SubKey;
 
         private readonly int[][] TestBoard = new int[][]
         {
@@ -57,6 +59,9 @@ namespace DolphEngine.Demo.Games.TestMap
             this.FpsCounter = fpsCounter;
             this.MessageRouter = messageRouter;
             this.Timer = timer;
+
+            this.PlayerPosition = messageRouter.GetPubKey<Position2d>("player-position");
+            this.SubKey = messageRouter.GetSubKey();
         }
 
         public void Load()
@@ -75,6 +80,12 @@ namespace DolphEngine.Demo.Games.TestMap
         {
             this.Ecosystem.Update();
             this.Keycosystem.Update();
+
+            if (this.Timer.Frames % 10 == 0)
+            {
+                this.PlayerPosition.Publish(this.Player.Space.GetOriginPosition());
+            }
+
             this.MessageRouter.Update();
             this.FpsCounter.Update();
         }
@@ -133,7 +144,6 @@ namespace DolphEngine.Demo.Games.TestMap
             this.Player.Text.FontAssetName = "Assets/Debug10";
             this.Player.Sprite.EnableBoxOutline = true;
             this.Ecosystem.AddEntity("Player", this.Player);
-            // this.MessageRouter.Publish("player-position", new Listener<PlayerEntity>(() => this.Player, (p1, p2) => p1.Space != p2.Space));
 
             var arrow1 = new GlyphEntity(0);
             arrow1.Space = new Rect2d(0, 0, 21, 11, new Origin2d(Anchor2d.MiddleRight));
@@ -172,17 +182,18 @@ namespace DolphEngine.Demo.Games.TestMap
             shape.Space.Shift(-300, -150);
             this.Ecosystem.AddEntity("TestPolygon", shape);
 
-            //this.MessageRouter.Subscribe<PlayerEntity>("player-position", player => {
-            //    var polygon = shape.GetComponent<PolygonComponent>();
-            //    if (player.Space.Position.Y < 0)
-            //    {
-            //        polygon.Color = 0x0000FFFF;
-            //    }
-            //    else
-            //    {
-            //        polygon.Color = 0x000000FF;
-            //    }
-            //});
+            this.SubKey.Subscribe<Position2d>("player-position", position =>
+            {
+                var polygon = shape.GetComponent<PolygonComponent>();
+                if (position.Y < 0)
+                {
+                    polygon.Color = 0x0000FFFF;
+                }
+                else
+                {
+                    polygon.Color = 0x000000FF;
+                }
+            });
 
             this.Ecosystem
                 .AddHandler<SpeedHandler>()
