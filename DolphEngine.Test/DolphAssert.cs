@@ -5,11 +5,9 @@ namespace DolphEngine.Test
 {
     public class DolphAssert
     {
-        private const float FTolerance = 0.001f;
-
         public static void EqualF(float expected, float actual)
         {
-            Assert.True(Math.Abs(expected - actual) < FTolerance, $"{actual} varies from {expected} by {expected - actual:F6}");
+            Assert.True(Math.Abs(expected - actual) < Constants.FloatTolerance, $"{actual} varies from {expected} by {expected - actual:F6}");
         }
 
         #region Object overrides

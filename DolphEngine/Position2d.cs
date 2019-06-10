@@ -40,17 +40,17 @@ namespace DolphEngine
             return this;
         }
 
-        public Position2d Shift(Vector2d vector)
-        {
-            this.X += vector.X;
-            this.Y += vector.Y;
-            return this;
-        }
-
         public Position2d Shift(float x, float y)
         {
             this.X += x;
             this.Y += y;
+            return this;
+        }
+
+        public Position2d Shift(Vector2d vector)
+        {
+            this.X += vector.X;
+            this.Y += vector.Y;
             return this;
         }
 
