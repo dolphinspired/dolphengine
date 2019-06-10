@@ -134,7 +134,7 @@ namespace DolphEngine.DI
         }
 
         private static readonly Dictionary<IServiceRepository, Dictionary<Type, object>> ScopedCache 
-            = new Dictionary<IServiceRepository, Dictionary<Type, object>>(ReferenceEqualityComparer<IServiceRepository>.Instance);
+            = new Dictionary<IServiceRepository, Dictionary<Type, object>>(ReferenceEqualityComparer<IServiceRepository>.Default);
 
         private static void AddServiceAsScoped(this IServiceRepository repository, Type type, Func<object> serviceBuilder)
         {

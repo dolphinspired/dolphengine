@@ -18,7 +18,7 @@ namespace DolphEngine.Messaging
     public class MessageChannel<T> : MessageChannel
     {   
         private readonly Dictionary<SubKey, Action<T>> _subscriptions 
-            = new Dictionary<SubKey, Action<T>>(ReferenceEqualityComparer<SubKey>.Instance);
+            = new Dictionary<SubKey, Action<T>>(ReferenceEqualityComparer<SubKey>.Default);
 
         public MessageChannel() : base(typeof(T)) { }
 

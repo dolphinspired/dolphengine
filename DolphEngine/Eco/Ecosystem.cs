@@ -33,12 +33,12 @@ namespace DolphEngine.Eco
         // All handlers that have been registered to the ecosystem, paired with the BitLock which represents
         // the components that the handler subscribes to. A handler's BitLock/Subscriptions never change throughout the
         // lifetime of the application.
-        private readonly Dictionary<EcosystemHandler, BitLock> _locksByHandler = new Dictionary<EcosystemHandler, BitLock>(ReferenceEqualityComparer<EcosystemHandler>.Instance);
+        private readonly Dictionary<EcosystemHandler, BitLock> _locksByHandler = new Dictionary<EcosystemHandler, BitLock>(ReferenceEqualityComparer<EcosystemHandler>.Default);
 
         // All entities in the ecosystem, indexed by the BitLocks for handlers within the Ecosystem that they support.
         // In other words, all of the entities that have a PositionComponent are grouped together; all the entities that have
         // a PositionComponent _and_ a SpriteComponent are groupd together, etc. This makes getting the arguments for a handler an O(1) operation.
-        private readonly Dictionary<BitLock, HashSet<Entity>> _entitiesByLock = new Dictionary<BitLock, HashSet<Entity>>(ReferenceEqualityComparer<BitLock>.Instance);
+        private readonly Dictionary<BitLock, HashSet<Entity>> _entitiesByLock = new Dictionary<BitLock, HashSet<Entity>>(ReferenceEqualityComparer<BitLock>.Default);
         private readonly Dictionary<string, HashSet<BitLock>> _locksByEntity = new Dictionary<string, HashSet<BitLock>>();
 
         // A pairing of all entities in the ecosystem with a BitKey that represents the components they currently have.
@@ -47,7 +47,7 @@ namespace DolphEngine.Eco
 
         // If an entity within the ecosystem has a component added or removed, its BitKey will need to be refreshed
         // before we can know which BitLocks (handlers) it should be sent to.
-        private readonly HashSet<Entity> _entitiesToRefreshBitKey = new HashSet<Entity>(ReferenceEqualityComparer<Entity>.Instance);
+        private readonly HashSet<Entity> _entitiesToRefreshBitKey = new HashSet<Entity>(ReferenceEqualityComparer<Entity>.Default);
 
         private ushort _nextBitPosition;
 
@@ -87,7 +87,7 @@ namespace DolphEngine.Eco
             // Next, find all the entities currently in the Ecosystem that have the components that will fit this lock,
             // then index them by this lock. So when the handler says "give me all the entities I need to handle", we
             // already have that list cached.
-            var entitiesByThisLock = new HashSet<Entity>(ReferenceEqualityComparer<Entity>.Instance);
+            var entitiesByThisLock = new HashSet<Entity>(ReferenceEqualityComparer<Entity>.Default);
             this._entitiesByLock.Add(bitLock, entitiesByThisLock);
             if (this._entitiesById.Any())
             {
@@ -343,7 +343,7 @@ namespace DolphEngine.Eco
             {
                 if (!this._locksByBits.TryGetValue(bitPosition, out var indexedLocks))
                 {
-                    indexedLocks = new HashSet<BitLock>(ReferenceEqualityComparer<BitLock>.Instance);
+                    indexedLocks = new HashSet<BitLock>(ReferenceEqualityComparer<BitLock>.Default);
                     this._locksByBits.Add(bitPosition, indexedLocks);
                 }
 
@@ -404,7 +404,7 @@ namespace DolphEngine.Eco
 
             // Try this new key in all of the known locks
             // Index the entity by all the locks that we know it it fits
-            var locksByThisEntityId = new HashSet<BitLock>(ReferenceEqualityComparer<BitLock>.Instance);
+            var locksByThisEntityId = new HashSet<BitLock>(ReferenceEqualityComparer<BitLock>.Default);
             if (this._locksByEntity.ContainsKey(entity.Id))
             {
                 this._locksByEntity[entity.Id] = locksByThisEntityId;

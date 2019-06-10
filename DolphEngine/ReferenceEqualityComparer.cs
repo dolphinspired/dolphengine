@@ -8,7 +8,7 @@ namespace DolphEngine
     {
         private static Dictionary<Type, object> _comparersByType;
 
-        public static ReferenceEqualityComparer<T> Instance
+        public static ReferenceEqualityComparer<T> Default
         {
             get
             {
