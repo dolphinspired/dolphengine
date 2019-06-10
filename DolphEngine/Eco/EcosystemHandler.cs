@@ -5,8 +5,8 @@ namespace DolphEngine.Eco
 {
     public abstract class EcosystemHandler
     {
-        internal IGameTimer _timer;
-        protected IGameTimer Timer => this._timer;
+        internal GameTimer _timer;
+        protected GameTimer Timer => this._timer;
         
         /// <summary>
         /// An enumerable of the <see cref="Component"/> types to which this handler subscribes.

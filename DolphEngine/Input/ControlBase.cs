@@ -14,7 +14,7 @@ namespace DolphEngine.Input
 
         private Keycosystem _keycosystem;
         protected InputState InputState => this._keycosystem.Observer.InputState;
-        protected IGameTimer Timer => this._keycosystem.Timer;
+        protected GameTimer Timer => this._keycosystem.Timer;
 
         #region Control building
 

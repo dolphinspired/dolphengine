@@ -40,7 +40,7 @@ namespace DolphEngine.Demo
             this.Services
                 .AddSingleton<IServiceRepository>(this.Services)
                 .AddSingleton<Game>(this)
-                .AddSingleton<IGameTimer>(this.Timer)
+                .AddSingleton<GameTimer>(this.Timer)
                 .AddSingleton<Director>()
                 .AddSingleton<SpriteBatch>(new SpriteBatch(this.GraphicsDevice))
                 .AddSingleton<ContentManager>(this.Content)
@@ -104,7 +104,7 @@ namespace DolphEngine.Demo
 
     public class BasicEcosystem : Ecosystem
     {
-        public BasicEcosystem(IGameTimer timer) : base(timer)
+        public BasicEcosystem(GameTimer timer) : base(timer)
         {
             // Put entities common to every scene here, they will be initialized with each scene
         }
@@ -112,7 +112,7 @@ namespace DolphEngine.Demo
 
     public class BasicKeycosystem : Keycosystem
     {
-        public BasicKeycosystem(Game game, Director director, IGameTimer timer, KeyStateObserver observer) : base(timer, observer)
+        public BasicKeycosystem(Game game, Director director, GameTimer timer, KeyStateObserver observer) : base(timer, observer)
         {
             var k = new StandardKeyboard();
             var scheme = new ControlScheme()
@@ -135,7 +135,7 @@ namespace DolphEngine.Demo
 
     public class BasicFpsCounter : FpsCounter
     {
-        public BasicFpsCounter(GraphicsDeviceManager gdm, ContentManager content, SpriteBatch sb, IGameTimer timer) : base(sb, timer)
+        public BasicFpsCounter(GraphicsDeviceManager gdm, ContentManager content, SpriteBatch sb, GameTimer timer) : base(sb, timer)
         {
             this.Font = content.Load<SpriteFont>("Assets/Debug10");
             this.Position = new Vector2d(10, gdm.PreferredBackBufferHeight - 22);

@@ -14,13 +14,13 @@ namespace DolphEngine.Demo
         public double Fps { get; private set; }
         
         private readonly SpriteBatch _spriteBatch;
-        private readonly IGameTimer _timer;
+        private readonly GameTimer _timer;
         
         private long[] _samples = new long[1];
         private int _currentFrame;
         private int _currentSample;
 
-        public FpsCounter(SpriteBatch sb, IGameTimer timer)
+        public FpsCounter(SpriteBatch sb, GameTimer timer)
         {
             this._spriteBatch = sb;
             this._timer = timer;

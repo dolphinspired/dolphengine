@@ -8,7 +8,7 @@ namespace DolphEngine.Input
     {
         #region Private properties, indexes
 
-        public readonly IGameTimer Timer;
+        public readonly GameTimer Timer;
         public readonly KeyStateObserver Observer;
 
         private readonly Dictionary<string, ControlBase> _controllers = new Dictionary<string, ControlBase>();
@@ -18,7 +18,7 @@ namespace DolphEngine.Input
 
         #region Constructors
 
-        public Keycosystem(IGameTimer timer, KeyStateObserver observer)
+        public Keycosystem(GameTimer timer, KeyStateObserver observer)
         {
             this.Timer = timer;
             this.Observer = observer;

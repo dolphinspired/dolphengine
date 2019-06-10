@@ -23,7 +23,7 @@ namespace DolphEngine.Demo.Games.TestMap
         protected readonly DirectiveRenderer Renderer;
         protected readonly FpsCounter FpsCounter;
         protected readonly MessageRouter MessageRouter;
-        protected readonly IGameTimer Timer;
+        protected readonly GameTimer Timer;
 
         protected PlayerEntity Player;
         protected CameraEntity Camera;
@@ -49,7 +49,7 @@ namespace DolphEngine.Demo.Games.TestMap
             DirectiveRenderer renderer,
             FpsCounter fpsCounter,
             MessageRouter messageRouter,
-            IGameTimer timer)
+            GameTimer timer)
         {
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
