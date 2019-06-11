@@ -50,7 +50,36 @@ namespace DolphEngine
 
         #endregion
 
+        #region Operators
+
+        public static bool operator ==(Rotation2d r1, Rotation2d r2)
+        {
+            return Math.Abs(r1.Radians - r2.Radians) < Constants.FloatTolerance;
+        }
+
+        public static bool operator !=(Rotation2d r1, Rotation2d r2)
+        {
+            return !(r1 == r2);
+        }
+
+        #endregion
+
         #region Object overrides
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Rotation2d) && this == (Rotation2d)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 31;
+                hash = hash * 37 + Radians.GetHashCode();
+                return hash;
+            }
+        }
 
         public override string ToString()
         {
