@@ -1,4 +1,6 @@
-﻿namespace DolphEngine
+﻿using System;
+
+namespace DolphEngine
 {
     public struct Rect2d
     {
@@ -261,7 +263,11 @@
 
         public static bool operator ==(Rect2d r1, Rect2d r2)
         {
-            return r1.X == r2.X && r1.Y == r2.Y && r1.Width == r2.Width && r1.Height == r2.Height && r1.Origin == r2.Origin;
+            return Math.Abs(r1.X - r2.X) < Constants.FloatTolerance
+                && Math.Abs(r1.Y - r2.Y) < Constants.FloatTolerance
+                && Math.Abs(r1.Width - r2.Width) < Constants.FloatTolerance
+                && Math.Abs(r1.Height - r2.Height) < Constants.FloatTolerance
+                && r1.Origin == r2.Origin;
         }
 
         public static bool operator !=(Rect2d r1, Rect2d r2)

@@ -30,7 +30,7 @@
 
         public static bool operator ==(Origin2d o1, Origin2d o2)
         {
-            return o1.Anchor != o2.Anchor && o1.Offset != o2.Offset;
+            return o1.Anchor == o2.Anchor && o1.Offset == o2.Offset;
         }
 
         public static bool operator !=(Origin2d o1, Origin2d o2)

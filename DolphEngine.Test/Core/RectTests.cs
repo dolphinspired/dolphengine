@@ -6,6 +6,82 @@ namespace DolphEngine.Test.Core
 {
     public class RectTests
     {
+        #region Constructor tests
+
+        [Fact]
+        public void CanCreateFromRect()
+        {
+            var rect1 = new Rect2d(1, 2, 3, 4);
+            var rect2 = new Rect2d(rect1);
+            DolphAssert.EqualF(rect1.X, rect2.X);
+            DolphAssert.EqualF(rect1.Y, rect2.Y);
+            DolphAssert.EqualF(rect1.Width, rect2.Width);
+            DolphAssert.EqualF(rect1.Height, rect2.Height);
+            Assert.Equal(rect1.Origin.Anchor, rect2.Origin.Anchor);
+        }
+
+        [Fact]
+        public void CanCreateFromPositionAndSize()
+        {
+            var pos = new Position2d(1, 2);
+            var size = new Size2d(3, 4);
+            var anchor = Anchor2d.Center;
+
+            var rect = new Rect2d(pos, size);
+            DolphAssert.EqualF(pos.X, rect.X);
+            DolphAssert.EqualF(pos.Y, rect.Y);
+            DolphAssert.EqualF(size.Width, rect.Width);
+            DolphAssert.EqualF(size.Height, rect.Height);
+
+            rect = new Rect2d(pos, size, anchor);
+            DolphAssert.EqualF(pos.X, rect.X);
+            DolphAssert.EqualF(pos.Y, rect.Y);
+            DolphAssert.EqualF(size.Width, rect.Width);
+            DolphAssert.EqualF(size.Height, rect.Height);
+            Assert.Equal(anchor, rect.Origin.Anchor);
+
+            rect = new Rect2d(pos, size, new Origin2d(anchor));
+            DolphAssert.EqualF(pos.X, rect.X);
+            DolphAssert.EqualF(pos.Y, rect.Y);
+            DolphAssert.EqualF(size.Width, rect.Width);
+            DolphAssert.EqualF(size.Height, rect.Height);
+            Assert.Equal(anchor, rect.Origin.Anchor);
+        }
+
+        [Fact]
+        public void CanCreateFromValues()
+        {
+            var x = 1;
+            var y = 2;
+            var width = 3;
+            var height = 4;
+            var anchor = Anchor2d.MiddleRight;
+
+            var rect = new Rect2d(x, y, width, height);
+            DolphAssert.EqualF(x, rect.X);
+            DolphAssert.EqualF(y, rect.Y);
+            DolphAssert.EqualF(width, rect.Width);
+            DolphAssert.EqualF(height, rect.Height);
+
+            rect = new Rect2d(x, y, width, height, anchor);
+            DolphAssert.EqualF(x, rect.X);
+            DolphAssert.EqualF(y, rect.Y);
+            DolphAssert.EqualF(width, rect.Width);
+            DolphAssert.EqualF(height, rect.Height);
+            Assert.Equal(anchor, rect.Origin.Anchor);
+
+            rect = new Rect2d(x, y, width, height, new Origin2d(anchor));
+            DolphAssert.EqualF(x, rect.X);
+            DolphAssert.EqualF(y, rect.Y);
+            DolphAssert.EqualF(width, rect.Width);
+            DolphAssert.EqualF(height, rect.Height);
+            Assert.Equal(anchor, rect.Origin.Anchor);
+        }
+
+        #endregion
+
+        #region Anchor position tests
+
         private const float X = 100;
         private const float Y = 200;
         private const float W = 30;
@@ -102,6 +178,162 @@ namespace DolphEngine.Test.Core
                 DolphAssert.EqualF(rp.X(expectedTopLeftX), pos.X);
                 DolphAssert.EqualF(rp.Y(expectedTopLeftY), pos.Y);
             }
+        }
+
+        #endregion
+
+        #region Transformation tests
+
+        [Fact]
+        public void CanMoveToPosition()
+        {
+            var width = 7;
+            var height = 8;
+
+            var rect = new Rect2d(1, 2, width, height);
+            rect.MoveTo(3, 4);
+
+            DolphAssert.EqualF(3, rect.X);
+            DolphAssert.EqualF(4, rect.Y);
+            DolphAssert.EqualF(width, rect.Width);
+            DolphAssert.EqualF(height, rect.Height);
+        }
+
+        [Theory]
+        [InlineData( 1,  2,  3,  4,  4,  6)]
+        [InlineData(-1, -2,  3,  4,  2,  2)]
+        [InlineData( 1,  2, -3, -4, -2, -2)]
+        [InlineData(-1, -2, -3, -4, -4, -6)]
+        public void CanShiftPosition(float x1, float y1, float x2, float y2, float x3, float y3)
+        {
+            var width = 30;
+            var height = 40;
+
+            var rect = new Rect2d(x1, y1, width, height, Anchor2d.BottomLeft);
+            rect.Shift(x2, y2);
+
+            DolphAssert.EqualF(x3, rect.X);
+            DolphAssert.EqualF(y3, rect.Y);
+            DolphAssert.EqualF(width, rect.Width);
+            DolphAssert.EqualF(height, rect.Height);
+        }
+
+        [Theory]
+        [InlineData(  0,   0, 100,   0,   0)]
+        [InlineData( 10,  20, 1.5,  15,  30)]
+        [InlineData(-10,  20, 1.5, -15,  30)]
+        [InlineData(-10, -20, 1.5, -15, -30)]
+        [InlineData( 10,  20, 0.5,   5,  10)]
+        [InlineData(-10,  20, 0.5,  -5,  10)]
+        [InlineData(-10, -20, 0.5,  -5, -10)]
+        [InlineData( 10,  20,  -2, -20, -40)]
+        [InlineData(-10,  20,  -2,  20, -40)]
+        [InlineData(-10, -20,  -2,  20,  40)]
+        public void CanScaleByMagnitude(float w1, float h1, float mag, float w2, float h2)
+        {
+            var x = 15;
+            var y = 25;
+
+            var rect = new Rect2d(x, y, w1, h1);
+            rect.Scale(mag);
+
+            DolphAssert.EqualF(x, rect.X);
+            DolphAssert.EqualF(y, rect.Y);
+            DolphAssert.EqualF(w2, rect.Width);
+            DolphAssert.EqualF(h2, rect.Height);
+        }
+
+        [Theory]
+        [InlineData( 10,  20,   3,  -3,  30, -60)]
+        [InlineData(-10, -20,  -4, 0.5,  40, -10)]
+        public void CanScaleByVector(float w1, float h1, float x, float y, float w2, float h2)
+        {
+            var rect = new Rect2d(x, y, w1, h1);
+            rect.Scale(x, y);
+
+            DolphAssert.EqualF(x, rect.X);
+            DolphAssert.EqualF(y, rect.Y);
+            DolphAssert.EqualF(w2, rect.Width);
+            DolphAssert.EqualF(h2, rect.Height);
+
+            rect = new Rect2d(x, y, w1, h1);
+            rect.Scale(new Vector2d(x, y));
+
+            DolphAssert.EqualF(x, rect.X);
+            DolphAssert.EqualF(y, rect.Y);
+            DolphAssert.EqualF(w2, rect.Width);
+            DolphAssert.EqualF(h2, rect.Height);
+        }
+
+        #endregion
+
+        [Fact]
+        public void CanConvertToSize()
+        {
+            var size1 = new Size2d(8, 12);
+            var rect = new Rect2d(new Position2d(4, 4), size1);
+            var size2 = rect.GetSize();
+
+            Assert.Equal(size1, size2);
+        }
+
+        [Fact]
+        public void CanGetPositionAtOrigin()
+        {
+            var anchor = Anchor2d.MiddleRight;
+            var rect = new Rect2d(100, 200, 300, 400, anchor);
+            var pos1 = rect.GetAnchorPosition(anchor);
+            var pos2 = rect.GetOriginPosition();
+
+            Assert.Equal(pos1, pos2);
+        }
+
+        [Fact]
+        public void CanConvertToPolygon()
+        {
+            var rect = new Rect2d(100, 200, 300, 400, Anchor2d.BottomCenter);
+            var poly = rect.ToPolygon();
+
+            // Extra point from where corner 4 closes back to corner 1
+            Assert.Equal(5, poly.Points.Count);
+        }
+
+        [Theory]
+        [InlineData(0, 0, 0, 0, Anchor2d.TopLeft)]
+        [InlineData(1, 2, -3, -4, Anchor2d.BottomLeft)]
+        [InlineData(-1, 2, 0.5, -0.25, Anchor2d.TopRight)]
+        [InlineData(1, -2.5, -3, 40.44, Anchor2d.BottomRight)]
+        [InlineData(-1, -2, 8, 2100, Anchor2d.Center)]
+        public void TestEquality(float x, float y, float w, float h, Anchor2d anchor)
+        {
+            var rect1 = new Rect2d(x, y, w, h, anchor);
+            var rect2 = new Rect2d(x, y, w, h, anchor);
+
+            Assert.True(rect1 == rect2);
+            Assert.True(rect1.Equals(rect2));
+
+            rect1.X += Constants.FloatTolerance / 10;
+
+            Assert.True(rect1 == rect2);
+            Assert.True(rect1.Equals(rect2));
+
+            rect1.X += Constants.FloatTolerance * 10;
+
+            Assert.False(rect1 == rect2);
+            Assert.False(rect1.Equals(rect2));
+        }
+
+        [Fact]
+        public void TestHashCode()
+        {
+            var rect1 = new Rect2d(1, 2, 3, 4);
+            var rect2 = new Rect2d(1, 2, 3, 4);
+
+            Assert.Equal(rect1.GetHashCode(), rect2.GetHashCode());
+
+            rect2.Shift(1, 1);
+
+            Assert.NotEqual(rect1.GetHashCode(), rect2.GetHashCode());
         }
     }
 }
