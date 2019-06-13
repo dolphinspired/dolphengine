@@ -61,7 +61,7 @@ namespace DolphEngine.Demo
             // All of the below is some really hacked together proto-UI garbage
             // There will be a better way to do this in the future
             var title = new Entity(new Rect2d(viewTopLeft + new Vector2d(10, 10), Size2d.Zero)); // Text doesn't use size yet
-            title.AddComponent(new TextComponent { Text = "Select a scene:", FontAssetName = "Assets/Zelda12" });
+            title.AddComponent(new TextComponent { Text = "Select a scene:", FontAssetName = "Assets/Zelda12", Color = new ColorRGBA(255, 255, 255) });
             title.AddComponent<DrawComponent>();
             this.Ecosystem.AddEntity("Title", title);
 
@@ -74,7 +74,7 @@ namespace DolphEngine.Demo
             foreach (var sceneName in this._selectableScenes)
             {
                 var option = new Entity(new Rect2d(title.Space.TopLeft + new Vector2d(20, ++i * 30), Size2d.Zero, Anchor2d.MiddleLeft));
-                option.AddComponent(new TextComponent { Text = sceneName, FontAssetName = "Assets/Zelda12" });
+                option.AddComponent(new TextComponent { Text = sceneName, FontAssetName = "Assets/Zelda12", Color = new ColorRGBA(255, 255, 255) });
 
                 var selectable = new SelectableItemComponent();
                 selectable.OnFocus = () => cursor.Space.MoveTo(option.Space.GetOriginPosition() + new Vector2d(-5, 6)); // text alignment is broken af right now

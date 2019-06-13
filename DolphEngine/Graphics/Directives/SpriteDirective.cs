@@ -11,5 +11,7 @@
         public float Rotation;
 
         public Vector2d Origin;
+
+        public ColorRGBA? Color;
     }
 }

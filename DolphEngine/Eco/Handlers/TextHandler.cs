@@ -20,7 +20,8 @@ namespace DolphEngine.Eco.Handlers
             {
                 FontAssetName = text.FontAssetName,
                 Destination = entity.Space.GetOriginPosition(),
-                Text = text.Text
+                Text = text.Text,
+                Color = text.Color
             });
         }
     }

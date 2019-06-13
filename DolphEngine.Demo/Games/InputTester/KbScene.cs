@@ -277,13 +277,13 @@ namespace DolphEngine.Demo.Games.InputTester
                     keyEntity.Space = rect;
                     keyEntity.AddComponent(new PolygonComponent {
                         Polygon = new Rect2d(0, 0, rect.Width, rect.Height).ToPolygon(),
-                        Color = 0x00FFFFFF });
+                        Color = new ColorRGBA(255, 255, 255) });
                     keyEntity.AddComponent<DrawComponent>();
                     this.Ecosystem.AddEntity($"KB_{kdd.KeyToRead}", keyEntity);
 
                     var keyboardKey = kdd.KeyboardKey(keyboard);
-                    controlScheme.AddControl(() => keyboardKey.JustPressed, () => keyEntity.GetComponent<PolygonComponent>().Color = 0x000000FF);
-                    controlScheme.AddControl(() => keyboardKey.JustReleased, () => keyEntity.GetComponent<PolygonComponent>().Color = 0x00FFFFFF);
+                    controlScheme.AddControl(() => keyboardKey.JustPressed, () => keyEntity.GetComponent<PolygonComponent>().Color = new ColorRGBA(255, 0, 0));
+                    controlScheme.AddControl(() => keyboardKey.JustReleased, () => keyEntity.GetComponent<PolygonComponent>().Color = new ColorRGBA(255, 255, 255));
 
                     x += kdd.Width + SPC;
                 }

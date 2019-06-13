@@ -85,13 +85,14 @@ namespace DolphEngine.MonoGame
         {
             var texture = this.Content.Load<Texture2D>(sprite.Asset);
             var dest = new Rectangle(sprite.Destination.ToPoint(), sprite.Size.ToPoint());
-            this.SpriteBatch.Draw(texture, dest, sprite.Source.ToRectangle(), Color.White, sprite.Rotation, sprite.Origin.ToVector2(), SpriteEffects.None, 0);
+            var color = sprite.Color.HasValue ? sprite.Color.Value.ToColor() : Color.White;
+            this.SpriteBatch.Draw(texture, dest, sprite.Source.ToRectangle(), color, sprite.Rotation, sprite.Origin.ToVector2(), SpriteEffects.None, 0);
         }
 
         private void DrawText(TextDirective text)
         {
             var font = this.Content.Load<SpriteFont>(text.FontAssetName);
-            this.SpriteBatch.DrawString(font, text.Text, text.Destination.ToVector2(), Color.White);
+            this.SpriteBatch.DrawString(font, text.Text, text.Destination.ToVector2(), text.Color.ToColor());
         }
 
         private void DrawPolygon(PolygonDirective poly)
@@ -101,7 +102,7 @@ namespace DolphEngine.MonoGame
                 return;
             }
 
-            var color = new Color(poly.Color);
+            var color = poly.Color.ToColor();
 
             Vector2 start = poly.Points[0].ToVector2();
             Vector2 end;

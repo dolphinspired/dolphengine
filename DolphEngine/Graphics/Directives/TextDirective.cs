@@ -5,5 +5,7 @@
         public string Text;
 
         public string FontAssetName;
+
+        public ColorRGBA Color;
     }
 }

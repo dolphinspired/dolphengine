@@ -2,8 +2,7 @@
 {
     public class PolygonComponent : Component
     {
-        // todo: get a real color struct
-        public uint Color;
+        public ColorRGBA Color;
 
         public Polygon2d Polygon;
     }

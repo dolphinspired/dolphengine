@@ -142,6 +142,7 @@ namespace DolphEngine.Demo.Games.TestMap
             this.Player = new PlayerEntity();
             this.Player.Text.Text = "Alphonse";
             this.Player.Text.FontAssetName = "Assets/Debug10";
+            this.Player.Text.Color = new ColorRGBA(0, 255, 255);
             this.Player.Sprite.EnableBoxOutline = true;
             this.Ecosystem.AddEntity("Player", this.Player);
 
@@ -170,7 +171,7 @@ namespace DolphEngine.Demo.Games.TestMap
             var shape = new Entity()
                 .AddComponent(new PolygonComponent
                 {
-                    Color = 0x000000FF,
+                    Color = new ColorRGBA(255, 0, 0),
                     Polygon = new Polygon2d(
                         // This should make a "Z" shape
                         new Vector2d(100, 0),
@@ -187,11 +188,11 @@ namespace DolphEngine.Demo.Games.TestMap
                 var polygon = shape.GetComponent<PolygonComponent>();
                 if (position.Y < 0)
                 {
-                    polygon.Color = 0x0000FFFF;
+                    polygon.Color = new ColorRGBA(255, 255, 0);
                 }
                 else
                 {
-                    polygon.Color = 0x000000FF;
+                    polygon.Color = new ColorRGBA(255, 0, 0);
                 }
             });
 

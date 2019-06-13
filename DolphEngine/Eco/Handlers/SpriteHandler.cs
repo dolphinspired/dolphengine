@@ -56,7 +56,7 @@ namespace DolphEngine.Eco.Handlers
             {
                 draw.Directives.Add(new PolygonDirective
                 {
-                    Color = 0xFF00FFFF,
+                    Color = new ColorRGBA(255, 255, 0),
                     Points = dest.ToPolygon().Points
                 });
             }

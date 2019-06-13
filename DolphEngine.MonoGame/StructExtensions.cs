@@ -28,5 +28,10 @@ namespace DolphEngine.MonoGame
         {
             return new Rectangle((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
         }
+
+        public static Color ToColor(this ColorRGBA color)
+        {
+            return new Color(color.R, color.G, color.B, color.A);
+        }
     }
 }
