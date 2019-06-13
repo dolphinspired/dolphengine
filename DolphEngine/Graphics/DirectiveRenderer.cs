@@ -13,7 +13,7 @@ namespace DolphEngine.Graphics
         public DirectiveRenderer AddRenderer<TDirective>(Action<TDirective> handler)
             where TDirective : DrawDirective
         {
-            this._renderers.Add(typeof(TDirective), new Action<DrawDirective>(dir => handler((TDirective)dir)));
+            this._renderers.Add(typeof(TDirective), dir => handler((TDirective)dir));
             return this;
         }
 
