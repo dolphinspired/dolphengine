@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DolphEngine.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,12 +9,14 @@ namespace DolphEngine.Eco
     {
         #region Constructors
 
-        public Ecosystem(GameTimer timer)
+        public Ecosystem(GameTimer timer, DirectiveRenderer renderer)
         {
             this._timer = timer;
+            this._renderer = renderer;
         }
         
         private readonly GameTimer _timer;
+        private readonly DirectiveRenderer _renderer;
 
         #endregion
 
@@ -222,6 +225,9 @@ namespace DolphEngine.Eco
                 var entitiesByThisLock = this._entitiesByLock[lockByHandler.Value];
                 lockByHandler.Key.Draw(entitiesByThisLock);
             }
+
+            var allDrawDirectives = this._entitiesById.Select(kvp => kvp.Value.DrawDirectives).SelectMany(kvp => kvp.Values);
+            this._renderer.Draw(allDrawDirectives);
         }
 
         #endregion

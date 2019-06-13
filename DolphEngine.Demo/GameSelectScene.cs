@@ -62,12 +62,10 @@ namespace DolphEngine.Demo
             // There will be a better way to do this in the future
             var title = new Entity(new Rect2d(viewTopLeft + new Vector2d(10, 10), Size2d.Zero)); // Text doesn't use size yet
             title.AddComponent(new TextComponent { Text = "Select a scene:", FontAssetName = "Assets/Zelda12", Color = new ColorRGBA(255, 255, 255) });
-            title.AddComponent<DrawComponent>();
             this.Ecosystem.AddEntity("Title", title);
 
             var cursor = new Entity(new Rect2d(0, 0, 7, 11, Anchor2d.MiddleRight));
             cursor.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, Index = 1 });
-            cursor.AddComponent<DrawComponent>();
             this.Ecosystem.AddEntity("Cursor", cursor);
 
             int i = 0;
@@ -80,7 +78,6 @@ namespace DolphEngine.Demo
                 selectable.OnFocus = () => cursor.Space.MoveTo(option.Space.GetOriginPosition() + new Vector2d(-5, 6)); // text alignment is broken af right now
                 selectable.OnBlur = () => { /* Nothing right now! */ };
                 option.AddComponent(selectable);
-                option.AddComponent<DrawComponent>();
 
                 if (i == 1)
                 {
@@ -96,8 +93,7 @@ namespace DolphEngine.Demo
 
             this.Ecosystem
                 .AddHandler<TextHandler>()
-                .AddHandler<SpriteHandler>()
-                .AddHandler(new DrawHandler(this.Renderer));
+                .AddHandler<SpriteHandler>();
 
             var k = this.Keycosystem.GetController<StandardKeyboard>(1);
 

@@ -8,8 +8,7 @@ namespace DolphEngine.Demo.Games.TestMap.Entities
     {
         public PlayerEntity()
         {
-            this.AddComponent<DrawComponent>()
-                .AddComponent<SpeedComponent>()
+            this.AddComponent<SpeedComponent>()
                 .AddComponent<FacingComponent>()
                 .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Alphonse })
                 .AddComponent<TextComponent>();

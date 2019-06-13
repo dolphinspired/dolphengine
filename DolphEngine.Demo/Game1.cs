@@ -104,7 +104,7 @@ namespace DolphEngine.Demo
 
     public class BasicEcosystem : Ecosystem
     {
-        public BasicEcosystem(GameTimer timer) : base(timer)
+        public BasicEcosystem(GameTimer timer, DirectiveRenderer renderer) : base(timer, renderer)
         {
             // Put entities common to every scene here, they will be initialized with each scene
         }

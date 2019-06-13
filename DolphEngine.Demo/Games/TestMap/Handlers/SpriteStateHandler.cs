@@ -5,7 +5,7 @@ using DolphEngine.Graphics.Animations;
 
 namespace DolphEngine.Demo.Games.TestMap.Handlers
 {
-    public class SpriteStateHandler : EcosystemHandler<SpriteComponent, DrawComponent>
+    public class SpriteStateHandler : EcosystemHandler<SpriteComponent>
     {
         public override void Draw(Entity entity)
         {

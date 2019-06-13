@@ -1,3 +1,4 @@
+using DolphEngine.Graphics.Directives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -245,6 +246,43 @@ namespace DolphEngine.Eco
         }
 
         #endregion
+
+        public Dictionary<string, DrawDirective> DrawDirectives { internal get; set; } = new Dictionary<string, DrawDirective>();
+
+        public Entity SetDirective<TDirective>(string name, Action<TDirective> action)
+            where TDirective : DrawDirective, new()
+        {
+            if (!this.DrawDirectives.TryGetValue(name, out var directive))
+            {
+                var typed = new TDirective();
+                action(typed);
+                this.DrawDirectives.Add(name, typed);
+            }
+            else
+            {
+                var typed = directive as TDirective;
+                if (typed == null)
+                {
+                    throw new InvalidCastException($"Attempted to set directive '{name}' with an action for type '{typeof(TDirective).Name}' on entity '{this.Id}', " +
+                        $"but a directive already exists by this name with type '{directive.GetType().Name}'!");
+                }
+                action(typed);
+            }
+
+            return this;
+        }
+
+        public Entity RemoveDirective(string name)
+        {
+            this.DrawDirectives.Remove(name);
+            return this;
+        }
+
+        public Entity ClearDirectives()
+        {
+            this.DrawDirectives.Clear();
+            return this;
+        }
 
         #region Object overrides
 

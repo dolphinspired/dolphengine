@@ -278,7 +278,6 @@ namespace DolphEngine.Demo.Games.InputTester
                     keyEntity.AddComponent(new PolygonComponent {
                         Polygon = new Rect2d(0, 0, rect.Width, rect.Height).ToPolygon(),
                         Color = new ColorRGBA(255, 255, 255) });
-                    keyEntity.AddComponent<DrawComponent>();
                     this.Ecosystem.AddEntity($"KB_{kdd.KeyToRead}", keyEntity);
 
                     var keyboardKey = kdd.KeyboardKey(keyboard);
@@ -293,8 +292,7 @@ namespace DolphEngine.Demo.Games.InputTester
 
             this.Ecosystem
                 .AddEntity("Camera", this.Camera)
-                .AddHandler<PolygonHandler>()
-                .AddHandler(new DrawHandler(this.Renderer));
+                .AddHandler<PolygonHandler>();
 
             // todo: none of this works to move the camera?
             // this.Camera.Lens.Pan = new Vector2d(200, 100);

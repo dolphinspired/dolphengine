@@ -3,12 +3,11 @@ using DolphEngine.Graphics.Directives;
 
 namespace DolphEngine.Eco.Handlers
 {
-    public class TextHandler : EcosystemHandler<TextComponent, DrawComponent>
+    public class TextHandler : EcosystemHandler<TextComponent>
     {
         public override void Draw(Entity entity)
         {
             var text = entity.GetComponent<TextComponent>();
-            var draw = entity.GetComponent<DrawComponent>();
 
             if (text.FontAssetName == null)
             {
@@ -16,12 +15,12 @@ namespace DolphEngine.Eco.Handlers
                 return;
             }
 
-            draw.Directives.Add(new TextDirective
+            entity.SetDirective<TextDirective>("simple-text", td =>
             {
-                FontAssetName = text.FontAssetName,
-                Destination = entity.Space.GetOriginPosition(),
-                Text = text.Text,
-                Color = text.Color
+                td.FontAssetName = text.FontAssetName;
+                td.Destination = entity.Space.GetOriginPosition();
+                td.Text = text.Text;
+                td.Color = text.Color;
             });
         }
     }

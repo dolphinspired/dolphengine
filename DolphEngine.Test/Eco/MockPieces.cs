@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using DolphEngine.Eco;
+using DolphEngine.Graphics;
 using Xunit;
 
 namespace DolphEngine.Test.Eco
@@ -113,6 +113,18 @@ namespace DolphEngine.Test.Eco
         public void Handle(IEnumerable<Entity> entities)
         {
             throw new Exception("You should not get here, this handler should not be subscribed to anything!");
+        }
+    }
+
+    public class MockDirectiveRenderer : DirectiveRenderer
+    {
+        public override void OnAfterDraw()
+        {
+        }
+
+        public override bool OnBeforeDraw()
+        {
+            return true;
         }
     }
 }

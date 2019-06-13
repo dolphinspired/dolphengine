@@ -3,12 +3,11 @@ using DolphEngine.Graphics.Directives;
 
 namespace DolphEngine.Eco.Handlers
 {
-    public class SpriteHandler : EcosystemHandler<SpriteComponent, DrawComponent>
+    public class SpriteHandler : EcosystemHandler<SpriteComponent>
     {
         public override void Draw(Entity entity)
         {
             var sprite = entity.GetComponent<SpriteComponent>();
-            var draw = entity.GetComponent<DrawComponent>();
 
             if (!TryGetAnimatedSprite(sprite, out Rect2d src) && !TryGetStaticSprite(sprite, out src))
             {
@@ -40,24 +39,22 @@ namespace DolphEngine.Eco.Handlers
                 dest.Scale(animScale);
             }
 
-            var directive = new SpriteDirective
+            entity.SetDirective<SpriteDirective>("simple-sprite", sd => 
             {
-                Asset = sprite.SpriteSheet.Name,
-                Source = src,
-                Destination = dest.GetOriginPosition(),
-                Size = dest.GetSize(),
-                Rotation = rotation.Radians,
-                Origin = origin
-            };
-
-            draw.Directives.Add(directive);
+                sd.Asset = sprite.SpriteSheet.Name;
+                sd.Source = src;
+                sd.Destination = dest.GetOriginPosition();
+                sd.Size = dest.GetSize();
+                sd.Rotation = rotation.Radians;
+                sd.Origin = origin;
+            });
 
             if (sprite.EnableBoxOutline)
             {
-                draw.Directives.Add(new PolygonDirective
+                entity.SetDirective<PolygonDirective>("simple-sprite-box-outline", pd =>
                 {
-                    Color = new ColorRGBA(255, 255, 0),
-                    Points = dest.ToPolygon().Points
+                    pd.Color = new ColorRGBA(255, 255, 0);
+                    pd.Points = dest.ToPolygon().Points;
                 });
             }
         }

@@ -123,7 +123,6 @@ namespace DolphEngine.Demo.Games.TestMap
 
                     var tileEntity = new Entity(new Rect2d(x, y, tileSize.Width, tileSize.Height, origin));
                     tileEntity.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Tiles, Index = tilevalue });
-                    tileEntity.AddComponent<DrawComponent>();
                     entities.Add(tileEntity);
 
                     col++;
@@ -178,8 +177,7 @@ namespace DolphEngine.Demo.Games.TestMap
                         new Vector2d(-100, 100),
                         new Vector2d(100, 0)
                     )
-                })
-                .AddComponent<DrawComponent>();
+                });
             shape.Space.Shift(-300, -150);
             this.Ecosystem.AddEntity("TestPolygon", shape);
 
@@ -202,8 +200,7 @@ namespace DolphEngine.Demo.Games.TestMap
                 .AddHandler<SpriteStateHandler>()
                 .AddHandler<TextHandler>()
                 .AddHandler<SpriteHandler>()
-                .AddHandler<PolygonHandler>()
-                .AddHandler(new DrawHandler(this.Renderer));
+                .AddHandler<PolygonHandler>();
 
             this.DebugLogger.AddPage(
                 () => Camera.ToString(),

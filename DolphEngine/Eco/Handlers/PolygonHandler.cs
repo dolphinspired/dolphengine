@@ -4,17 +4,16 @@ using System.Linq;
 
 namespace DolphEngine.Eco.Handlers
 {
-    public class PolygonHandler : EcosystemHandler<PolygonComponent, DrawComponent>
+    public class PolygonHandler : EcosystemHandler<PolygonComponent>
     {
         public override void Draw(Entity entity)
         {
             var poly = entity.GetComponent<PolygonComponent>();
-            var draw = entity.GetComponent<DrawComponent>();
 
-            draw.Directives.Add(new PolygonDirective
+            entity.SetDirective<PolygonDirective>("simple-polygon", pd =>
             {
-                Color = poly.Color,
-                Points = poly.Polygon.Points.Select(x => x.Shift(entity.Space.GetOriginPosition().ToVector())).ToList()
+                pd.Color = poly.Color;
+                pd.Points = poly.Polygon.Points.Select(x => x.Shift(entity.Space.GetOriginPosition().ToVector())).ToList();
             });
         }
     }

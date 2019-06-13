@@ -416,7 +416,7 @@ namespace DolphEngine.Test.Eco
 
         private static Ecosystem TestEco()
         {
-            return new Ecosystem(new GameTimer());
+            return new Ecosystem(new GameTimer(), new MockDirectiveRenderer());
         }
 
         #endregion
