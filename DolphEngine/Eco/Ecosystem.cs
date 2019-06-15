@@ -1,11 +1,12 @@
 ﻿using DolphEngine.Graphics;
+using DolphEngine.Graphics.Directives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DolphEngine.Eco
 {
-    public class Ecosystem
+    public class Ecosystem : IDirectiveChannel
     {
         #region Constructors
 
@@ -14,7 +15,7 @@ namespace DolphEngine.Eco
             this._timer = timer;
             this._renderer = renderer;
         }
-        
+
         private readonly GameTimer _timer;
         private readonly DirectiveRenderer _renderer;
 
@@ -24,7 +25,7 @@ namespace DolphEngine.Eco
 
         // All entities added to the ecosystem, indexed by id
         private readonly Dictionary<string, Entity> _entitiesById = new Dictionary<string, Entity>();
-        
+
         // All types of components for which at least one handler has been registered to this ecosystem at some point, paired with the
         // bitPosition by which the type is represented in a BitLock or BitKey
         private readonly Dictionary<Type, ushort> _componentBitPositions = new Dictionary<Type, ushort>();
@@ -57,7 +58,7 @@ namespace DolphEngine.Eco
         #endregion
 
         #region Handler methods
-        
+
         public Ecosystem AddHandler(EcosystemHandler handler)
         {
             if (handler == null)
@@ -218,16 +219,18 @@ namespace DolphEngine.Eco
             }
         }
 
-        public void Draw()
+        public IEnumerable<DrawDirective> Directives
         {
-            foreach (var lockByHandler in this._locksByHandler)
+            get
             {
-                var entitiesByThisLock = this._entitiesByLock[lockByHandler.Value];
-                lockByHandler.Key.Draw(entitiesByThisLock);
-            }
+                foreach (var lockByHandler in this._locksByHandler)
+                {
+                    var entitiesByThisLock = this._entitiesByLock[lockByHandler.Value];
+                    lockByHandler.Key.Draw(entitiesByThisLock);
+                }
 
-            var allDrawDirectives = this._entitiesById.Select(kvp => kvp.Value.DrawDirectives).SelectMany(kvp => kvp.Values);
-            this._renderer.Draw(allDrawDirectives);
+                return this._entitiesById.Select(kvp => kvp.Value.DrawDirectives).SelectMany(kvp => kvp.Values);
+            }
         }
 
         #endregion

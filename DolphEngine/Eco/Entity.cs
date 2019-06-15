@@ -247,6 +247,8 @@ namespace DolphEngine.Eco
 
         #endregion
 
+        #region Drawing
+
         public Dictionary<string, DrawDirective> DrawDirectives { internal get; set; } = new Dictionary<string, DrawDirective>();
 
         public Entity SetDirective<TDirective>(string name, Action<TDirective> action)
@@ -283,6 +285,8 @@ namespace DolphEngine.Eco
             this.DrawDirectives.Clear();
             return this;
         }
+
+        #endregion
 
         #region Object overrides
 

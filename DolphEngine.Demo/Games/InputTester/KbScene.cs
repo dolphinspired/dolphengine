@@ -218,6 +218,7 @@ namespace DolphEngine.Demo.Games.InputTester
         {
             this.LoadEntities();
             this.LoadControls();
+            this.Renderer.AddDirectiveChannel(this.Ecosystem);
         }
 
         public void Unload()
@@ -234,7 +235,7 @@ namespace DolphEngine.Demo.Games.InputTester
 
         public void Draw()
         {
-            this.Ecosystem.Draw();
+            this.Renderer.Draw();
             this.FpsCounter.Draw();
         }
 

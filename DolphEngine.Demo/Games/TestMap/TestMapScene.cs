@@ -69,6 +69,8 @@ namespace DolphEngine.Demo.Games.TestMap
             this.LoadMap();
             this.LoadEntities();
             this.LoadControls();
+
+            this.Renderer.AddDirectiveChannel(this.Ecosystem);
         }
 
         public void Unload()
@@ -92,7 +94,7 @@ namespace DolphEngine.Demo.Games.TestMap
 
         public void Draw()
         {
-            this.Ecosystem.Draw();
+            this.Renderer.Draw();
             this.DebugLogger.Draw();
             this.FpsCounter.Draw();
         }
@@ -251,25 +253,7 @@ namespace DolphEngine.Demo.Games.TestMap
                     speed.X = 0;
                     speed.Y = 0;
                 })
-                .AddControl(() => k.WASD.IsPressed, () =>
-                {
-                    if ((k.WASD.Direction & Direction2d.Up) > 0)
-                    {
-                        this.Camera.Space.Y -= 8;
-                    }
-                    if ((k.WASD.Direction & Direction2d.Right) > 0)
-                    {
-                        this.Camera.Space.X += 8;
-                    }
-                    if ((k.WASD.Direction & Direction2d.Down) > 0)
-                    {
-                        this.Camera.Space.Y += 8;
-                    }
-                    if ((k.WASD.Direction & Direction2d.Left) > 0)
-                    {
-                        this.Camera.Space.X -= 8;
-                    }
-                })
+                .AddControl(() => k.WASD.IsPressed, () => ControlSchemes.PanCamera(this.Camera, k.WASD))
                 .AddControl(() => m.Scroll.Y.JustMoved, () =>
                 {
                     var zoom = m.Scroll.Y.PositionDelta > 0 ? 0.25f : -0.25f;

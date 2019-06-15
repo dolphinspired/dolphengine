@@ -1,12 +1,14 @@
 ﻿using DolphEngine.Graphics.Directives;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DolphEngine.Graphics
 {
     public abstract class DirectiveRenderer
     {
         private readonly Dictionary<Type, Action<DrawDirective>> _renderers = new Dictionary<Type, Action<DrawDirective>>();
+        private readonly List<IDirectiveChannel> _directiveChannels = new List<IDirectiveChannel>();
 
         #region Core methods
 
@@ -17,7 +19,14 @@ namespace DolphEngine.Graphics
             return this;
         }
 
-        public void Draw(IEnumerable<DrawDirective> directives)
+        // This might be a candidate for some sort of stream structure
+        public DirectiveRenderer AddDirectiveChannel(IDirectiveChannel channel)
+        {
+            this._directiveChannels.Add(channel);
+            return this;
+        }
+
+        public void Draw()
         {
             if (this._renderers.Count == 0)
             {
@@ -29,7 +38,7 @@ namespace DolphEngine.Graphics
                 return;
             }
 
-            foreach (var directive in directives)
+            foreach (var directive in this._directiveChannels.SelectMany(c => c.Directives))
             {
                 if (this._renderers.TryGetValue(directive.GetType(), out var action))
                 {
