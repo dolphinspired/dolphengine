@@ -2,6 +2,6 @@
 {
     public class DrawDirective
     {
-        public Position2d Destination;
+        public virtual Position2d Destination { get; set; }
     }
 }

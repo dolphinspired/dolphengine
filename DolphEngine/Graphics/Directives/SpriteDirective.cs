@@ -2,16 +2,16 @@
 {
     public class SpriteDirective : DrawDirective
     {
-        public string Asset;
+        public virtual string Asset { get; set; }
 
-        public Rect2d Source;
+        public virtual Rect2d Source { get; set; }
 
-        public Size2d Size;
+        public virtual Size2d Size { get; set; }
 
-        public float Rotation;
+        public virtual float Rotation { get; set; }
 
-        public Vector2d Origin;
+        public virtual Vector2d Origin { get; set; }
 
-        public ColorRGBA? Color;
+        public virtual ColorRGBA? Color { get; set; }
     }
 }

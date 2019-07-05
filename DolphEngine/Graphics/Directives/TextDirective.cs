@@ -2,10 +2,10 @@
 {
     public class TextDirective : DrawDirective
     {
-        public string Text;
+        public virtual string Text { get; set; }
 
-        public string FontAssetName;
+        public virtual string FontAssetName { get; set; }
 
-        public ColorRGBA Color;
+        public virtual ColorRGBA Color { get; set; }
     }
 }

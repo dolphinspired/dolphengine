@@ -4,9 +4,8 @@ namespace DolphEngine.Graphics.Directives
 {
     public class PolygonDirective : DrawDirective
     {
-        // todo: Get a real color struct
-        public ColorRGBA Color;
+        public virtual ColorRGBA Color { get; set; }
 
-        public IList<Position2d> Points;
+        public virtual IList<Position2d> Points { get; set; }
     }
 }
