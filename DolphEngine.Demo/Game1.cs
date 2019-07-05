@@ -3,13 +3,13 @@ using DolphEngine.Demo.Games.InputTester;
 using DolphEngine.Demo.Games.TestMap;
 using DolphEngine.DI;
 using DolphEngine.Eco;
-using DolphEngine.Eco.Entities;
 using DolphEngine.Graphics;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
 using DolphEngine.Messaging;
 using DolphEngine.MonoGame;
 using DolphEngine.Scenery;
+using DolphEngine.UI.Containers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -47,12 +47,12 @@ namespace DolphEngine.Demo
                 .AddSingleton<GraphicsDeviceManager>(this.Graphics)
                 .AddSingleton<KeyStateObserver>(new MonoGameObserver().UseKeyboard().UseMouse())
                 .AddScoped<Ecosystem>()
+                .AddScoped<MessageRouter>()
                 .AddScoped<Keycosystem, BasicKeycosystem>()
                 .AddScoped<DebugLogger, BasicDebugLogger>()
-                .AddScoped<CameraEntity, BasicCamera>()
                 .AddScoped<DirectiveRenderer, BasicRenderer>()
                 .AddScoped<FpsCounter, BasicFpsCounter>()
-                .AddScoped<MessageRouter>();
+                .AddScoped<Window, BasicWindow>();
 
             base.Initialize();
         }
@@ -87,18 +87,12 @@ namespace DolphEngine.Demo
 
     #region Basic DI implementations
 
-    public class BasicCamera : CameraEntity
-    {
-        public BasicCamera(GraphicsDeviceManager gdm) : base(gdm.PreferredBackBufferWidth, gdm.PreferredBackBufferHeight)
-        {
-        }
-    }
-
     public class BasicRenderer : MonoGameRenderer
     {
-        public BasicRenderer(SpriteBatch sb, ContentManager content, CameraEntity camera) : base(sb, content, camera)
+        public BasicRenderer(SpriteBatch sb, ContentManager content, GraphicsDeviceManager gdm) : base(sb, content)
         {
             this.BackgroundColor = Color.Black; // todo: make configurable
+            this.AddViewport("default", new Viewport2d(new Rect2d(0, 0, gdm.PreferredBackBufferWidth, gdm.PreferredBackBufferHeight, Origin2d.TrueCenter)));
         }
     }
 
@@ -140,6 +134,14 @@ namespace DolphEngine.Demo
             this.Font = content.Load<SpriteFont>("Assets/Debug10");
             this.Position = new Vector2d(10, gdm.PreferredBackBufferHeight - 22);
             this.SetSampleSize(60);
+        }
+    }
+
+    public class BasicWindow : Window
+    {
+        public BasicWindow(GraphicsDeviceManager gdm)
+        {
+            this.Space = new Rect2d(0, 0, gdm.PreferredBackBufferWidth, gdm.PreferredBackBufferHeight);
         }
     }
 

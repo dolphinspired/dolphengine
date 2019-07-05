@@ -1,13 +1,14 @@
 ﻿using DolphEngine.Demo.Components;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
-using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
 using DolphEngine.Graphics;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
 using DolphEngine.Scenery;
+using DolphEngine.UI.Containers;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DolphEngine.Demo
 {
@@ -19,8 +20,9 @@ namespace DolphEngine.Demo
         protected readonly DebugLogger DebugLogger;
         protected readonly DirectiveRenderer Renderer;
         protected readonly FpsCounter FpsCounter;
+        protected readonly Window Window;
 
-        protected CameraEntity Camera;
+        protected readonly Viewport2d Camera;
 
         private readonly string[] _selectableScenes = new[]
         {
@@ -37,32 +39,34 @@ namespace DolphEngine.Demo
             Keycosystem keycosystem,
             Director director,
             DebugLogger debugLogger,
-            CameraEntity camera,
             DirectiveRenderer renderer,
-            FpsCounter fpsCounter)
+            FpsCounter fpsCounter,
+            Window window)
         {
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
             this.Director = director;
             this.DebugLogger = debugLogger;
-            this.Camera = camera;
             this.Renderer = renderer;
             this.FpsCounter = fpsCounter;
+            this.Window = window;
 
-            // this.Renderer.BackgroundColor = Color.Black;
+            this.Camera = renderer.GetViewport("default");
         }
 
         public void Load()
         {
             var viewTopLeft = this.Camera.Space.TopLeft;
+            viewTopLeft.Shift(10, 10); // Padding from edge of screen
 
-            this.Ecosystem.AddEntity("Camera", this.Camera);
-
-            // All of the below is some really hacked together proto-UI garbage
-            // There will be a better way to do this in the future
-            var title = new Entity(new Rect2d(viewTopLeft + new Vector2d(10, 10), Size2d.Zero)); // Text doesn't use size yet
-            title.AddComponent(new TextComponent { Text = "Select a scene:", FontAssetName = "Assets/Zelda12", Color = new ColorRGBA(255, 255, 255) });
-            this.Ecosystem.AddEntity("Title", title);
+            var title = new TextBox
+            {
+                Text = "Select a scene:",
+                Color = new ColorRGBA(255, 255, 255),
+                Font = "Assets/Zelda12",
+                Space = new Rect2d(viewTopLeft, Size2d.Zero)
+            };
+            this.Window.Children.Add(title);
 
             var cursor = new Entity(new Rect2d(0, 0, 7, 11, Anchor2d.MiddleRight));
             cursor.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, Index = 1 });
@@ -132,11 +136,19 @@ namespace DolphEngine.Demo
                 {
                     var selectedSceneName = this._selectableScenes[this._selectedIndex];
                     this.Director.LoadScene(selectedSceneName);
-                });
+                })
+                .AddControl(() => k.WASD.IsPressed, () => ControlSchemes.PanCamera(this.Camera, k.WASD));
 
             this.Keycosystem.AddControlScheme("SceneSelect", controls);
             this.Keycosystem.AddControlScheme("DebugNav", ControlSchemes.DebugNavigation(this.DebugLogger, k));
-            this.DebugLogger.AddControlInfo(this.Keycosystem);
+            this.DebugLogger.AddPage(
+                () => $"Ecosystem Directives: {this.Ecosystem.Directives.Count()}",
+                () => $"Window Directives: {this.Window.Directives.Count()}");
+            
+
+            this.Renderer
+                .AddViewChannel("default", this.Ecosystem)
+                .AddViewChannel("default", this.Window);
         }
 
         public void Unload()
@@ -153,7 +165,7 @@ namespace DolphEngine.Demo
 
         public void Draw()
         {
-            this.Ecosystem.Draw();
+            this.Renderer.Draw();
             this.DebugLogger.Draw();
             this.FpsCounter.Draw();
         }

@@ -1,6 +1,5 @@
 ﻿using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
-using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
 using DolphEngine.Graphics;
 using DolphEngine.Input;
@@ -17,7 +16,7 @@ namespace DolphEngine.Demo.Games.InputTester
     {
         private readonly Ecosystem Ecosystem;
         private readonly Keycosystem Keycosystem;
-        private readonly CameraEntity Camera;
+        private readonly Viewport2d Camera;
         private readonly DirectiveRenderer Renderer;
         private readonly FpsCounter FpsCounter;
 
@@ -203,22 +202,22 @@ namespace DolphEngine.Demo.Games.InputTester
         public KbScene(
             Ecosystem ecosystem,
             Keycosystem keycosystem,
-            CameraEntity camera,
             DirectiveRenderer renderer,
             FpsCounter fpsCounter)
         {
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
-            this.Camera = camera;
             this.Renderer = renderer;
             this.FpsCounter = fpsCounter;
+
+            this.Camera = renderer.GetViewport("default");
         }
 
         public void Load()
         {
             this.LoadEntities();
             this.LoadControls();
-            this.Renderer.AddDirectiveChannel(this.Ecosystem);
+            this.Renderer.AddViewChannel("default", this.Ecosystem);
         }
 
         public void Unload()
@@ -292,7 +291,6 @@ namespace DolphEngine.Demo.Games.InputTester
             this.Keycosystem.AddControlScheme("KeyHighlighter", controlScheme);
 
             this.Ecosystem
-                .AddEntity("Camera", this.Camera)
                 .AddHandler<PolygonHandler>();
 
             // todo: none of this works to move the camera?

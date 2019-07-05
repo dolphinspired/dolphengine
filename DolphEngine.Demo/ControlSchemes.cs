@@ -1,4 +1,4 @@
-﻿using DolphEngine.Eco.Entities;
+﻿using DolphEngine.Graphics;
 using DolphEngine.Input;
 using DolphEngine.Input.Controllers;
 using DolphEngine.Input.Controls;
@@ -15,7 +15,7 @@ namespace DolphEngine.Demo
                 .AddControl(() => k.F2.JustPressed, () => debugLogger.NextPage());
         }
 
-        public static void PanCamera(CameraEntity camera, DirectionalPadControl dpad)
+        public static void PanCamera(Viewport2d camera, DirectionalPadControl dpad)
         {
             if ((dpad.Direction & Direction2d.Up) > 0)
             {

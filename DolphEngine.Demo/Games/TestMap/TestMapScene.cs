@@ -2,7 +2,6 @@
 using DolphEngine.Demo.Games.TestMap.Handlers;
 using DolphEngine.Eco;
 using DolphEngine.Eco.Components;
-using DolphEngine.Eco.Entities;
 using DolphEngine.Eco.Handlers;
 using DolphEngine.Graphics;
 using DolphEngine.Input;
@@ -26,7 +25,7 @@ namespace DolphEngine.Demo.Games.TestMap
         protected readonly GameTimer Timer;
 
         protected PlayerEntity Player;
-        protected CameraEntity Camera;
+        protected Viewport2d Camera;
         protected PubKey<Position2d> PlayerPosition;
         protected SubKey SubKey;
 
@@ -45,7 +44,6 @@ namespace DolphEngine.Demo.Games.TestMap
             Keycosystem keycosystem, 
             DebugLogger debugLogger,
             Director director,
-            CameraEntity camera,
             DirectiveRenderer renderer,
             FpsCounter fpsCounter,
             MessageRouter messageRouter,
@@ -54,7 +52,6 @@ namespace DolphEngine.Demo.Games.TestMap
             this.Ecosystem = ecosystem;
             this.Keycosystem = keycosystem;
             this.DebugLogger = debugLogger;
-            this.Camera = camera;
             this.Renderer = renderer;
             this.FpsCounter = fpsCounter;
             this.MessageRouter = messageRouter;
@@ -62,6 +59,7 @@ namespace DolphEngine.Demo.Games.TestMap
 
             this.PlayerPosition = messageRouter.GetPubKey<Position2d>("player-position");
             this.SubKey = messageRouter.GetSubKey();
+            this.Camera = renderer.GetViewport("default");
         }
 
         public void Load()
@@ -70,7 +68,7 @@ namespace DolphEngine.Demo.Games.TestMap
             this.LoadEntities();
             this.LoadControls();
 
-            this.Renderer.AddDirectiveChannel(this.Ecosystem);
+            this.Renderer.AddViewChannel("default", this.Ecosystem);
         }
 
         public void Unload()
@@ -138,8 +136,6 @@ namespace DolphEngine.Demo.Games.TestMap
 
         private void LoadEntities()
         {
-            this.Ecosystem.AddEntity("Camera", this.Camera);
-
             this.Player = new PlayerEntity();
             this.Player.Text.Text = "Alphonse";
             this.Player.Text.FontAssetName = "Assets/Debug10";
@@ -257,11 +253,11 @@ namespace DolphEngine.Demo.Games.TestMap
                 .AddControl(() => m.Scroll.Y.JustMoved, () =>
                 {
                     var zoom = m.Scroll.Y.PositionDelta > 0 ? 0.25f : -0.25f;
-                    this.Camera.Lens.Zoom += zoom;
+                    this.Camera.Zoom += zoom;
                 })
-                .AddControl(() => m.MiddleClick.JustPressed, () => this.Camera.Lens.Zoom = 1.000f)
-                .AddControl(() => k.F.JustPressed, () => this.Camera.Lens.Focus = this.Player)
-                .AddControl(() => k.G.JustPressed, () => this.Camera.Lens.Focus = null)
+                .AddControl(() => m.MiddleClick.JustPressed, () => this.Camera.Zoom = 1.000f)
+                .AddControl(() => k.F.JustPressed, () => this.Camera.Focus = () => this.Player.Space.GetOriginPosition())
+                .AddControl(() => k.G.JustPressed, () => this.Camera.Focus = null)
                 .AddControl(() => k.LeftShift.DurationPressed > TimeSpan.FromSeconds(1).Ticks && k.Z.DurationPressed > TimeSpan.FromSeconds(1).Ticks, () =>
                 {
                     this.Director.LoadScene(Scenes.SceneSelect);

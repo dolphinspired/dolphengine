@@ -1,6 +1,4 @@
-﻿using DolphEngine.Eco;
-using DolphEngine.Eco.Components;
-using DolphEngine.Graphics;
+﻿using DolphEngine.Graphics;
 using DolphEngine.Graphics.Directives;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -17,17 +15,16 @@ namespace DolphEngine.MonoGame
 
         protected readonly SpriteBatch SpriteBatch;
         protected readonly ContentManager Content;
-        protected readonly Entity Camera;
 
         private readonly Texture2D _pixelTexture;
 
         public Color BackgroundColor = Color.CornflowerBlue;
+        public bool ClearFrame = true;
 
-        public MonoGameRenderer(SpriteBatch spriteBatch, ContentManager contentManager, Entity camera)
+        public MonoGameRenderer(SpriteBatch spriteBatch, ContentManager contentManager)
         {
             this.SpriteBatch = spriteBatch;
             this.Content = contentManager;
-            this.Camera = camera;
 
             this.AddRenderer<SpriteDirective>(this.DrawSprite)
                 .AddRenderer<TextDirective>(this.DrawText)
@@ -37,44 +34,44 @@ namespace DolphEngine.MonoGame
             this._pixelTexture.SetData(new Color[] { Color.White });
         }
 
-        public override bool OnBeforeDraw()
+        public override bool OnBeforeRenderView(Viewport2d viewport)
         {
-            if (Camera.Space.Width <= 0 || Camera.Space.Height <= 0)
-            {
-                // If the camera is zero-size, nothing can be drawn, but we still need to clear out the last frame
-                this.SpriteBatch.Begin();
-                this.SpriteBatch.GraphicsDevice.Clear(this.BackgroundColor);
-                this.SpriteBatch.End();
-                return false;
-            }
-
-            var lens = this.Camera.GetComponentOrDefault<CameraComponent>();
-
-            if (lens.Focus != null)
-            {
-                this.Camera.Space.MoveTo(lens.Focus.Space);
-            }
-
-            var zoomDiffX = (Camera.Space.Width * lens.Zoom) - Camera.Space.Width;
-            var zoomDiffY = (Camera.Space.Height * lens.Zoom) - Camera.Space.Height;
-
-            // This formula adapted from: https://roguesharp.wordpress.com/2014/07/13/tutorial-5-creating-a-2d-camera-with-pan-and-zoom-in-monogame/
-            var translation =
-                Matrix.CreateTranslation(-Camera.Space.TopLeft.X, -Camera.Space.TopLeft.Y, FZero) *
-                Matrix.CreateTranslation(lens.Pan.X, lens.Pan.Y, FZero) *
-                //Matrix.CreateRotationZ(cameraTranslation.Rotation) *
-                Matrix.CreateScale(lens.Zoom, lens.Zoom, FOne) *
-                Matrix.CreateTranslation(-zoomDiffX / 2, -zoomDiffY / 2, FZero); // Keep the camera centered after zoom
+            var translation = GetCameraTranslation(viewport);
 
             this.SpriteBatch.Begin(
                 samplerState: SamplerState.PointWrap, // disable anti-aliasing
                 transformMatrix: translation);
 
-            this.SpriteBatch.GraphicsDevice.Clear(this.BackgroundColor);
+            if (this.ClearFrame)
+            {
+                // todo: this probably doesn't work with multiple viewports on one screen
+                this.SpriteBatch.GraphicsDevice.Clear(this.BackgroundColor);
+            }
             return true;
         }
 
-        public override void OnAfterDraw()
+        private static Matrix GetCameraTranslation(Viewport2d viewport)
+        {
+            if (viewport.Focus != null)
+            {
+                viewport.Space.MoveTo(viewport.Focus());
+            }
+
+            var zoomDiffX = (viewport.Space.Width * viewport.Zoom) - viewport.Space.Width;
+            var zoomDiffY = (viewport.Space.Height * viewport.Zoom) - viewport.Space.Height;
+
+            // This formula adapted from: https://roguesharp.wordpress.com/2014/07/13/tutorial-5-creating-a-2d-camera-with-pan-and-zoom-in-monogame/
+            var translation =
+                Matrix.CreateTranslation(-viewport.Space.TopLeft.X, -viewport.Space.TopLeft.Y, FZero) *
+                Matrix.CreateTranslation(viewport.Pan.X, viewport.Pan.Y, FZero) *
+                //Matrix.CreateRotationZ(cameraTranslation.Rotation) *
+                Matrix.CreateScale(viewport.Zoom, viewport.Zoom, FOne) *
+                Matrix.CreateTranslation(-zoomDiffX / 2, -zoomDiffY / 2, FZero); // Keep the camera centered after zoom
+
+            return translation;
+        }
+
+        public override void OnAfterRenderView(Viewport2d viewport)
         {
             this.SpriteBatch.End();
         }

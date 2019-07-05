@@ -8,8 +8,10 @@ namespace DolphEngine.Graphics
     public abstract class DirectiveRenderer
     {
         private readonly Dictionary<Type, Action<DrawDirective>> _renderers = new Dictionary<Type, Action<DrawDirective>>();
-        private readonly List<IDirectiveChannel> _directiveChannels = new List<IDirectiveChannel>();
-
+        // todo: this structure isn't great if you want to reference the same viewChannels in multiple panes (i.e. split-screen multiplayer), but it'll do for now
+        private readonly Dictionary<Viewport2d, List<IDirectiveChannel>> _viewChannels = new Dictionary<Viewport2d, List<IDirectiveChannel>>(ReferenceEqualityComparer<Viewport2d>.Default);
+        private readonly Dictionary<string, Viewport2d> _viewports = new Dictionary<string, Viewport2d>();
+        
         #region Core methods
 
         public DirectiveRenderer AddRenderer<TDirective>(Action<TDirective> handler)
@@ -20,10 +22,42 @@ namespace DolphEngine.Graphics
         }
 
         // This might be a candidate for some sort of stream structure
-        public DirectiveRenderer AddDirectiveChannel(IDirectiveChannel channel)
+        public DirectiveRenderer AddViewChannel(string viewportName, IDirectiveChannel channel)
         {
-            this._directiveChannels.Add(channel);
+            if (!this._viewports.TryGetValue(viewportName, out var viewport))
+            {
+                throw new InvalidOperationException($"No viewport has been added with name '{viewportName}' - cannot add a channel to it!");
+            }
+
+            if (!this._viewChannels.TryGetValue(viewport, out var channels))
+            {
+                channels = new List<IDirectiveChannel>();
+                this._viewChannels.Add(viewport, channels);
+            }
+
+            channels.Add(channel);
             return this;
+        }
+
+        public DirectiveRenderer AddViewport(string name, Viewport2d viewport)
+        {
+            if (this._viewports.ContainsKey(name))
+            {
+                throw new InvalidOperationException($"A viewport has already been added with name '{name}'!");
+            }
+
+            this._viewports.Add(name, viewport);
+            return this;
+        }
+
+        public Viewport2d GetViewport(string name)
+        {
+            if (!this._viewports.TryGetValue(name, out var viewport))
+            {
+                throw new InvalidOperationException($"No viewport has been added with name '{name}'!");
+            }
+
+            return viewport;
         }
 
         public void Draw()
@@ -38,12 +72,24 @@ namespace DolphEngine.Graphics
                 return;
             }
 
-            foreach (var directive in this._directiveChannels.SelectMany(c => c.Directives))
+            foreach (var viewChannel in this._viewChannels)
             {
-                if (this._renderers.TryGetValue(directive.GetType(), out var action))
+                var viewport = viewChannel.Key;
+
+                if (!this.OnBeforeRenderView(viewport))
                 {
-                    action(directive);
+                    continue;
                 }
+
+                foreach (var directive in viewChannel.Value.SelectMany(c => c.Directives))
+                {
+                    if (this._renderers.TryGetValue(directive.GetType(), out var action))
+                    {
+                        action(directive);
+                    }
+                }
+
+                this.OnAfterRenderView(viewport);
             }
 
             this.OnAfterDraw();
@@ -54,15 +100,29 @@ namespace DolphEngine.Graphics
         #region Abstract methods
 
         /// <summary>
-        /// This method will be called once, before any directives handled.
+        /// This method will be called once, before any directives are handled.
         /// </summary>
         /// <returns>True to proceed with drawing, false otherwise. If false, renderers and OnAfterDraw will not be called.</returns>
-        public abstract bool OnBeforeDraw();
+        public virtual bool OnBeforeDraw()
+        {
+            return true;
+        }
+
+        public virtual bool OnBeforeRenderView(Viewport2d viewport)
+        {
+            return true;
+        }
+
+        public virtual void OnAfterRenderView(Viewport2d viewport)
+        {
+        }
 
         /// <summary>
         /// This method will be called once, after all directives have been handled.
         /// </summary>
-        public abstract void OnAfterDraw();
+        public virtual void OnAfterDraw()
+        {
+        }
 
         #endregion
     }
