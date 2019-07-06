@@ -201,60 +201,22 @@ namespace DolphEngine
             return new Polygon2d(TopLeft, TopRight, BottomRight, BottomLeft).Close();
         }
 
-        public Rect2d MoveTo(Position2d position)
-        {
-            this.X = position.X;
-            this.Y = position.Y;
-            return this;
-        }
-
-        public Rect2d MoveTo(float x, float y)
+        public void MoveTo(float x, float y)
         {
             this.X = x;
             this.Y = y;
-            return this;
         }
 
-        public Rect2d MoveTo(Rect2d rect)
-        {
-            this.X = rect.X;
-            this.Y = rect.Y;
-            return this;
-        }
-
-        public Rect2d Shift(Vector2d vector)
-        {
-            this.X += vector.X;
-            this.Y += vector.Y;
-            return this;
-        }
-
-        public Rect2d Shift(float x, float y)
+        public void Shift(float x, float y)
         {
             this.X += x;
             this.Y += y;
-            return this;
         }
 
-        public Rect2d Scale(float magnitude)
-        {
-            this.Width *= magnitude;
-            this.Height *= magnitude;
-            return this;
-        }
-
-        public Rect2d Scale(float x, float y)
+        public void Scale(float x, float y)
         {
             this.Width *= x;
             this.Height *= y;
-            return this;
-        }
-
-        public Rect2d Scale(Vector2d scale)
-        {
-            this.Width *= scale.X;
-            this.Height *= scale.Y;
-            return this;
         }
 
         #endregion
@@ -303,5 +265,111 @@ namespace DolphEngine
         }
 
         #endregion
+    }
+
+    public abstract class Rect2dBase : IRect2d
+    {
+        public Rect2dBase()
+        {
+        }
+
+        public Rect2dBase(Rect2d rect)
+        {
+            this._rect = rect;
+        }
+
+        public virtual float X
+        {
+            get => this._rect.X;
+            set => this._rect.X = value;
+        }
+
+        public virtual float Y
+        {
+            get => this._rect.Y;
+            set => this._rect.Y = value;
+        }
+
+        public virtual float Width
+        {
+            get => this._rect.Width;
+            set => this._rect.Width = value;
+        }
+
+        public virtual float Height
+        {
+            get => this._rect.Height;
+            set => this._rect.Height = value;
+        }
+
+        public virtual Origin2d Origin
+        {
+            get => this._rect.Origin;
+            set => this._rect.Origin = value;
+        }
+
+        private Rect2d _rect;
+        public Rect2d Rect
+        {
+            get => this._rect;
+            set => this._rect = value;
+        }
+
+        public virtual Position2d Position
+        {
+            get => this._rect.GetOriginPosition();
+        }
+
+        public virtual Size2d Size
+        {
+            get => this._rect.GetSize();
+        }
+
+        public override string ToString()
+        {
+            return this._rect.ToString();
+        }
+    }
+
+    public interface IRect2d : IPosition2d, ISize2d
+    {
+        Origin2d Origin { get; set; }
+    }
+
+    public static class Rect2dExtensions
+    {
+        public static Position2d GetOriginPosition(this IRect2d rect)
+        {
+            return new Rect2d(rect.X, rect.Y, rect.Width, rect.Height, rect.Origin).GetOriginPosition();
+        }
+
+        public static Position2d GetOriginPosition(this IRect2d rect, float offsetX, float offsetY)
+        {
+            var pos = rect.GetOriginPosition();
+            pos.Shift(offsetX, offsetY);
+            return pos;
+        }
+
+        public static Position2d GetOriginPosition(this IRect2d rect, Vector2d offset)
+        {
+            return rect.GetOriginPosition(offset.X, offset.Y);
+        }
+
+        public static Position2d GetAnchorPosition(this IRect2d rect, Anchor2d anchor)
+        {
+            return new Rect2d(rect.X, rect.Y, rect.Width, rect.Height, rect.Origin).GetAnchorPosition(anchor);
+        }
+
+        public static Position2d GetAnchorPosition(this IRect2d rect, Anchor2d anchor, float offsetX, float offsetY)
+        {
+            var pos = rect.GetAnchorPosition(anchor);
+            pos.Shift(offsetX, offsetY);
+            return pos;
+        }
+
+        public static Position2d GetAnchorPosition(this IRect2d rect, Anchor2d anchor, Vector2d offset)
+        {
+            return rect.GetAnchorPosition(anchor, offset.X, offset.Y);
+        }
     }
 }

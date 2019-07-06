@@ -9,11 +9,15 @@ namespace DolphEngine.Eco.Handlers
         public override void Draw(Entity entity)
         {
             var poly = entity.GetComponent<PolygonComponent>();
+            var entityOrigin = entity.GetOriginPosition();
 
             entity.SetDirective<PolygonDirective>("simple-polygon", pd =>
             {
                 pd.Color = poly.Color;
-                pd.Points = poly.Polygon.Points.Select(x => x.Shift(entity.Space.GetOriginPosition().ToVector())).ToList();
+                pd.Points = poly.Polygon.Points.Select(x => {
+                    x.Shift(entityOrigin.X, entityOrigin.Y);
+                    return x;
+                }).ToList();
             });
         }
     }

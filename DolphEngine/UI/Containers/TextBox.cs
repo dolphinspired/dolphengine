@@ -38,7 +38,7 @@ namespace DolphEngine.UI.Containers
         {
             get
             {
-                this._td.Destination = this.Space.GetOriginPosition();
+                this._td.Destination = this.GetOriginPosition();
                 yield return this._td;
             }
         }

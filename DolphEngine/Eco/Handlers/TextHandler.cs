@@ -18,7 +18,7 @@ namespace DolphEngine.Eco.Handlers
             entity.SetDirective<TextDirective>("simple-text", td =>
             {
                 td.FontAssetName = text.FontAssetName;
-                td.Destination = entity.Space.GetOriginPosition();
+                td.Destination = entity.GetOriginPosition();
                 td.Text = text.Text;
                 td.Color = text.Color;
             });

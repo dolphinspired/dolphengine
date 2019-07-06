@@ -26,32 +26,16 @@ namespace DolphEngine
 
         #region Public methods
 
-        public Position2d MoveTo(float x, float y)
+        public void MoveTo(float x, float y)
         {
             this.X = x;
             this.Y = y;
-            return this;
         }
 
-        public Position2d MoveTo(Position2d position)
-        {
-            this.X = position.X;
-            this.Y = position.Y;
-            return this;
-        }
-
-        public Position2d Shift(float x, float y)
+        public void Shift(float x, float y)
         {
             this.X += x;
             this.Y += y;
-            return this;
-        }
-
-        public Position2d Shift(Vector2d vector)
-        {
-            this.X += vector.X;
-            this.Y += vector.Y;
-            return this;
         }
 
         public Vector2d ToVector()
@@ -131,6 +115,71 @@ namespace DolphEngine
         public override string ToString()
         {
             return $"[ {X}, {Y} ]";
+        }
+
+        #endregion
+    }
+
+    public abstract class Position2dBase : IPosition2d
+    {
+        public virtual float X
+        {
+            get => this._pos.X;
+            set => this._pos.X = value;
+        }
+
+        public virtual float Y
+        {
+            get => this._pos.Y;
+            set => this._pos.Y = value;
+        }
+
+        private Position2d _pos;
+        public virtual Position2d Position
+        {
+            get => this._pos;
+            set => this._pos = value;
+        }
+
+        public override string ToString()
+        {
+            return this._pos.ToString();
+        }
+    }
+
+    public interface IPosition2d
+    {
+        float X { get; set; }
+
+        float Y { get; set; }
+    }
+
+    public static class Position2dExtensions
+    {
+        #region Public methods
+
+        public static IPosition2d MoveTo(this IPosition2d pos, float x, float y)
+        {
+            pos.X = x;
+            pos.Y = y;
+            return pos;
+        }
+
+        public static IPosition2d MoveTo(this IPosition2d pos, Position2d position)
+        {
+            return pos.MoveTo(position.X, position.Y);
+        }
+
+        public static IPosition2d Shift(this IPosition2d pos, float x, float y)
+        {
+            pos.X += x;
+            pos.Y += y;
+            return pos;
+        }
+
+        public static IPosition2d Shift(this IPosition2d pos, Vector2d vector)
+        {
+            return pos.Shift(vector.X, vector.Y);
         }
 
         #endregion

@@ -5,10 +5,8 @@ using System.Linq;
 
 namespace DolphEngine.UI
 {
-    public abstract class Container : IDirectiveChannel
+    public abstract class Container : Rect2dBase, IDirectiveChannel
     {
-        public Rect2d Space;
-
         private List<Container> _children;
         public List<Container> Children
         {

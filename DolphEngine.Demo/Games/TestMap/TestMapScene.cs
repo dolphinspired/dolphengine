@@ -83,7 +83,7 @@ namespace DolphEngine.Demo.Games.TestMap
 
             if (this.Timer.Frames % 10 == 0)
             {
-                this.PlayerPosition.Publish(this.Player.Space.GetOriginPosition());
+                this.PlayerPosition.Publish(this.Player.GetOriginPosition());
             }
 
             this.MessageRouter.Update();
@@ -144,22 +144,22 @@ namespace DolphEngine.Demo.Games.TestMap
             this.Ecosystem.AddEntity("Player", this.Player);
 
             var arrow1 = new GlyphEntity(0);
-            arrow1.Space = new Rect2d(0, 0, 21, 11, new Origin2d(Anchor2d.MiddleRight));
-            arrow1.AddComponent(new LinkedPositionComponent(this.Player, e => e.Space.GetAnchorPosition(Anchor2d.MiddleLeft).Shift(new Vector2d(-5, 0))));
+            arrow1.Rect = new Rect2d(0, 0, 21, 11, new Origin2d(Anchor2d.MiddleRight));
+            arrow1.AddComponent(new LinkedPositionComponent(this.Player, e => e.GetAnchorPosition(Anchor2d.MiddleLeft, -5, 0)));
             arrow1.Sprite.Scale = new Vector2d(2, 2);
             arrow1.Sprite.OffsetAnimation = Animations.Select(TimeSpan.FromSeconds(1));
             arrow1.Sprite.EnableBoxOutline = true;
             this.Ecosystem.AddEntity("Arrow", arrow1);
 
             var ball1 = new GlyphEntity(2);
-            ball1.Space = new Rect2d(100, 50, 11, 11, Origin2d.TrueCenter);
+            ball1.Rect = new Rect2d(100, 50, 11, 11, Origin2d.TrueCenter);
             ball1.Sprite.Scale = new Vector2d(4, 4);
             ball1.Sprite.RotationAnimation = Animations.Rotate(TimeSpan.FromSeconds(1));
             ball1.Sprite.EnableBoxOutline = true;
             this.Ecosystem.AddEntity("Ball (rotating)", ball1);
 
             var ball2 = new GlyphEntity(2);
-            ball2.Space = new Rect2d(100, 150, 11, 11, Origin2d.TrueCenter);
+            ball2.Rect = new Rect2d(100, 150, 11, 11, Origin2d.TrueCenter);
             ball2.Sprite.Scale = new Vector2d(4, 4);
             ball2.Sprite.ScaleAnimation = Animations.Breathe(TimeSpan.FromSeconds(4));
             ball2.Sprite.EnableBoxOutline = true;
@@ -176,7 +176,7 @@ namespace DolphEngine.Demo.Games.TestMap
                         new Vector2d(100, 0)
                     )
                 });
-            shape.Space.Shift(-300, -150);
+            shape.Shift(-300, -150);
             this.Ecosystem.AddEntity("TestPolygon", shape);
 
             this.SubKey.Subscribe<Position2d>("player-position", position =>
@@ -256,7 +256,7 @@ namespace DolphEngine.Demo.Games.TestMap
                     this.Camera.Zoom += zoom;
                 })
                 .AddControl(() => m.MiddleClick.JustPressed, () => this.Camera.Zoom = 1.000f)
-                .AddControl(() => k.F.JustPressed, () => this.Camera.Focus = () => this.Player.Space.GetOriginPosition())
+                .AddControl(() => k.F.JustPressed, () => this.Camera.Focus = () => this.Player.GetOriginPosition())
                 .AddControl(() => k.G.JustPressed, () => this.Camera.Focus = null)
                 .AddControl(() => k.LeftShift.DurationPressed > TimeSpan.FromSeconds(1).Ticks && k.Z.DurationPressed > TimeSpan.FromSeconds(1).Ticks, () =>
                 {

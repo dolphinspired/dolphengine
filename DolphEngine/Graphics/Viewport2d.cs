@@ -2,16 +2,11 @@
 
 namespace DolphEngine.Graphics
 {
-    public class Viewport2d
+    public class Viewport2d : Rect2dBase
     {
         public Viewport2d() { }
 
-        public Viewport2d(Rect2d space)
-        {
-            this.Space = space;
-        }
-
-        public Rect2d Space;
+        public Viewport2d(Rect2d rect) : base(rect) { }
 
         public float Zoom = 1.000f;
 
@@ -23,7 +18,7 @@ namespace DolphEngine.Graphics
 
         public override string ToString()
         {
-            return $"{{ space: {this.Space}, zoom: {this.Zoom}, pan: {this.Pan}, focus: {this.Focus?.Invoke().ToString() ?? "null"} }}";
+            return $"{{ rect: {this.Rect}, zoom: {this.Zoom}, pan: {this.Pan}, focus: {this.Focus?.Invoke().ToString() ?? "null"} }}";
         }
 
         #endregion

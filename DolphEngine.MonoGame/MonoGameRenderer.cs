@@ -54,15 +54,16 @@ namespace DolphEngine.MonoGame
         {
             if (viewport.Focus != null)
             {
-                viewport.Space.MoveTo(viewport.Focus());
+                viewport.MoveTo(viewport.Focus());
             }
 
-            var zoomDiffX = (viewport.Space.Width * viewport.Zoom) - viewport.Space.Width;
-            var zoomDiffY = (viewport.Space.Height * viewport.Zoom) - viewport.Space.Height;
+            var zoomDiffX = (viewport.Width * viewport.Zoom) - viewport.Width;
+            var zoomDiffY = (viewport.Height * viewport.Zoom) - viewport.Height;
+            var viewportTopLeft = viewport.GetAnchorPosition(Anchor2d.TopLeft);
 
             // This formula adapted from: https://roguesharp.wordpress.com/2014/07/13/tutorial-5-creating-a-2d-camera-with-pan-and-zoom-in-monogame/
             var translation =
-                Matrix.CreateTranslation(-viewport.Space.TopLeft.X, -viewport.Space.TopLeft.Y, FZero) *
+                Matrix.CreateTranslation(-viewportTopLeft.X, -viewportTopLeft.Y, FZero) *
                 Matrix.CreateTranslation(viewport.Pan.X, viewport.Pan.Y, FZero) *
                 //Matrix.CreateRotationZ(cameraTranslation.Rotation) *
                 Matrix.CreateScale(viewport.Zoom, viewport.Zoom, FOne) *

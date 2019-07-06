@@ -141,7 +141,7 @@ namespace DolphEngine.Demo
     {
         public BasicWindow(GraphicsDeviceManager gdm)
         {
-            this.Space = new Rect2d(0, 0, gdm.PreferredBackBufferWidth, gdm.PreferredBackBufferHeight);
+            this.Rect = new Rect2d(0, 0, gdm.PreferredBackBufferWidth, gdm.PreferredBackBufferHeight);
         }
     }
 

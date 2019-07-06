@@ -15,7 +15,7 @@ namespace DolphEngine.Eco.Handlers
                 return;
             }
 
-            Rect2d dest = entity.Space;
+            Rect2d dest = entity.Rect;
 
             // Get the origin before any transformations are applied
             Vector2d origin = (dest.GetOriginPosition() - dest.TopLeft).ToVector();
@@ -26,17 +26,18 @@ namespace DolphEngine.Eco.Handlers
                 rotation.Turn(sprite.RotationAnimation.GetFrame(this.Timer.Total));
             }
 
-            dest.Shift(sprite.Offset);
+            dest.Shift(sprite.Offset.X, sprite.Offset.Y);
             if (sprite.OffsetAnimation != null)
             {
-                dest.Shift(sprite.OffsetAnimation.GetFrame(this.Timer.Total));
+                var animShift = sprite.OffsetAnimation.GetFrame(this.Timer.Total);
+                dest.Shift(animShift.X, animShift.Y);
             }
 
-            dest.Scale(sprite.Scale);
+            dest.Scale(sprite.Scale.X, sprite.Scale.Y);
             if (sprite.ScaleAnimation != null)
             {
                 var animScale = sprite.ScaleAnimation.GetFrame(this.Timer.Total);
-                dest.Scale(animScale);
+                dest.Scale(animScale.X, animScale.Y);
             }
 
             entity.SetDirective<SpriteDirective>("simple-sprite", sd => 

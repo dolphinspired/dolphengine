@@ -235,29 +235,7 @@ namespace DolphEngine.Test.Core
             var y = 25;
 
             var rect = new Rect2d(x, y, w1, h1);
-            rect.Scale(mag);
-
-            DolphAssert.EqualF(x, rect.X);
-            DolphAssert.EqualF(y, rect.Y);
-            DolphAssert.EqualF(w2, rect.Width);
-            DolphAssert.EqualF(h2, rect.Height);
-        }
-
-        [Theory]
-        [InlineData( 10,  20,   3,  -3,  30, -60)]
-        [InlineData(-10, -20,  -4, 0.5,  40, -10)]
-        public void CanScaleByVector(float w1, float h1, float x, float y, float w2, float h2)
-        {
-            var rect = new Rect2d(x, y, w1, h1);
-            rect.Scale(x, y);
-
-            DolphAssert.EqualF(x, rect.X);
-            DolphAssert.EqualF(y, rect.Y);
-            DolphAssert.EqualF(w2, rect.Width);
-            DolphAssert.EqualF(h2, rect.Height);
-
-            rect = new Rect2d(x, y, w1, h1);
-            rect.Scale(new Vector2d(x, y));
+            rect.Scale(mag, mag);
 
             DolphAssert.EqualF(x, rect.X);
             DolphAssert.EqualF(y, rect.Y);

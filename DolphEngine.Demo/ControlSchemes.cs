@@ -19,19 +19,19 @@ namespace DolphEngine.Demo
         {
             if ((dpad.Direction & Direction2d.Up) > 0)
             {
-                camera.Space.Y -= 8;
+                camera.Y -= 8;
             }
             if ((dpad.Direction & Direction2d.Right) > 0)
             {
-                camera.Space.X += 8;
+                camera.X += 8;
             }
             if ((dpad.Direction & Direction2d.Down) > 0)
             {
-                camera.Space.Y += 8;
+                camera.Y += 8;
             }
             if ((dpad.Direction & Direction2d.Left) > 0)
             {
-                camera.Space.X -= 8;
+                camera.X -= 8;
             }
         }
     }

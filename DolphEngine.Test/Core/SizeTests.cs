@@ -18,25 +18,7 @@ namespace DolphEngine.Test.Core
         public void CanScaleByMagnitude(float w1, float h1, float mag, float w2, float h2)
         {
             var size = new Size2d(w1, h1);
-            size.Scale(mag);
-
-            DolphAssert.EqualF(w2, size.Width);
-            DolphAssert.EqualF(h2, size.Height);
-        }
-
-        [Theory]
-        [InlineData( 10,  20,   3,  -3,  30, -60)]
-        [InlineData(-10, -20,  -4, 0.5,  40, -10)]
-        public void CanScaleByVector(float w1, float h1, float x, float y, float w2, float h2)
-        {
-            var size = new Size2d(w1, h1);
-            size.Scale(x, y);
-
-            DolphAssert.EqualF(w2, size.Width);
-            DolphAssert.EqualF(h2, size.Height);
-
-            size = new Size2d(w1, h1);
-            size.Scale(new Vector2d(x, y));
+            size.Scale(mag, mag);
 
             DolphAssert.EqualF(w2, size.Width);
             DolphAssert.EqualF(h2, size.Height);
@@ -75,7 +57,7 @@ namespace DolphEngine.Test.Core
 
             Assert.Equal(size1.GetHashCode(), size2.GetHashCode());
 
-            size2.Scale(1.1f);
+            size2.Scale(1.1f, 1.1f);
 
             Assert.NotEqual(size1.GetHashCode(), size2.GetHashCode());
         }

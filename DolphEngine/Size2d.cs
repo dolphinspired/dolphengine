@@ -26,25 +26,10 @@ namespace DolphEngine
 
         #region Public methods
 
-        public Size2d Scale(float magnitude)
-        {
-            this.Width *= magnitude;
-            this.Height *= magnitude;
-            return this;
-        }
-
-        public Size2d Scale(float x, float y)
+        public void Scale(float x, float y)
         {
             this.Width *= x;
             this.Height *= y;
-            return this;
-        }
-
-        public Size2d Scale(Vector2d scale)
-        {
-            this.Width *= scale.X;
-            this.Height *= scale.Y;
-            return this;
         }
 
         #endregion
@@ -87,5 +72,59 @@ namespace DolphEngine
         }
 
         #endregion
+    }
+
+    public abstract class Size2dBase : ISize2d
+    {
+        public virtual float Width
+        {
+            get => this._size.Width;
+            set => this._size.Width = value;
+        }
+
+        public virtual float Height
+        {
+            get => this._size.Height;
+            set => this._size.Height = value;
+        }
+
+        private Size2d _size;
+        public virtual Size2d Size
+        {
+            get => this._size;
+            set => this._size = value;
+        }
+
+        public override string ToString()
+        {
+            return this._size.ToString();
+        }
+    }
+
+    public interface ISize2d
+    {
+        float Width { get; set; }
+
+        float Height { get; set; }
+    }
+
+    public static class Size2dExtensions
+    {
+        public static ISize2d Scale(this ISize2d size, float x, float y)
+        {
+            size.Width *= x;
+            size.Height *= y;
+            return size;
+        }
+
+        public static ISize2d Scale(this ISize2d size, float magnitude)
+        {
+            return size.Scale(magnitude, magnitude);
+        }
+
+        public static ISize2d Scale(this ISize2d size, Vector2d scale)
+        {
+            return size.Scale(scale.X, scale.Y);
+        }
     }
 }

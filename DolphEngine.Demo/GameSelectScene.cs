@@ -56,7 +56,7 @@ namespace DolphEngine.Demo
 
         public void Load()
         {
-            var viewTopLeft = this.Camera.Space.TopLeft;
+            var viewTopLeft = this.Camera.GetAnchorPosition(Anchor2d.TopLeft);
             viewTopLeft.Shift(10, 10); // Padding from edge of screen
 
             var title = new TextBox
@@ -64,7 +64,7 @@ namespace DolphEngine.Demo
                 Text = "Select a scene:",
                 Color = new ColorRGBA(255, 255, 255),
                 Font = "Assets/Zelda12",
-                Space = new Rect2d(viewTopLeft, Size2d.Zero)
+                Rect = new Rect2d(viewTopLeft, Size2d.Zero)
             };
             this.Window.Children.Add(title);
 
@@ -75,11 +75,11 @@ namespace DolphEngine.Demo
             int i = 0;
             foreach (var sceneName in this._selectableScenes)
             {
-                var option = new Entity(new Rect2d(title.Space.TopLeft + new Vector2d(20, ++i * 30), Size2d.Zero, Anchor2d.MiddleLeft));
+                var option = new Entity(new Rect2d(title.GetAnchorPosition(Anchor2d.TopLeft) + new Vector2d(20, ++i * 30), Size2d.Zero, Anchor2d.MiddleLeft));
                 option.AddComponent(new TextComponent { Text = sceneName, FontAssetName = "Assets/Zelda12", Color = new ColorRGBA(255, 255, 255) });
 
                 var selectable = new SelectableItemComponent();
-                selectable.OnFocus = () => cursor.Space.MoveTo(option.Space.GetOriginPosition() + new Vector2d(-5, 6)); // text alignment is broken af right now
+                selectable.OnFocus = () => cursor.MoveTo(option.Rect.GetOriginPosition() + new Vector2d(-5, 6)); // text alignment is broken af right now
                 selectable.OnBlur = () => { /* Nothing right now! */ };
                 option.AddComponent(selectable);
 

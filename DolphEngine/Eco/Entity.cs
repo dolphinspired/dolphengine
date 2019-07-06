@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DolphEngine.Eco
 {
-    public class Entity
+    public class Entity : Rect2dBase
     {
         #region Constructors/Destructors
 
@@ -19,18 +19,12 @@ namespace DolphEngine.Eco
         /// <summary>
         /// Creates an entity and places it at the provided position.
         /// </summary>
-        public Entity(Position2d position)
-        {
-            this.Space = new Rect2d(position, Size2d.Zero);
-        }
+        public Entity(Position2d position) : base(new Rect2d(position, Size2d.Zero)) { }
 
         /// <summary>
         /// Creates an entity and places it at the provided position with the given size.
         /// </summary>
-        public Entity(Rect2d space)
-        {
-            this.Space = space;
-        }
+        public Entity(Rect2d rect) : base(rect) { }
 
         #endregion
 
@@ -45,12 +39,6 @@ namespace DolphEngine.Eco
         /// Each entity is assigned an Id when it's added to an <see cref="Ecosystem"/>.
         /// </summary>
         public string Id { get; internal set; }
-
-        #endregion
-
-        #region Core data
-
-        public Rect2d Space;
 
         #endregion
 
@@ -292,7 +280,7 @@ namespace DolphEngine.Eco
 
         public override string ToString()
         {
-            return $"{{ id: {Id}, components: {_componentsByType.Count}, space: {Space} }}";
+            return $"{{ id: {Id}, components: {_componentsByType.Count}, rect: {Rect} }}";
         }
 
         #endregion

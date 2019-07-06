@@ -13,7 +13,7 @@ namespace DolphEngine.Demo.Games.TestMap.Entities
                 .AddComponent(new SpriteComponent { SpriteSheet = Sprites.Alphonse })
                 .AddComponent<TextComponent>();
 
-            this.Space = new Rect2d(0, 0, 32, 64, new Origin2d(Anchor2d.BottomCenter));
+            this.Rect = new Rect2d(0, 0, 32, 64, new Origin2d(Anchor2d.BottomCenter));
         }
 
         public SpeedComponent Speed => this.GetComponent<SpeedComponent>();
