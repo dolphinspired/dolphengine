@@ -1,7 +1,7 @@
 ﻿namespace DolphEngine.Graphics.Directives
 {
-    public class DrawDirective
+    public class DrawDirective : Position2dBase
     {
-        public virtual Position2d Destination { get; set; }
+
     }
 }

@@ -66,7 +66,7 @@ namespace DolphEngine.Demo
                 Font = "Assets/Zelda12",
                 Rect = new Rect2d(viewTopLeft, Size2d.Zero)
             };
-            this.Window.Children.Add(title);
+            this.Window.AddChild(title);
 
             var cursor = new Entity(new Rect2d(0, 0, 7, 11, Anchor2d.MiddleRight));
             cursor.AddComponent(new SpriteComponent { SpriteSheet = Sprites.Glyphs, Index = 1 });

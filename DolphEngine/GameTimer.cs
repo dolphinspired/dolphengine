@@ -38,5 +38,15 @@ namespace DolphEngine
         public virtual TimeSpan Total { get; private set; }
 
         public virtual int Frames { get; private set; }
+
+        public TimedValue<T> TrackValue<T>()
+        {
+            return new TimedValue<T>(this);
+        }
+
+        public TimedValue<T> TrackValue<T>(T def)
+        {
+            return new TimedValue<T>(this, def);
+        }
     }
 }
